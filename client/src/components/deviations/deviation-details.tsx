@@ -40,7 +40,7 @@ const DeviationDetails = ({ deviationId, onBack }: DeviationDetailsProps) => {
       if (onBack) {
         onBack();
       } else {
-        navigate('/deviations');
+        setLocation('/deviations');
       }
     },
     onError: (error) => {
@@ -66,7 +66,7 @@ const DeviationDetails = ({ deviationId, onBack }: DeviationDetailsProps) => {
       if (onBack) {
         onBack();
       } else {
-        navigate('/manager');
+        setLocation('/manager');
       }
     },
     onError: (error) => {
@@ -92,7 +92,7 @@ const DeviationDetails = ({ deviationId, onBack }: DeviationDetailsProps) => {
       if (onBack) {
         onBack();
       } else {
-        navigate('/manager');
+        setLocation('/manager');
       }
     },
     onError: (error) => {
@@ -118,7 +118,7 @@ const DeviationDetails = ({ deviationId, onBack }: DeviationDetailsProps) => {
       if (onBack) {
         onBack();
       } else {
-        navigate('/manager');
+        setLocation('/manager');
       }
     },
     onError: (error) => {
