@@ -18,7 +18,7 @@ interface DeviationListProps {
 
 const DeviationList = ({ onSelect }: DeviationListProps) => {
   const { t } = useI18n();
-  const [, navigate] = useLocation();
+  const [, setLocation] = useLocation();
   const { user } = useStore();
   const employeeId = user.currentUser?.employeeId;
   

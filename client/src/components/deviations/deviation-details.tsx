@@ -134,7 +134,7 @@ const DeviationDetails = ({ deviationId, onBack }: DeviationDetailsProps) => {
     if (onBack) {
       onBack();
     } else {
-      navigate('/deviations');
+      setLocation('/deviations');
     }
   };
   
@@ -145,7 +145,7 @@ const DeviationDetails = ({ deviationId, onBack }: DeviationDetailsProps) => {
   };
   
   const handleApprove = () => {
-    approveMutation.mutate();
+    approveMutation.mutate('');
   };
   
   const handleReject = () => {
@@ -326,7 +326,7 @@ const DeviationDetails = ({ deviationId, onBack }: DeviationDetailsProps) => {
                   <Button 
                     type="button" 
                     variant="default" 
-                    onClick={() => navigate(`/deviations/edit/${deviation.id}`)}
+                    onClick={() => setLocation(`/deviations/edit/${deviation.id}`)}
                     className="mt-3 md:mt-0"
                   >
                     {t('action.edit')}
