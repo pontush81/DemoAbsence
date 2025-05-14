@@ -1,7 +1,9 @@
 import { useStore } from "@/lib/store";
+import { Badge } from "@/components/ui/badge";
+import { Link } from "wouter";
 
 const MobileHeader = () => {
-  const { toggleMobileSidebar } = useStore();
+  const { toggleMobileSidebar, user } = useStore();
   
   return (
     <header className="fixed top-0 left-0 right-0 bg-white shadow-sm z-50 md:hidden">
@@ -21,11 +23,18 @@ const MobileHeader = () => {
           />
           <span className="font-bold ml-2">Kontek Lön</span>
         </div>
-        <div className="flex">
-          <button className="ml-2">
-            <span className="material-icons">notifications</span>
-          </button>
-          <button className="ml-2">
+        <div className="flex items-center">
+          <Link href="/settings">
+            <a>
+              <Badge 
+                variant={user.currentRole === 'manager' ? 'secondary' : 'default'}
+                className="mr-2 py-1 px-2"
+              >
+                {user.currentRole === 'manager' ? 'Chef' : 'Anställd'}
+              </Badge>
+            </a>
+          </Link>
+          <button className="ml-1">
             <span className="material-icons">account_circle</span>
           </button>
         </div>

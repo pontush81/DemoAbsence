@@ -58,12 +58,12 @@ const PersonalInfoForm = () => {
   const form = useForm<PersonalInfoFormValues>({
     resolver: zodResolver(personalInfoSchema),
     defaultValues: {
-      personnummer: employee?.personnummer || "",
-      firstName: employee?.firstName || "",
-      lastName: employee?.lastName || "",
-      careOfAddress: employee?.careOfAddress || "",
-      streetAddress: employee?.streetAddress || "",
-      postalCode: employee?.postalCode || "",
+      personnummer: "",
+      firstName: "",
+      lastName: "",
+      careOfAddress: "",
+      streetAddress: "",
+      postalCode: "",
       city: "",
       country: "Sverige",
       phoneNumber: "",
@@ -74,22 +74,24 @@ const PersonalInfoForm = () => {
   });
   
   // Update form when employee data loads
-  if (employee && !form.formState.isDirty) {
-    form.reset({
-      personnummer: employee.personnummer,
-      firstName: employee.firstName,
-      lastName: employee.lastName,
-      careOfAddress: employee.careOfAddress || "",
-      streetAddress: employee.streetAddress,
-      postalCode: employee.postalCode,
-      city: employee.city,
-      country: employee.country,
-      phoneNumber: employee.phoneNumber || "",
-      email: employee.email || "",
-      workEmail: employee.workEmail || "",
-      preferredEmail: employee.preferredEmail === "personal" ? "personal" : "work",
-    });
-  }
+  useEffect(() => {
+    if (employee) {
+      form.reset({
+        personnummer: employee.personnummer,
+        firstName: employee.firstName,
+        lastName: employee.lastName,
+        careOfAddress: employee.careOfAddress || "",
+        streetAddress: employee.streetAddress,
+        postalCode: employee.postalCode,
+        city: employee.city,
+        country: employee.country,
+        phoneNumber: employee.phoneNumber || "",
+        email: employee.email || "",
+        workEmail: employee.workEmail || "",
+        preferredEmail: employee.preferredEmail === "personal" ? "personal" : "work",
+      });
+    }
+  }, [employee, form]);
   
   // Update mutation
   const updateMutation = useMutation({

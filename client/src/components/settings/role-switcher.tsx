@@ -1,25 +1,42 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useI18n } from "@/lib/i18n";
 import { useStore } from "@/lib/store";
+import { useLocation } from "wouter";
 import type { UserRole } from "@/lib/store";
 
 const RoleSwitcher = () => {
   const { t } = useI18n();
   const { user, setCurrentRole } = useStore();
+  const [, setLocation] = useLocation();
   
   const handleRoleChange = (role: string) => {
     setCurrentRole(role as UserRole);
   };
   
+  const goToManagerArea = () => {
+    setLocation('/manager');
+  };
+  
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>{t('settings.roleSwitch') || 'Role Settings'}</CardTitle>
-        <CardDescription>
-          {t('settings.roleSwitchDescription') || 'Switch between employee and manager roles to test different views.'}
-        </CardDescription>
+      <CardHeader className="pb-3">
+        <div className="flex flex-row justify-between items-center">
+          <div>
+            <CardTitle className="text-xl">{t('settings.roleSwitch') || 'Role Settings'}</CardTitle>
+            <CardDescription className="mt-1.5">
+              {t('settings.roleSwitchDescription') || 'Switch between employee and manager roles to test different views.'}
+            </CardDescription>
+          </div>
+          <Badge 
+            variant={user.currentRole === 'manager' ? 'secondary' : 'default'}
+            className="text-md py-1.5 px-3"
+          >
+            {user.currentRole === 'manager' ? 'Chef' : 'Anställd'}
+          </Badge>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
@@ -55,6 +72,16 @@ const RoleSwitcher = () => {
                 : (t('settings.employeeInfo') || 'You can submit deviations and leave requests for approval.')}
             </p>
           </div>
+          
+          {user.currentRole === 'manager' && (
+            <Button 
+              className="w-full mt-4 bg-blue-600 hover:bg-blue-700" 
+              onClick={goToManagerArea}
+            >
+              <span className="material-icons mr-2">supervisor_account</span>
+              {t('settings.goToManager') || 'Go to Manager Area'}
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>
