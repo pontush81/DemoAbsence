@@ -1,15 +1,23 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  Table, 
+  TableBody, 
+  TableCaption, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { useI18n } from "@/lib/i18n";
 import { apiService } from "@/lib/apiService";
 import { Payslip } from "@shared/schema";
 import { getMonthName } from "@/lib/utils/date";
+import { FileTextIcon, EyeIcon, DownloadIcon } from "lucide-react";
 
 interface PayslipListProps {
   payslips: Payslip[];
@@ -18,19 +26,14 @@ interface PayslipListProps {
 const PayslipList = ({ payslips }: PayslipListProps) => {
   const { t } = useI18n();
   const { toast } = useToast();
-  const [activeYear, setActiveYear] = useState<number>(new Date().getFullYear());
   
-  // Group payslips by year
-  const payslipsByYear = payslips.reduce<Record<number, Payslip[]>>((acc, payslip) => {
-    if (!acc[payslip.year]) {
-      acc[payslip.year] = [];
-    }
-    acc[payslip.year].push(payslip);
-    return acc;
-  }, {});
-  
-  // Get unique years
-  const years = Object.keys(payslipsByYear).map(Number).sort((a, b) => b - a);
+  // Sort payslips by date (newest first)
+  const sortedPayslips = [...payslips].sort((a, b) => {
+    // Sort by year (descending)
+    if (a.year !== b.year) return b.year - a.year;
+    // Then by month (descending)
+    return b.month - a.month;
+  });
   
   // Download payslip handler
   const handleDownload = async (payslipId: number, fileName: string) => {
@@ -62,69 +65,76 @@ const PayslipList = ({ payslips }: PayslipListProps) => {
       });
     }
   };
+
+  // Function to format amount with thousands separator
+  const formatAmount = (amount: number) => {
+    return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  };
   
   return (
     <Card>
-      <CardContent className="p-6">
-        <Tabs 
-          value={activeYear.toString()} 
-          onValueChange={(value) => setActiveYear(parseInt(value, 10))}
-          className="w-full"
-        >
-          <TabsList className="mb-6 inline-flex">
-            {years.map((year) => (
-              <TabsTrigger 
-                key={year} 
-                value={year.toString()}
-                className={`
-                  px-4 py-2 text-sm font-medium 
-                  ${activeYear === year 
-                    ? 'bg-primary text-white' 
-                    : 'bg-background hover:bg-muted'}
-                `}
-              >
-                {year}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-          
-          {years.map((year) => (
-            <TabsContent key={year} value={year.toString()} className="mt-0">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {payslipsByYear[year]
-                  .sort((a, b) => b.month - a.month)
-                  .map((payslip) => (
-                    <Card key={payslip.id} className="overflow-hidden hover:shadow-md transition-shadow">
-                      <CardContent className="p-0">
-                        <div className="bg-primary-light p-4 flex justify-between items-center">
-                          <div>
-                            <h3 className="font-bold text-lg">{getMonthName(payslip.month)}</h3>
-                            <p className="text-sm text-muted-foreground">{payslip.year}</p>
-                          </div>
-                          <Badge variant="outline" className="bg-white">
-                            PDF
-                          </Badge>
-                        </div>
-                        <div className="p-4">
-                          <p className="text-sm text-muted-foreground mb-4">
-                            {t('payslips.published')}: {new Date(payslip.published).toLocaleDateString()}
-                          </p>
-                          <Button
-                            variant="outline"
-                            className="w-full"
-                            onClick={() => handleDownload(payslip.id, payslip.fileName)}
-                          >
-                            <span className="material-icons mr-2 text-sm">download</span>
-                            {t('payslips.download')}
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-              </div>
-            </TabsContent>
-          ))}
-        </Tabs>
+      <CardHeader className="pb-3">
+        <div className="flex items-center gap-2">
+          <FileTextIcon className="h-6 w-6" />
+          <CardTitle>{t('payslips.yourPayslips')}</CardTitle>
+        </div>
+        <CardDescription>{t('payslips.payslipsDescription')}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>{t('payslips.period')}</TableHead>
+              <TableHead>{t('payslips.paymentDate')}</TableHead>
+              <TableHead>{t('payslips.amount')}</TableHead>
+              <TableHead>{t('payslips.status')}</TableHead>
+              <TableHead className="text-right">{t('payslips.actions')}</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {sortedPayslips.map((payslip) => {
+              // Format payment date from yyyy-MM-dd to something more readable
+              const paymentDate = payslip.payDate;
+              const monthName = getMonthName(payslip.month - 1); // Adjust because getMonthName is 0-based
+              const viewStatus = payslip.viewed ? 'viewed' : 'new';
+              
+              return (
+                <TableRow key={payslip.id}>
+                  <TableCell className="font-medium">
+                    {monthName} {payslip.year}
+                  </TableCell>
+                  <TableCell>{paymentDate}</TableCell>
+                  <TableCell>{formatAmount(payslip.netAmount)} kr</TableCell>
+                  <TableCell>
+                    <Badge variant={viewStatus === 'new' ? 'default' : 'outline'}>
+                      {viewStatus === 'new' ? t('payslips.status.new') : t('payslips.status.viewed')}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-2">
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        title={t('payslips.view')}
+                        onClick={() => handleDownload(payslip.id, payslip.fileName)}
+                      >
+                        <EyeIcon className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        title={t('payslips.download')}
+                        onClick={() => handleDownload(payslip.id, payslip.fileName)}
+                      >
+                        <DownloadIcon className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
       </CardContent>
     </Card>
   );

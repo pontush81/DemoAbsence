@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { FileTextIcon, AlertCircle } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useStore } from "@/lib/store";
 import { apiService } from "@/lib/apiService";
@@ -21,43 +23,61 @@ export default function Payslips() {
   });
   
   return (
-    <section>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold">{t('payslips.title')}</h1>
-        <p className="text-muted-foreground">{t('payslips.description')}</p>
-      </div>
+    <section className="container py-6 max-w-7xl">
+      <h1 className="text-3xl font-bold mb-6">{t('payslips.title')}</h1>
       
       {isLoading ? (
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <Skeleton className="h-6 w-48 mb-4" />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {Array.from({ length: 6 }).map((_, index) => (
-              <Skeleton key={index} className="h-32 rounded-md" />
-            ))}
-          </div>
-        </div>
+        <Card>
+          <CardHeader className="pb-3">
+            <Skeleton className="h-8 w-64 mb-2" />
+            <Skeleton className="h-4 w-full" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-8 w-full mb-4" />
+            <div className="space-y-2">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} className="h-14 w-full" />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       ) : error ? (
-        <div className="bg-white rounded-lg shadow-sm p-6 text-center">
-          <p className="text-destructive mb-4">
-            {t('payslips.loadError')}: {(error as Error).message}
-          </p>
-          <Button 
-            onClick={() => window.location.reload()} 
-            variant="outline"
-          >
-            {t('action.retry')}
-          </Button>
-        </div>
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2 text-destructive">
+              <AlertCircle className="h-6 w-6" />
+              <CardTitle>{t('payslips.loadError')}</CardTitle>
+            </div>
+            <CardDescription>{(error as Error).message}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button 
+              onClick={() => window.location.reload()} 
+              variant="outline"
+            >
+              {t('action.retry')}
+            </Button>
+          </CardContent>
+        </Card>
       ) : payslips && payslips.length > 0 ? (
         <PayslipList payslips={payslips} />
       ) : (
-        <div className="bg-white rounded-lg shadow-sm p-6 text-center">
-          <span className="material-icons text-4xl text-muted-foreground mb-2">description</span>
-          <h3 className="text-lg font-medium">{t('payslips.noPayslips')}</h3>
-          <p className="text-muted-foreground">
-            {t('payslips.noPayslipsDescription')}
-          </p>
-        </div>
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <FileTextIcon className="h-6 w-6" />
+              <CardTitle>{t('payslips.yourPayslips')}</CardTitle>
+            </div>
+            <CardDescription>{t('payslips.payslipsDescription')}</CardDescription>
+          </CardHeader>
+          <CardContent className="text-center py-12">
+            <FileTextIcon className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
+            <h3 className="text-lg font-medium mb-1">{t('payslips.noPayslips')}</h3>
+            <p className="text-muted-foreground max-w-md mx-auto">
+              {t('payslips.noPayslipsDescription')}
+            </p>
+          </CardContent>
+        </Card>
       )}
     </section>
   );

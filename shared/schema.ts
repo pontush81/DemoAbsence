@@ -197,6 +197,10 @@ export const payslips = pgTable("payslips", {
   employeeId: text("employee_id").notNull(),
   year: integer("year").notNull(),
   month: integer("month").notNull(),
+  payDate: text("pay_date").notNull(), // Payment date in format 'YYYY-MM-DD'
+  grossAmount: integer("gross_amount").notNull(), // Amount in öre (cents)
+  netAmount: integer("net_amount").notNull(), // Amount in öre (cents)
+  status: text("status").default("new"), // 'new' or 'viewed'
   fileName: text("file_name").notNull(),
   fileUrl: text("file_url").notNull(),
   published: timestamp("published").defaultNow(),
