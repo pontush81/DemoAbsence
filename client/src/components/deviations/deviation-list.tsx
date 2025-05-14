@@ -46,7 +46,7 @@ const DeviationList = ({ onSelect }: DeviationListProps) => {
     if (onSelect) {
       onSelect(deviation.id);
     } else {
-      navigate(`/deviations/${deviation.id}`);
+      setLocation(`/deviations/${deviation.id}`);
     }
   };
   
@@ -165,7 +165,7 @@ const DeviationList = ({ onSelect }: DeviationListProps) => {
                         className="text-primary hover:text-primary-dark mr-3"
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate(`/deviations/edit/${deviation.id}`);
+                          setLocation(`/deviations/edit/${deviation.id}`);
                         }}
                       >
                         {t('action.edit')}

@@ -18,7 +18,7 @@ interface LeaveListProps {
 
 const LeaveList = ({ onSelect }: LeaveListProps) => {
   const { t } = useI18n();
-  const [, navigate] = useLocation();
+  const [, setLocation] = useLocation();
   const { user } = useStore();
   const employeeId = user.currentUser?.employeeId;
   
@@ -46,7 +46,7 @@ const LeaveList = ({ onSelect }: LeaveListProps) => {
     if (onSelect) {
       onSelect(leave.id);
     } else {
-      navigate(`/leave/${leave.id}`);
+      setLocation(`/leave/${leave.id}`);
     }
   };
   
@@ -272,7 +272,7 @@ const LeaveList = ({ onSelect }: LeaveListProps) => {
                         className="text-primary hover:text-primary-dark mr-3"
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate(`/leave/edit/${leave.id}`);
+                          setLocation(`/leave/edit/${leave.id}`);
                         }}
                       >
                         {t('action.edit')}
