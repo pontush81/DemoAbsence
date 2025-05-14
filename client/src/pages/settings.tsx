@@ -5,6 +5,7 @@ import { useI18n } from "@/lib/i18n";
 import PersonalInfoForm from "@/components/settings/personal-info-form";
 import BankInfoForm from "@/components/settings/bank-info-form";
 import LanguageSelector from "@/components/settings/language-selector";
+import RoleSwitcher from "@/components/settings/role-switcher";
 
 export default function Settings() {
   const { t } = useI18n();
@@ -28,7 +29,7 @@ export default function Settings() {
           className="w-full"
         >
           <CardContent className="pt-6">
-            <TabsList className="mb-8 grid grid-cols-3 gap-4">
+            <TabsList className="mb-8 grid grid-cols-4 gap-4">
               <TabsTrigger 
                 value="personal"
                 className={`
@@ -62,6 +63,17 @@ export default function Settings() {
               >
                 {t('settings.language')}
               </TabsTrigger>
+              <TabsTrigger 
+                value="role"
+                className={`
+                  px-4 py-2 text-sm font-medium 
+                  ${activeTab === 'role' 
+                    ? 'bg-primary text-white' 
+                    : 'bg-background hover:bg-muted'}
+                `}
+              >
+                {t('settings.role') || 'Role'}
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="personal" className="mt-0">
@@ -72,6 +84,9 @@ export default function Settings() {
             </TabsContent>
             <TabsContent value="language" className="mt-0">
               <LanguageSelector />
+            </TabsContent>
+            <TabsContent value="role" className="mt-0">
+              <RoleSwitcher />
             </TabsContent>
           </CardContent>
         </Tabs>
