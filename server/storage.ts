@@ -6,8 +6,11 @@ import {
   LeaveRequest, type InsertLeaveRequest,
   TimeBalance, type InsertTimeBalance,
   Payslip, type InsertPayslip,
-  ActivityLog, type InsertActivityLog
+  ActivityLog, type InsertActivityLog,
+  employees, schedules, timeCodes, deviations, leaveRequests, timeBalances, payslips, activityLogs
 } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 // Interface for all storage operations
 export interface IStorage {
@@ -295,4 +298,195 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+// Database Storage Implementation
+export class DatabaseStorage implements IStorage {
+  // Employee operations
+  async getEmployees(): Promise<Employee[]> {
+    const result = await db.select().from(employees);
+    return result;
+  }
+
+  async getEmployee(id: number): Promise<Employee | undefined> {
+    const [result] = await db.select().from(employees).where(eq(employees.id, id));
+    return result;
+  }
+
+  async getEmployeeByEmployeeId(employeeId: string): Promise<Employee | undefined> {
+    const [result] = await db.select().from(employees).where(eq(employees.employeeId, employeeId));
+    return result;
+  }
+
+  async createEmployee(employee: InsertEmployee): Promise<Employee> {
+    const [result] = await db.insert(employees).values(employee).returning();
+    return result;
+  }
+
+  async updateEmployee(employeeId: string, updates: Partial<Employee>): Promise<Employee | undefined> {
+    const [result] = await db
+      .update(employees)
+      .set(updates)
+      .where(eq(employees.employeeId, employeeId))
+      .returning();
+    return result;
+  }
+  
+  // Schedule operations
+  async getSchedules(employeeId: string, date?: string): Promise<Schedule[]> {
+    let query = db.select().from(schedules).where(eq(schedules.employeeId, employeeId));
+    
+    if (date) {
+      query = query.where(eq(schedules.date, date));
+    }
+    
+    return await query;
+  }
+
+  async getSchedule(id: number): Promise<Schedule | undefined> {
+    const [result] = await db.select().from(schedules).where(eq(schedules.id, id));
+    return result;
+  }
+
+  async createSchedule(schedule: InsertSchedule): Promise<Schedule> {
+    const [result] = await db.insert(schedules).values(schedule).returning();
+    return result;
+  }
+  
+  // TimeCode operations
+  async getTimeCodes(): Promise<TimeCode[]> {
+    return await db.select().from(timeCodes);
+  }
+
+  async getTimeCode(id: number): Promise<TimeCode | undefined> {
+    const [result] = await db.select().from(timeCodes).where(eq(timeCodes.id, id));
+    return result;
+  }
+
+  async getTimeCodeByCode(code: string): Promise<TimeCode | undefined> {
+    const [result] = await db.select().from(timeCodes).where(eq(timeCodes.code, code));
+    return result;
+  }
+  
+  // Deviation operations
+  async getDeviations(filters?: { employeeId?: string, status?: string, timeCode?: string }): Promise<Deviation[]> {
+    let query = db.select().from(deviations);
+    
+    if (filters?.employeeId) {
+      query = query.where(eq(deviations.employeeId, filters.employeeId));
+    }
+    
+    if (filters?.status) {
+      query = query.where(eq(deviations.status, filters.status));
+    }
+    
+    if (filters?.timeCode) {
+      query = query.where(eq(deviations.timeCode, filters.timeCode));
+    }
+    
+    return await query;
+  }
+
+  async getDeviation(id: number): Promise<Deviation | undefined> {
+    const [result] = await db.select().from(deviations).where(eq(deviations.id, id));
+    return result;
+  }
+
+  async createDeviation(deviation: InsertDeviation): Promise<Deviation> {
+    const [result] = await db.insert(deviations).values(deviation).returning();
+    return result;
+  }
+
+  async updateDeviation(id: number, updates: Partial<Deviation>): Promise<Deviation | undefined> {
+    const [result] = await db
+      .update(deviations)
+      .set(updates)
+      .where(eq(deviations.id, id))
+      .returning();
+    return result;
+  }
+
+  async deleteDeviation(id: number): Promise<boolean> {
+    const result = await db.delete(deviations).where(eq(deviations.id, id));
+    return result.rowCount > 0;
+  }
+  
+  // LeaveRequest operations
+  async getLeaveRequests(filters?: { employeeId?: string, status?: string, leaveType?: string }): Promise<LeaveRequest[]> {
+    let query = db.select().from(leaveRequests);
+    
+    if (filters?.employeeId) {
+      query = query.where(eq(leaveRequests.employeeId, filters.employeeId));
+    }
+    
+    if (filters?.status) {
+      query = query.where(eq(leaveRequests.status, filters.status));
+    }
+    
+    if (filters?.leaveType) {
+      query = query.where(eq(leaveRequests.leaveType, filters.leaveType));
+    }
+    
+    return await query;
+  }
+
+  async getLeaveRequest(id: number): Promise<LeaveRequest | undefined> {
+    const [result] = await db.select().from(leaveRequests).where(eq(leaveRequests.id, id));
+    return result;
+  }
+
+  async createLeaveRequest(leaveRequest: InsertLeaveRequest): Promise<LeaveRequest> {
+    const [result] = await db.insert(leaveRequests).values(leaveRequest).returning();
+    return result;
+  }
+
+  async updateLeaveRequest(id: number, updates: Partial<LeaveRequest>): Promise<LeaveRequest | undefined> {
+    const [result] = await db
+      .update(leaveRequests)
+      .set(updates)
+      .where(eq(leaveRequests.id, id))
+      .returning();
+    return result;
+  }
+
+  async deleteLeaveRequest(id: number): Promise<boolean> {
+    const result = await db.delete(leaveRequests).where(eq(leaveRequests.id, id));
+    return result.rowCount > 0;
+  }
+  
+  // TimeBalance operations
+  async getTimeBalance(employeeId: string): Promise<TimeBalance | undefined> {
+    const [result] = await db.select().from(timeBalances).where(eq(timeBalances.employeeId, employeeId));
+    return result;
+  }
+
+  async updateTimeBalance(employeeId: string, updates: Partial<TimeBalance>): Promise<TimeBalance | undefined> {
+    const [result] = await db
+      .update(timeBalances)
+      .set(updates)
+      .where(eq(timeBalances.employeeId, employeeId))
+      .returning();
+    return result;
+  }
+  
+  // Payslip operations
+  async getPayslips(employeeId: string): Promise<Payslip[]> {
+    return await db.select().from(payslips).where(eq(payslips.employeeId, employeeId));
+  }
+
+  async getPayslip(id: number): Promise<Payslip | undefined> {
+    const [result] = await db.select().from(payslips).where(eq(payslips.id, id));
+    return result;
+  }
+  
+  // ActivityLog operations
+  async getActivityLogs(employeeId: string): Promise<ActivityLog[]> {
+    return await db.select().from(activityLogs).where(eq(activityLogs.employeeId, employeeId));
+  }
+
+  async createActivityLog(log: InsertActivityLog): Promise<ActivityLog> {
+    const [result] = await db.insert(activityLogs).values(log).returning();
+    return result;
+  }
+}
+
+// Use DatabaseStorage instead of MemStorage
+export const storage = new DatabaseStorage();
