@@ -25,14 +25,12 @@ const MobileHeader = () => {
         </div>
         <div className="flex items-center">
           <Link href="/settings">
-            <a>
-              <Badge 
-                variant={user.currentRole === 'manager' ? 'secondary' : 'default'}
-                className="mr-2 py-1 px-2"
-              >
-                {user.currentRole === 'manager' ? 'Chef' : 'Anställd'}
-              </Badge>
-            </a>
+            <Badge 
+              variant={user.currentRole === 'manager' ? 'secondary' : 'default'}
+              className="mr-2 py-1 px-2 cursor-pointer"
+            >
+              {user.currentRole === 'manager' ? 'Chef' : 'Anställd'}
+            </Badge>
           </Link>
           <button className="ml-1">
             <span className="material-icons">account_circle</span>

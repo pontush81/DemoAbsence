@@ -35,6 +35,10 @@ const translations: Translations = {
     sv: 'Chefvy',
     en: 'Manager View',
   },
+  'nav.attestation': {
+    sv: 'Attestering',
+    en: 'Attestation',
+  },
   'nav.expenses': {
     sv: 'Resa & Utlägg',
     en: 'Travel & Expenses',

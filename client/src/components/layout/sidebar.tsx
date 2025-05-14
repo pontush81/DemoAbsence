@@ -46,12 +46,20 @@ const Sidebar = () => {
     }
   ];
   
-  const managerMenuItem = {
-    href: "/manager",
-    icon: "supervisor_account",
-    label: t('nav.manager'),
-    active: location === "/manager"
-  };
+  const managerMenuItems = [
+    {
+      href: "/manager",
+      icon: "supervisor_account",
+      label: t('nav.manager'),
+      active: location === "/manager"
+    },
+    {
+      href: "/attestation",
+      icon: "fact_check",
+      label: t('nav.attestation'),
+      active: location === "/attestation"
+    }
+  ];
   
   const travelExpensesMenuItem = {
     href: "#",
@@ -104,19 +112,28 @@ const Sidebar = () => {
           
           {/* Manager section */}
           {isManager && (
-            <li className="border-t mt-2 pt-2 border-sidebar-border">
-              <Link href={managerMenuItem.href}>
-                <a
-                  className={cn(
-                    "flex items-center px-4 py-3 hover:bg-sidebar-accent text-sidebar-foreground",
-                    managerMenuItem.active && "bg-primary bg-opacity-10 text-primary border-l-4 border-primary"
-                  )}
-                >
-                  <span className="material-icons mr-3">{managerMenuItem.icon}</span>
-                  {managerMenuItem.label}
-                </a>
-              </Link>
-            </li>
+            <>
+              <li className="border-t mt-2 pt-2 border-sidebar-border">
+                <div className="px-4 py-2 text-xs font-semibold text-muted-foreground">
+                  Manager Functions
+                </div>
+              </li>
+              {managerMenuItems.map((item) => (
+                <li key={item.href}>
+                  <Link href={item.href}>
+                    <a
+                      className={cn(
+                        "flex items-center px-4 py-3 hover:bg-sidebar-accent text-sidebar-foreground",
+                        item.active && "bg-primary bg-opacity-10 text-primary border-l-4 border-primary"
+                      )}
+                    >
+                      <span className="material-icons mr-3">{item.icon}</span>
+                      {item.label}
+                    </a>
+                  </Link>
+                </li>
+              ))}
+            </>
           )}
           
           {/* Travel & Expenses - Feature flagged */}
