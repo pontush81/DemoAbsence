@@ -173,7 +173,7 @@ async function seedDatabase() {
         type: activityLog.type,
         action: activityLog.action,
         description: activityLog.description,
-        timestamp: activityLog.timestamp || new Date(),
+        timestamp: new Date(),
         referenceId: activityLog.referenceId || null,
         referenceType: activityLog.referenceType || null
       });
