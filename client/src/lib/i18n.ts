@@ -601,6 +601,34 @@ const translations: Translations = {
     sv: 'Visa och ladda ner dina lönespecifikationer',
     en: 'View and download your payslips',
   },
+  'payslips.yourPayslips': {
+    sv: 'Dina lönespecifikationer',
+    en: 'Your Payslips',
+  },
+  'payslips.payslipsDescription': {
+    sv: 'Här hittar du dina lönespecifikationer för de senaste månaderna.',
+    en: 'Here you can find your payslips for the recent months.',
+  },
+  'payslips.period': {
+    sv: 'Period',
+    en: 'Period',
+  },
+  'payslips.paymentDate': {
+    sv: 'Utbetalningsdatum',
+    en: 'Payment Date',
+  },
+  'payslips.amount': {
+    sv: 'Belopp',
+    en: 'Amount',
+  },
+  'payslips.status': {
+    sv: 'Status',
+    en: 'Status',
+  },
+  'payslips.actions': {
+    sv: 'Åtgärder',
+    en: 'Actions',
+  },
   'payslips.year': {
     sv: 'År',
     en: 'Year',
@@ -613,13 +641,45 @@ const translations: Translations = {
     sv: 'Ladda ner',
     en: 'Download',
   },
+  'payslips.view': {
+    sv: 'Visa',
+    en: 'View',
+  },
   'payslips.noPayslips': {
     sv: 'Inga lönespecifikationer tillgängliga',
     en: 'No payslips available',
   },
+  'payslips.noPayslipsDescription': {
+    sv: 'Du har inte några lönespecifikationer tillgängliga för tillfället.',
+    en: 'You don\'t have any payslips available at the moment.',
+  },
   'payslips.published': {
     sv: 'Publicerad',
     en: 'Published',
+  },
+  'payslips.downloadSuccess': {
+    sv: 'Nedladdning lyckades',
+    en: 'Download successful',
+  },
+  'payslips.downloadSuccessDescription': {
+    sv: 'Din lönespecifikation har laddats ner',
+    en: 'Your payslip has been downloaded',
+  },
+  'payslips.downloadError': {
+    sv: 'Nedladdning misslyckades',
+    en: 'Download failed',
+  },
+  'payslips.loadError': {
+    sv: 'Kunde inte ladda lönespecifikationer',
+    en: 'Failed to load payslips',
+  },
+  'payslips.status.new': {
+    sv: 'Ny',
+    en: 'New',
+  },
+  'payslips.status.viewed': {
+    sv: 'Visad',
+    en: 'Viewed',
   },
   
   // Settings

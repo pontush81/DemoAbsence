@@ -572,45 +572,75 @@ export const mockPayslips: Payslip[] = [
     employeeId: 'E001',
     year: 2023,
     month: 3,
+    payDate: '2023-03-25',
+    grossAmount: 4500000, // 45,000 SEK
+    netAmount: 3600000,   // 36,000 SEK
+    status: 'viewed',
     fileName: 'lonespec_2023_03_E001.pdf',
     fileUrl: '/api/payslips/file/1',
     published: new Date(2023, 2, 25).toISOString(),
+    viewed: true,
+    viewedAt: new Date(2023, 2, 26).toISOString(),
   },
   {
     id: 2,
     employeeId: 'E001',
     year: 2023,
     month: 2,
+    payDate: '2023-02-25',
+    grossAmount: 4450000, // 44,500 SEK
+    netAmount: 3550000,   // 35,500 SEK
+    status: 'viewed',
     fileName: 'lonespec_2023_02_E001.pdf',
     fileUrl: '/api/payslips/file/2',
     published: new Date(2023, 1, 25).toISOString(),
+    viewed: true,
+    viewedAt: new Date(2023, 1, 26).toISOString(),
   },
   {
     id: 3,
     employeeId: 'E001',
     year: 2023,
     month: 1,
+    payDate: '2023-01-25',
+    grossAmount: 4480000, // 44,800 SEK
+    netAmount: 3580000,   // 35,800 SEK
+    status: 'viewed',
     fileName: 'lonespec_2023_01_E001.pdf',
     fileUrl: '/api/payslips/file/3',
     published: new Date(2023, 0, 25).toISOString(),
+    viewed: true,
+    viewedAt: new Date(2023, 0, 26).toISOString(),
   },
   {
     id: 4,
     employeeId: 'E001',
     year: 2022,
     month: 12,
+    payDate: '2022-12-22', // Earlier due to holidays
+    grossAmount: 4480000, // 44,800 SEK
+    netAmount: 3580000,   // 35,800 SEK
+    status: 'viewed',
     fileName: 'lonespec_2022_12_E001.pdf',
     fileUrl: '/api/payslips/file/4',
     published: new Date(2022, 11, 22).toISOString(),
+    viewed: true,
+    viewedAt: new Date(2022, 11, 23).toISOString(),
   },
   {
     id: 5,
     employeeId: 'E001',
     year: 2022,
     month: 11,
+    payDate: '2022-11-25',
+    grossAmount: 4380000, // 43,800 SEK
+    netAmount: 3500000,   // 35,000 SEK
+    status: 'viewed',
     fileName: 'lonespec_2022_11_E001.pdf',
     fileUrl: '/api/payslips/file/5',
     published: new Date(2022, 10, 25).toISOString(),
+    viewed: true,
+    viewedAt: new Date(2022, 10, 26).toISOString(),
   },
 ];
 

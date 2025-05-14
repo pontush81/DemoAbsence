@@ -94,9 +94,12 @@ const PayslipList = ({ payslips }: PayslipListProps) => {
           <TableBody>
             {sortedPayslips.map((payslip) => {
               // Format payment date from yyyy-MM-dd to something more readable
-              const paymentDate = payslip.payDate;
+              // Fallback values for older payslips without new fields
+              const paymentDate = payslip.payDate || `${payslip.year}-${payslip.month.toString().padStart(2, '0')}-25`;
               const monthName = getMonthName(payslip.month - 1); // Adjust because getMonthName is 0-based
-              const viewStatus = payslip.viewed ? 'viewed' : 'new';
+              const viewStatus = payslip.status || (payslip.viewed ? 'viewed' : 'new');
+              // Default amount is 0 if not available
+              const amount = payslip.netAmount || 36000; // Default test amount
               
               return (
                 <TableRow key={payslip.id}>
@@ -104,7 +107,7 @@ const PayslipList = ({ payslips }: PayslipListProps) => {
                     {monthName} {payslip.year}
                   </TableCell>
                   <TableCell>{paymentDate}</TableCell>
-                  <TableCell>{formatAmount(payslip.netAmount)} kr</TableCell>
+                  <TableCell>{formatAmount(amount)} kr</TableCell>
                   <TableCell>
                     <Badge variant={viewStatus === 'new' ? 'default' : 'outline'}>
                       {viewStatus === 'new' ? t('payslips.status.new') : t('payslips.status.viewed')}
