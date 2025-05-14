@@ -5,7 +5,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import StatusCard from "@/components/dashboard/status-card";
 import ActivityItem from "@/components/dashboard/activity-item";
-import QuickActionCard from "@/components/dashboard/quick-action-card";
 import { useI18n } from "@/lib/i18n";
 import { useStore } from "@/lib/store";
 import { apiService } from "@/lib/apiService";
@@ -199,30 +198,7 @@ export default function Dashboard() {
         </CardContent>
       </Card>
 
-      {/* Quick Actions Section */}
-      <h2 className="text-xl font-bold mt-8 mb-4">{t('dashboard.quickActions')}</h2>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <QuickActionCard
-          icon="event_note"
-          label={t('dashboard.registerDeviation')}
-          href="/deviations/new"
-        />
-        <QuickActionCard
-          icon="free_cancellation"
-          label={t('dashboard.applyLeave')}
-          href="/leave/new"
-        />
-        <QuickActionCard
-          icon="receipt"
-          label={t('dashboard.viewPayslip')}
-          href="/payslips"
-        />
-        <QuickActionCard
-          icon="person"
-          label={t('dashboard.personalInfo')}
-          href="/settings"
-        />
-      </div>
+
     </section>
   );
 }
