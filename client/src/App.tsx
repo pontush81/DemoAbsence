@@ -36,6 +36,9 @@ function Router() {
       <Switch>
         <Route path="/" component={Dashboard} />
         <Route path="/deviations/:id?" component={Deviations} />
+        <Route path="/leave/new" component={Leave} />
+        <Route path="/leave/edit/:id" component={Leave} />
+        <Route path="/leave/:id" component={Leave} />
         <Route path="/leave" component={Leave} />
         <Route path="/payslips" component={Payslips} />
         <Route path="/settings" component={Settings} />

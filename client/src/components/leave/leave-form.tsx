@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import * as React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -80,7 +81,7 @@ const LeaveForm = ({ leaveRequestId, onCancel }: LeaveFormProps) => {
   });
   
   // Update form when leave request data loads
-  useState(() => {
+  React.useEffect(() => {
     if (leaveRequest) {
       form.reset({
         employeeId: leaveRequest.employeeId,
@@ -94,7 +95,7 @@ const LeaveForm = ({ leaveRequestId, onCancel }: LeaveFormProps) => {
         status: leaveRequest.status,
       });
     }
-  });
+  }, [leaveRequest, form]);
   
   // Watch scope to conditionally show custom time inputs
   const scope = form.watch('scope');
