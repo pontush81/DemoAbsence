@@ -60,13 +60,13 @@ function DeviationApprovals() {
   const { t } = useI18n();
   
   const { data: pendingDeviations, isLoading, refetch } = useQuery<Deviation[]>({
-    queryKey: ['/api/deviations/pending'],
+    queryKey: ['/api/manager/deviations/pending'],
     retry: false,
   });
 
   const handleApprove = async (id: number) => {
     try {
-      await apiRequest('/api/deviations/' + id + '/approve', 'POST');
+      await apiRequest('/api/manager/deviations/' + id + '/approve', 'POST');
       refetch();
     } catch (error) {
       console.error("Failed to approve deviation:", error);
@@ -75,7 +75,7 @@ function DeviationApprovals() {
 
   const handleReject = async (id: number) => {
     try {
-      await apiRequest('/api/deviations/' + id + '/reject', 'POST', { comment: "Rejected by manager" });
+      await apiRequest('/api/manager/deviations/' + id + '/reject', 'POST', { comment: "Rejected by manager" });
       refetch();
     } catch (error) {
       console.error("Failed to reject deviation:", error);
@@ -135,13 +135,13 @@ function LeaveApprovals() {
   const { t } = useI18n();
   
   const { data: pendingLeaveRequests, isLoading, refetch } = useQuery<LeaveRequest[]>({
-    queryKey: ['/api/leave-requests/pending'],
+    queryKey: ['/api/manager/leave-requests/pending'],
     retry: false,
   });
 
   const handleApprove = async (id: number) => {
     try {
-      await apiRequest('/api/leave-requests/' + id + '/approve', 'POST');
+      await apiRequest('/api/manager/leave-requests/' + id + '/approve', 'POST');
       refetch();
     } catch (error) {
       console.error("Failed to approve leave request:", error);
@@ -150,7 +150,7 @@ function LeaveApprovals() {
 
   const handleReject = async (id: number) => {
     try {
-      await apiRequest('/api/leave-requests/' + id + '/reject', 'POST', { comment: "Rejected by manager" });
+      await apiRequest('/api/manager/leave-requests/' + id + '/reject', 'POST', { comment: "Rejected by manager" });
       refetch();
     } catch (error) {
       console.error("Failed to reject leave request:", error);
