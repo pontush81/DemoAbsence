@@ -404,24 +404,24 @@ const translations: Translations = {
   
   // Attestation
   'attestation.description': {
-    sv: 'Hantera och attestera avvikelser och ledighetsansökningar',
-    en: 'Manage and approve deviations and leave requests',
+    sv: 'Hantera och attestera tidperioder och ledighetsansökningar',
+    en: 'Manage and approve time periods and leave requests',
   },
-  'attestation.pendingDeviations': {
-    sv: 'Väntande avvikelser',
-    en: 'Pending Deviations',
+  'attestation.pendingPeriods': {
+    sv: 'Väntande perioder',
+    en: 'Pending Periods',
   },
   'attestation.pendingLeave': {
     sv: 'Väntande ledighetsansökningar',
     en: 'Pending Leave Requests',
   },
-  'attestation.noDeviations': {
-    sv: 'Inga avvikelser att attestera',
-    en: 'No deviations to approve',
+  'attestation.noPeriods': {
+    sv: 'Inga perioder att attestera',
+    en: 'No periods to approve',
   },
-  'attestation.noDeviationsDescription': {
-    sv: 'Det finns inga väntande avvikelser som behöver attesteras just nu',
-    en: 'There are currently no pending deviations that need approval',
+  'attestation.noPeriodsDescription': {
+    sv: 'Det finns inga väntande perioder som behöver attesteras just nu',
+    en: 'There are currently no pending periods that need approval',
   },
   'attestation.noLeave': {
     sv: 'Inga ledighetsansökningar att attestera',
@@ -438,6 +438,158 @@ const translations: Translations = {
   'attestation.managerRoleRequired': {
     sv: 'Du måste vara inloggad som chef för att kunna attestera',
     en: 'You need to be logged in as a manager to access attestation',
+  },
+  'attestation.deviations': {
+    sv: 'avvikelser',
+    en: 'deviations',
+  },
+  'attestation.submitted': {
+    sv: 'Inskickad',
+    en: 'Submitted',
+  },
+  'attestation.viewPeriod': {
+    sv: 'Visa period',
+    en: 'View Period',
+  },
+  'attestation.sendReminder': {
+    sv: 'Skicka påminnelse',
+    en: 'Send Reminder',
+  },
+  'attestation.periodSummary': {
+    sv: 'Periodöversikt',
+    en: 'Period Summary',
+  },
+  'attestation.periodSummaryDescription': {
+    sv: 'Översikt över perioden och dess registrerade avvikelser',
+    en: 'Overview of the period and its registered deviations',
+  },
+  'attestation.submittedAt': {
+    sv: 'Inskickad',
+    en: 'Submitted',
+  },
+  'attestation.totalDeviations': {
+    sv: 'Totalt antal avvikelser',
+    en: 'Total deviations',
+  },
+  'attestation.periodDeviations': {
+    sv: 'Avvikelser i perioden',
+    en: 'Deviations in period',
+  },
+  'attestation.returnForCorrection': {
+    sv: 'Skicka tillbaka för korrigering',
+    en: 'Return for correction',
+  },
+  'attestation.approvePeriod': {
+    sv: 'Godkänn period',
+    en: 'Approve period',
+  },
+  'attestation.sendReminderDescription': {
+    sv: 'Skicka en påminnelse till medarbetare om att registrera avvikelser',
+    en: 'Send a reminder to employee about registering deviations',
+  },
+  'attestation.reminderMessage': {
+    sv: 'Påminnelsemeddelande',
+    en: 'Reminder message',
+  },
+  'attestation.reminderMessagePlaceholder': {
+    sv: 'Skriv ditt påminnelsemeddelande här...',
+    en: 'Write your reminder message here...',
+  },
+  'attestation.reminderSentSuccess': {
+    sv: 'Påminnelse skickad!',
+    en: 'Reminder sent successfully!',
+  },
+  'attestation.reminderSentError': {
+    sv: 'Kunde inte skicka påminnelse',
+    en: 'Failed to send reminder',
+  },
+  'attestation.returnPeriod': {
+    sv: 'Skicka tillbaka period',
+    en: 'Return period',
+  },
+  'attestation.returnPeriodDescription': {
+    sv: 'Skicka tillbaka perioden till medarbetaren för korrigering eller komplettering',
+    en: 'Return the period to the employee for correction or completion',
+  },
+  'attestation.returnComment': {
+    sv: 'Kommentar till medarbetare',
+    en: 'Comment to employee',
+  },
+  'attestation.returnCommentPlaceholder': {
+    sv: 'Beskriv vad som behöver korrigeras eller kompletteras...',
+    en: 'Describe what needs to be corrected or completed...',
+  },
+  'attestation.periodReturnedSuccess': {
+    sv: 'Perioden har skickats tillbaka för korrigering',
+    en: 'Period has been returned for correction',
+  },
+  'attestation.periodReturnedError': {
+    sv: 'Kunde inte skicka tillbaka perioden',
+    en: 'Failed to return the period',
+  },
+  'attestation.periodApprovedSuccess': {
+    sv: 'Perioden har godkänts',
+    en: 'Period has been approved',
+  },
+  'attestation.periodApprovedError': {
+    sv: 'Kunde inte godkänna perioden',
+    en: 'Failed to approve the period',
+  },
+  'attestation.rejectLeave': {
+    sv: 'Avslå ledighetsansökan',
+    en: 'Reject leave request',
+  },
+  'attestation.rejectLeaveDescription': {
+    sv: 'Ange anledning för avslag',
+    en: 'Provide reason for rejection',
+  },
+  'attestation.rejectReason': {
+    sv: 'Avslagsanledning',
+    en: 'Rejection reason',
+  },
+  'attestation.rejectReasonPlaceholder': {
+    sv: 'Beskriv varför ledighetsansökan avslås...',
+    en: 'Describe why the leave request is being rejected...',
+  },
+  'attestation.pauseLeave': {
+    sv: 'Pausa ledighetsansökan',
+    en: 'Pause leave request',
+  },
+  'attestation.pauseLeaveDescription': {
+    sv: 'Ange anledning för pausning',
+    en: 'Provide reason for pausing',
+  },
+  'attestation.pauseReason': {
+    sv: 'Pausningsanledning',
+    en: 'Pause reason',
+  },
+  'attestation.pauseReasonPlaceholder': {
+    sv: 'Beskriv varför ledighetsansökan pausas...',
+    en: 'Describe why the leave request is being paused...',
+  },
+  'attestation.leaveApprovedSuccess': {
+    sv: 'Ledighetsansökan har godkänts',
+    en: 'Leave request has been approved',
+  },
+  'attestation.leaveApprovedError': {
+    sv: 'Kunde inte godkänna ledighetsansökan',
+    en: 'Failed to approve leave request',
+  },
+  'attestation.leaveRejectedSuccess': {
+    sv: 'Ledighetsansökan har avslagits',
+    en: 'Leave request has been rejected',
+  },
+  'attestation.leaveRejectedError': {
+    sv: 'Kunde inte avslå ledighetsansökan',
+    en: 'Failed to reject leave request',
+  },
+  'attestation.leavePausedSuccess': {
+    sv: 'Ledighetsansökan har pausats',
+    en: 'Leave request has been paused',
+  },
+  'attestation.leavePausedError': {
+    sv: 'Kunde inte pausa ledighetsansökan',
+    en: 'Failed to pause leave request',
   },
   
   // Payslips

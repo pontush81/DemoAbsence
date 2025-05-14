@@ -7,7 +7,10 @@ import {
   TimeBalance, type InsertTimeBalance,
   Payslip, type InsertPayslip,
   ActivityLog, type InsertActivityLog,
-  employees, schedules, timeCodes, deviations, leaveRequests, timeBalances, payslips, activityLogs
+  Period, type InsertPeriod,
+  Reminder, type InsertReminder,
+  employees, schedules, timeCodes, deviations, leaveRequests, timeBalances, payslips, activityLogs,
+  periods, reminders
 } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
@@ -21,6 +24,12 @@ export interface IStorage {
   createEmployee(employee: InsertEmployee): Promise<Employee>;
   updateEmployee(employeeId: string, updates: Partial<Employee>): Promise<Employee | undefined>;
   
+  // Period operations
+  getPeriods(filters?: { employeeId?: string, status?: string, year?: number, month?: number }): Promise<Period[]>;
+  getPeriod(id: number): Promise<Period | undefined>;
+  createPeriod(period: InsertPeriod): Promise<Period>;
+  updatePeriod(id: number, updates: Partial<Period>): Promise<Period | undefined>;
+  
   // Schedule operations
   getSchedules(employeeId: string, date?: string): Promise<Schedule[]>;
   getSchedule(id: number): Promise<Schedule | undefined>;
@@ -32,11 +41,12 @@ export interface IStorage {
   getTimeCodeByCode(code: string): Promise<TimeCode | undefined>;
   
   // Deviation operations
-  getDeviations(filters?: { employeeId?: string, status?: string, timeCode?: string }): Promise<Deviation[]>;
+  getDeviations(filters?: { employeeId?: string, status?: string, timeCode?: string, periodId?: number }): Promise<Deviation[]>;
   getDeviation(id: number): Promise<Deviation | undefined>;
   createDeviation(deviation: InsertDeviation): Promise<Deviation>;
   updateDeviation(id: number, updates: Partial<Deviation>): Promise<Deviation | undefined>;
   deleteDeviation(id: number): Promise<boolean>;
+  assignDeviationsToPeriod(deviationIds: number[], periodId: number): Promise<boolean>;
   
   // LeaveRequest operations
   getLeaveRequests(filters?: { employeeId?: string, status?: string, leaveType?: string }): Promise<LeaveRequest[]>;
@@ -44,6 +54,13 @@ export interface IStorage {
   createLeaveRequest(leaveRequest: InsertLeaveRequest): Promise<LeaveRequest>;
   updateLeaveRequest(id: number, updates: Partial<LeaveRequest>): Promise<LeaveRequest | undefined>;
   deleteLeaveRequest(id: number): Promise<boolean>;
+  pauseLeaveRequest(id: number, pausedBy: string, pauseReason: string): Promise<LeaveRequest | undefined>;
+  
+  // Reminder operations
+  getReminders(employeeId: string, isRead?: boolean): Promise<Reminder[]>;
+  getReminder(id: number): Promise<Reminder | undefined>;
+  createReminder(reminder: InsertReminder): Promise<Reminder>;
+  markReminderAsRead(id: number): Promise<Reminder | undefined>;
   
   // TimeBalance operations
   getTimeBalance(employeeId: string): Promise<TimeBalance | undefined>;
@@ -54,7 +71,7 @@ export interface IStorage {
   getPayslip(id: number): Promise<Payslip | undefined>;
   
   // ActivityLog operations
-  getActivityLogs(employeeId: string): Promise<ActivityLog[]>;
+  getActivityLogs(employeeId: string, filters?: { type?: string, referenceId?: string }): Promise<ActivityLog[]>;
   createActivityLog(log: InsertActivityLog): Promise<ActivityLog>;
 }
 
@@ -68,6 +85,8 @@ export class MemStorage implements IStorage {
   private timeBalances: Map<number, TimeBalance>;
   private payslips: Map<number, Payslip>;
   private activityLogs: Map<number, ActivityLog>;
+  private periods: Map<number, Period>;
+  private reminders: Map<number, Reminder>;
   
   private employeeIdCounter: number;
   private scheduleIdCounter: number;
@@ -77,6 +96,8 @@ export class MemStorage implements IStorage {
   private timeBalanceIdCounter: number;
   private payslipIdCounter: number;
   private activityLogIdCounter: number;
+  private periodIdCounter: number;
+  private reminderIdCounter: number;
   
   constructor() {
     this.employees = new Map();

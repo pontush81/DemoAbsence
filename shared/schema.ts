@@ -1,6 +1,7 @@
 import { pgTable, text, serial, integer, boolean, date, time, timestamp, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { relations } from "drizzle-orm";
 
 // Employees (Personnel)
 export const employees = pgTable("employees", {
@@ -31,6 +32,41 @@ export const employees = pgTable("employees", {
   scheduleTemplate: text("schedule_template"),
 });
 
+// Employee relations
+export const employeesRelations = relations(employees, ({ many }) => ({
+  periods: many(periods),
+  deviations: many(deviations),
+  leaveRequests: many(leaveRequests),
+  reminders: many(reminders),
+}));
+
+// Time periods (months of work to be approved)
+export const periods = pgTable("periods", {
+  id: serial("id").primaryKey(),
+  employeeId: text("employee_id").notNull(),
+  year: integer("year").notNull(),
+  month: integer("month").notNull(),
+  status: text("status").default("draft"), // "draft", "submitted", "approved", "rejected", "returned"
+  submittedAt: timestamp("submitted_at"),
+  approvedBy: text("approved_by"),
+  approvedAt: timestamp("approved_at"),
+  rejectedBy: text("rejected_by"),
+  rejectedAt: timestamp("rejected_at"),
+  returnedBy: text("returned_by"),
+  returnedAt: timestamp("returned_at"),
+  managerComment: text("manager_comment"),
+  lastUpdated: timestamp("last_updated").defaultNow(),
+});
+
+// Period relations
+export const periodsRelations = relations(periods, ({ one, many }) => ({
+  employee: one(employees, {
+    fields: [periods.employeeId],
+    references: [employees.employeeId],
+  }),
+  deviations: many(deviations),
+}));
+
 // Schedules
 export const schedules = pgTable("schedules", {
   id: serial("id").primaryKey(),
@@ -43,6 +79,14 @@ export const schedules = pgTable("schedules", {
   status: text("status").default("scheduled"), // "scheduled", "modified", "approved"
 });
 
+// Schedule relations
+export const schedulesRelations = relations(schedules, ({ one }) => ({
+  employee: one(employees, {
+    fields: [schedules.employeeId],
+    references: [employees.employeeId],
+  }),
+}));
+
 // Time codes (for deviations)
 export const timeCodes = pgTable("time_codes", {
   id: serial("id").primaryKey(),
@@ -54,16 +98,22 @@ export const timeCodes = pgTable("time_codes", {
   requiresApproval: boolean("requires_approval").default(true),
 });
 
+// TimeCode relations
+export const timeCodesRelations = relations(timeCodes, ({ many }) => ({
+  deviations: many(deviations),
+}));
+
 // Deviations
 export const deviations = pgTable("deviations", {
   id: serial("id").primaryKey(),
+  periodId: integer("period_id"), // Can be null for deviations not yet assigned to a period
   employeeId: text("employee_id").notNull(),
   date: date("date").notNull(),
   startTime: time("start_time").notNull(),
   endTime: time("end_time").notNull(),
   timeCode: text("time_code").notNull(),
   comment: text("comment"),
-  status: text("status").default("pending"), // "draft", "pending", "approved", "rejected", "returned"
+  status: text("status").default("draft"), // "draft", "pending", "approved", "rejected", "returned"
   managerComment: text("manager_comment"),
   lastUpdated: timestamp("last_updated").defaultNow(),
   submitted: timestamp("submitted"),
@@ -72,6 +122,22 @@ export const deviations = pgTable("deviations", {
   rejectedBy: text("rejected_by"),
   rejectedAt: timestamp("rejected_at"),
 });
+
+// Deviation relations
+export const deviationsRelations = relations(deviations, ({ one }) => ({
+  employee: one(employees, {
+    fields: [deviations.employeeId],
+    references: [employees.employeeId],
+  }),
+  period: one(periods, {
+    fields: [deviations.periodId],
+    references: [periods.id],
+  }),
+  timeCode: one(timeCodes, {
+    fields: [deviations.timeCode],
+    references: [timeCodes.code],
+  }),
+}));
 
 // Leave requests
 export const leaveRequests = pgTable("leave_requests", {
@@ -84,7 +150,7 @@ export const leaveRequests = pgTable("leave_requests", {
   customStartTime: time("custom_start_time"),
   customEndTime: time("custom_end_time"),
   comment: text("comment"),
-  status: text("status").default("pending"), // "draft", "pending", "approved", "rejected"
+  status: text("status").default("pending"), // "draft", "pending", "approved", "rejected", "paused"
   managerComment: text("manager_comment"),
   lastUpdated: timestamp("last_updated").defaultNow(),
   submitted: timestamp("submitted"),
@@ -92,7 +158,18 @@ export const leaveRequests = pgTable("leave_requests", {
   approvedAt: timestamp("approved_at"),
   rejectedBy: text("rejected_by"),
   rejectedAt: timestamp("rejected_at"),
+  pausedBy: text("paused_by"),
+  pausedAt: timestamp("paused_at"),
+  pauseReason: text("pause_reason"),
 });
+
+// LeaveRequest relations
+export const leaveRequestsRelations = relations(leaveRequests, ({ one }) => ({
+  employee: one(employees, {
+    fields: [leaveRequests.employeeId],
+    references: [employees.employeeId],
+  }),
+}));
 
 // Time balances (for displaying saldos)
 export const timeBalances = pgTable("time_balances", {
@@ -106,6 +183,14 @@ export const timeBalances = pgTable("time_balances", {
   lastUpdated: timestamp("last_updated").defaultNow(),
 });
 
+// TimeBalance relations
+export const timeBalancesRelations = relations(timeBalances, ({ one }) => ({
+  employee: one(employees, {
+    fields: [timeBalances.employeeId],
+    references: [employees.employeeId],
+  }),
+}));
+
 // Payslips
 export const payslips = pgTable("payslips", {
   id: serial("id").primaryKey(),
@@ -115,22 +200,64 @@ export const payslips = pgTable("payslips", {
   fileName: text("file_name").notNull(),
   fileUrl: text("file_url").notNull(),
   published: timestamp("published").defaultNow(),
+  viewed: boolean("viewed").default(false),
+  viewedAt: timestamp("viewed_at"),
 });
+
+// Payslip relations
+export const payslipsRelations = relations(payslips, ({ one }) => ({
+  employee: one(employees, {
+    fields: [payslips.employeeId],
+    references: [employees.employeeId],
+  }),
+}));
 
 // Activity logs
 export const activityLogs = pgTable("activity_logs", {
   id: serial("id").primaryKey(),
   employeeId: text("employee_id").notNull(),
-  type: text("type").notNull(), // "deviation", "leave", "payslip", etc.
-  action: text("action").notNull(), // "created", "updated", "approved", "rejected", etc.
+  type: text("type").notNull(), // "deviation", "leave", "payslip", "period", etc.
+  action: text("action").notNull(), // "created", "updated", "approved", "rejected", "returned", etc.
   description: text("description").notNull(),
   timestamp: timestamp("timestamp").defaultNow(),
   referenceId: text("reference_id"), // ID of the referenced entity
-  referenceType: text("reference_type"), // "deviation", "leave", etc.
+  referenceType: text("reference_type"), // "deviation", "leave", "period", etc.
+  performedBy: text("performed_by"), // employeeId of who performed the action
 });
+
+// ActivityLog relations
+export const activityLogsRelations = relations(activityLogs, ({ one }) => ({
+  employee: one(employees, {
+    fields: [activityLogs.employeeId],
+    references: [employees.employeeId],
+  }),
+}));
+
+// Reminders
+export const reminders = pgTable("reminders", {
+  id: serial("id").primaryKey(),
+  employeeId: text("employee_id").notNull(),
+  message: text("message").notNull(),
+  sentBy: text("sent_by"), // employeeId of sender, null if system-generated
+  sentAt: timestamp("sent_at").defaultNow(),
+  isRead: boolean("is_read").default(false),
+  readAt: timestamp("read_at"),
+  type: text("type").default("manual"), // "manual", "auto", "system"
+  referenceType: text("reference_type"), // "period", "deviation", "leave", etc.
+  referenceId: text("reference_id"), // ID of referenced entity
+});
+
+// Reminder relations
+export const remindersRelations = relations(reminders, ({ one }) => ({
+  employee: one(employees, {
+    fields: [reminders.employeeId],
+    references: [employees.employeeId],
+  }),
+}));
 
 // Insert schemas
 export const insertEmployeeSchema = createInsertSchema(employees).omit({ id: true });
+export const insertPeriodSchema = createInsertSchema(periods).omit({ id: true });
 export const insertScheduleSchema = createInsertSchema(schedules).omit({ id: true });
 export const insertTimeCodeSchema = createInsertSchema(timeCodes).omit({ id: true });
 export const insertDeviationSchema = createInsertSchema(deviations).omit({ id: true });
@@ -138,10 +265,14 @@ export const insertLeaveRequestSchema = createInsertSchema(leaveRequests).omit({
 export const insertTimeBalanceSchema = createInsertSchema(timeBalances).omit({ id: true });
 export const insertPayslipSchema = createInsertSchema(payslips).omit({ id: true });
 export const insertActivityLogSchema = createInsertSchema(activityLogs).omit({ id: true });
+export const insertReminderSchema = createInsertSchema(reminders).omit({ id: true });
 
 // Types
 export type Employee = typeof employees.$inferSelect;
 export type InsertEmployee = z.infer<typeof insertEmployeeSchema>;
+
+export type Period = typeof periods.$inferSelect;
+export type InsertPeriod = z.infer<typeof insertPeriodSchema>;
 
 export type Schedule = typeof schedules.$inferSelect;
 export type InsertSchedule = z.infer<typeof insertScheduleSchema>;
@@ -163,3 +294,6 @@ export type InsertPayslip = z.infer<typeof insertPayslipSchema>;
 
 export type ActivityLog = typeof activityLogs.$inferSelect;
 export type InsertActivityLog = z.infer<typeof insertActivityLogSchema>;
+
+export type Reminder = typeof reminders.$inferSelect;
+export type InsertReminder = z.infer<typeof insertReminderSchema>;
