@@ -81,63 +81,67 @@ const PayslipList = ({ payslips }: PayslipListProps) => {
         <CardDescription>{t('payslips.payslipsDescription')}</CardDescription>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t('payslips.period')}</TableHead>
-              <TableHead>{t('payslips.paymentDate')}</TableHead>
-              <TableHead>{t('payslips.amount')}</TableHead>
-              <TableHead>{t('payslips.status')}</TableHead>
-              <TableHead className="text-right">{t('payslips.actions')}</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {sortedPayslips.map((payslip) => {
-              // Format payment date from yyyy-MM-dd to something more readable
-              // Fallback values for older payslips without new fields
-              const paymentDate = payslip.payDate || `${payslip.year}-${payslip.month.toString().padStart(2, '0')}-25`;
-              const monthName = getMonthName(payslip.month - 1); // Adjust because getMonthName is 0-based
-              const viewStatus = payslip.status || (payslip.viewed ? 'viewed' : 'new');
-              // Default amount is 0 if not available
-              const amount = payslip.netAmount || 36000; // Default test amount
-              
-              return (
-                <TableRow key={payslip.id}>
-                  <TableCell className="font-medium">
-                    {monthName} {payslip.year}
-                  </TableCell>
-                  <TableCell>{paymentDate}</TableCell>
-                  <TableCell>{formatAmount(amount)} kr</TableCell>
-                  <TableCell>
-                    <Badge variant={viewStatus === 'new' ? 'default' : 'outline'}>
-                      {viewStatus === 'new' ? t('payslips.status.new') : t('payslips.status.viewed')}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        title={t('payslips.view')}
-                        onClick={() => handleDownload(payslip.id, payslip.fileName)}
-                      >
-                        <EyeIcon className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        title={t('payslips.download')}
-                        onClick={() => handleDownload(payslip.id, payslip.fileName)}
-                      >
-                        <DownloadIcon className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+        <div className="overflow-x-auto -mx-6 px-6"> {/* Add horizontal scroll with negative margin and padding */}
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="whitespace-nowrap">{t('payslips.period')}</TableHead>
+                <TableHead className="whitespace-nowrap">{t('payslips.paymentDate')}</TableHead>
+                <TableHead className="whitespace-nowrap">{t('payslips.amount')}</TableHead>
+                <TableHead className="whitespace-nowrap">{t('payslips.status')}</TableHead>
+                <TableHead className="text-right whitespace-nowrap">{t('payslips.actions')}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {sortedPayslips.map((payslip) => {
+                // Format payment date from yyyy-MM-dd to something more readable
+                // Fallback values for older payslips without new fields
+                const paymentDate = payslip.payDate || `${payslip.year}-${payslip.month.toString().padStart(2, '0')}-25`;
+                const monthName = getMonthName(payslip.month - 1); // Adjust because getMonthName is 0-based
+                const viewStatus = payslip.status || (payslip.viewed ? 'viewed' : 'new');
+                // Default amount is 0 if not available
+                const amount = payslip.netAmount || 36000; // Default test amount
+                
+                return (
+                  <TableRow key={payslip.id}>
+                    <TableCell className="font-medium whitespace-nowrap">
+                      {monthName} {payslip.year}
+                    </TableCell>
+                    <TableCell className="whitespace-nowrap">{paymentDate}</TableCell>
+                    <TableCell className="whitespace-nowrap">{formatAmount(amount)} kr</TableCell>
+                    <TableCell>
+                      <Badge variant={viewStatus === 'new' ? 'default' : 'outline'}>
+                        {viewStatus === 'new' ? t('payslips.status.new') : t('payslips.status.viewed')}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          title={t('payslips.view')}
+                          onClick={() => handleDownload(payslip.id, payslip.fileName)}
+                          className="h-8 w-8" 
+                        >
+                          <EyeIcon className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          title={t('payslips.download')}
+                          onClick={() => handleDownload(payslip.id, payslip.fileName)}
+                          className="h-8 w-8"
+                        >
+                          <DownloadIcon className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </div>
       </CardContent>
     </Card>
   );

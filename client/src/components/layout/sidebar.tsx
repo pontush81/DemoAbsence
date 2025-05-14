@@ -99,7 +99,7 @@ const Sidebar = () => {
               <Link href={item.href}>
                 <a
                   className={cn(
-                    "flex items-center px-4 py-3 hover:bg-gray-50 text-sidebar-foreground",
+                    "flex items-center px-4 py-3 text-sidebar-foreground",
                     item.active && "text-primary border-l-4 border-primary"
                   )}
                 >

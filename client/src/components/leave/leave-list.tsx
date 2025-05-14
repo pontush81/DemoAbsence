@@ -134,16 +134,16 @@ const LeaveList = ({ onSelect }: LeaveListProps) => {
       <div>
         {renderFilters()}
         <div className="bg-white rounded-lg shadow-sm overflow-hidden mt-6">
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>{t('leave.period')}</TableHead>
-                  <TableHead>{t('leave.leaveType')}</TableHead>
-                  <TableHead>{t('leave.scope')}</TableHead>
-                  <TableHead>{t('deviations.status')}</TableHead>
-                  <TableHead>{t('deviations.comment')}</TableHead>
-                  <TableHead className="text-right">{t('deviations.actions')}</TableHead>
+                  <TableHead className="whitespace-nowrap">{t('leave.period')}</TableHead>
+                  <TableHead className="whitespace-nowrap">{t('leave.leaveType')}</TableHead>
+                  <TableHead className="whitespace-nowrap">{t('leave.scope')}</TableHead>
+                  <TableHead className="whitespace-nowrap">{t('deviations.status')}</TableHead>
+                  <TableHead className="whitespace-nowrap">{t('deviations.comment')}</TableHead>
+                  <TableHead className="text-right whitespace-nowrap">{t('deviations.actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -229,16 +229,16 @@ const LeaveList = ({ onSelect }: LeaveListProps) => {
       {renderFilters()}
       
       <div className="bg-white rounded-lg shadow-sm overflow-hidden mt-6">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>{t('leave.period')}</TableHead>
-                <TableHead>{t('leave.leaveType')}</TableHead>
-                <TableHead>{t('leave.scope')}</TableHead>
-                <TableHead>{t('deviations.status')}</TableHead>
-                <TableHead>{t('deviations.comment')}</TableHead>
-                <TableHead className="text-right">{t('deviations.actions')}</TableHead>
+                <TableHead className="whitespace-nowrap">{t('leave.period')}</TableHead>
+                <TableHead className="whitespace-nowrap">{t('leave.leaveType')}</TableHead>
+                <TableHead className="whitespace-nowrap">{t('leave.scope')}</TableHead>
+                <TableHead className="whitespace-nowrap">{t('deviations.status')}</TableHead>
+                <TableHead className="whitespace-nowrap">{t('deviations.comment')}</TableHead>
+                <TableHead className="text-right whitespace-nowrap">{t('deviations.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -259,7 +259,7 @@ const LeaveList = ({ onSelect }: LeaveListProps) => {
                   <TableCell className="whitespace-nowrap">
                     {getScopeLabel(leave.scope)}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="whitespace-nowrap">
                     <StatusBadge status={leave.status as any} />
                   </TableCell>
                   <TableCell className="max-w-xs truncate-text">
@@ -269,7 +269,7 @@ const LeaveList = ({ onSelect }: LeaveListProps) => {
                     {leave.status === 'draft' ? (
                       <Button 
                         variant="link" 
-                        className="text-primary hover:text-primary-dark mr-3"
+                        className="text-primary hover:text-primary-dark"
                         onClick={(e) => {
                           e.stopPropagation();
                           setLocation(`/leave/edit/${leave.id}`);
@@ -280,7 +280,7 @@ const LeaveList = ({ onSelect }: LeaveListProps) => {
                     ) : (
                       <Button 
                         variant="link" 
-                        className="text-primary hover:text-primary-dark mr-3"
+                        className="text-primary hover:text-primary-dark"
                       >
                         {t('action.view')}
                       </Button>
