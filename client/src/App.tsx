@@ -11,6 +11,7 @@ import Leave from "@/pages/leave";
 import Settings from "@/pages/settings";
 import Payslips from "@/pages/payslips";
 import Manager from "@/pages/manager";
+import Attestation from "@/pages/attestation";
 import { useEffect } from "react";
 import { useStore } from "./lib/store";
 
@@ -39,6 +40,7 @@ function Router() {
         <Route path="/payslips" component={Payslips} />
         <Route path="/settings" component={Settings} />
         <Route path="/manager" component={Manager} />
+        <Route path="/attestation" component={Attestation} />
         <Route component={NotFound} />
       </Switch>
     </AppShell>

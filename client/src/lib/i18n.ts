@@ -402,6 +402,44 @@ const translations: Translations = {
     en: 'Registered',
   },
   
+  // Attestation
+  'attestation.description': {
+    sv: 'Hantera och attestera avvikelser och ledighetsansökningar',
+    en: 'Manage and approve deviations and leave requests',
+  },
+  'attestation.pendingDeviations': {
+    sv: 'Väntande avvikelser',
+    en: 'Pending Deviations',
+  },
+  'attestation.pendingLeave': {
+    sv: 'Väntande ledighetsansökningar',
+    en: 'Pending Leave Requests',
+  },
+  'attestation.noDeviations': {
+    sv: 'Inga avvikelser att attestera',
+    en: 'No deviations to approve',
+  },
+  'attestation.noDeviationsDescription': {
+    sv: 'Det finns inga väntande avvikelser som behöver attesteras just nu',
+    en: 'There are currently no pending deviations that need approval',
+  },
+  'attestation.noLeave': {
+    sv: 'Inga ledighetsansökningar att attestera',
+    en: 'No leave requests to approve',
+  },
+  'attestation.noLeaveDescription': {
+    sv: 'Det finns inga väntande ledighetsansökningar som behöver attesteras just nu',
+    en: 'There are currently no pending leave requests that need approval',
+  },
+  'attestation.notAuthorized': {
+    sv: 'Ej behörig',
+    en: 'Not Authorized',
+  },
+  'attestation.managerRoleRequired': {
+    sv: 'Du måste vara inloggad som chef för att kunna attestera',
+    en: 'You need to be logged in as a manager to access attestation',
+  },
+  
   // Payslips
   'payslips.title': {
     sv: 'Lönespecifikationer',
