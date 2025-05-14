@@ -152,50 +152,55 @@ export const mockEmployees: Employee[] = [
 
 // Mock Schedules
 export const mockSchedules: Schedule[] = [
+  // Måndag
   {
     id: 1,
     employeeId: 'E001',
-    date: new Date().toISOString().split('T')[0],
+    date: getDateString(0), // Idag (måndag)
     startTime: '08:00:00',
     endTime: '17:00:00',
     breakStart: '12:00:00',
     breakEnd: '13:00:00',
     status: 'scheduled',
   },
+  // Tisdag
   {
     id: 2,
-    employeeId: 'E002',
-    date: new Date().toISOString().split('T')[0],
-    startTime: '09:00:00',
-    endTime: '18:00:00',
-    breakStart: '12:30:00',
-    breakEnd: '13:30:00',
-    status: 'scheduled',
-  },
-  {
-    id: 3,
-    employeeId: 'E003',
-    date: new Date().toISOString().split('T')[0],
-    startTime: '08:30:00',
-    endTime: '17:30:00',
+    employeeId: 'E001',
+    date: getDateString(1), // Tisdag
+    startTime: '08:00:00',
+    endTime: '17:00:00',
     breakStart: '12:00:00',
     breakEnd: '13:00:00',
     status: 'scheduled',
   },
+  // Onsdag
   {
-    id: 4,
-    employeeId: 'E004',
-    date: new Date().toISOString().split('T')[0],
+    id: 3,
+    employeeId: 'E001',
+    date: getDateString(2), // Onsdag
     startTime: '08:00:00',
     endTime: '17:00:00',
-    breakStart: '11:30:00',
-    breakEnd: '12:30:00',
+    breakStart: '12:00:00',
+    breakEnd: '13:00:00',
     status: 'scheduled',
   },
+  // Torsdag
+  {
+    id: 4,
+    employeeId: 'E001',
+    date: getDateString(3), // Torsdag
+    startTime: '08:00:00',
+    endTime: '17:00:00',
+    breakStart: '12:00:00',
+    breakEnd: '13:00:00',
+    status: 'scheduled',
+  },
+  // Fredag
   {
     id: 5,
-    employeeId: 'E005',
-    date: new Date().toISOString().split('T')[0],
+    employeeId: 'E001',
+    date: getDateString(4), // Fredag
     startTime: '08:00:00',
     endTime: '17:00:00',
     breakStart: '12:00:00',
@@ -203,6 +208,13 @@ export const mockSchedules: Schedule[] = [
     status: 'scheduled',
   },
 ];
+
+// Hjälpfunktion för att få rätt datum
+function getDateString(daysAhead: number): string {
+  const date = new Date();
+  date.setDate(date.getDate() + daysAhead);
+  return date.toISOString().split('T')[0];
+}
 
 // Mock Time Codes
 export const mockTimeCodes: TimeCode[] = [
