@@ -2,6 +2,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { 
   Form, 
   FormControl, 
@@ -57,12 +58,12 @@ const PersonalInfoForm = () => {
   const form = useForm<PersonalInfoFormValues>({
     resolver: zodResolver(personalInfoSchema),
     defaultValues: {
-      personnummer: "",
-      firstName: "",
-      lastName: "",
-      careOfAddress: "",
-      streetAddress: "",
-      postalCode: "",
+      personnummer: employee?.personnummer || "",
+      firstName: employee?.firstName || "",
+      lastName: employee?.lastName || "",
+      careOfAddress: employee?.careOfAddress || "",
+      streetAddress: employee?.streetAddress || "",
+      postalCode: employee?.postalCode || "",
       city: "",
       country: "Sverige",
       phoneNumber: "",

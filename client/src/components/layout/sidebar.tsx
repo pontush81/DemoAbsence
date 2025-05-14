@@ -62,7 +62,7 @@ const Sidebar = () => {
   };
   
   return (
-    <aside className="hidden md:flex md:flex-col md:w-64 bg-sidebar shadow-md z-10">
+    <aside className="hidden md:flex md:flex-col md:w-64 bg-white shadow-md z-10">
       <div className="flex items-center p-4 border-b border-sidebar-border">
         <img 
           src="https://pixabay.com/get/g71147032ef23548394939a9177a80ee6c469d108bf2fef71f6aae5036927c5fe34037a517d978a8abd60877a73f2bf4b4a26e41fa877986bf2d3cc41ff44950a_1280.jpg" 

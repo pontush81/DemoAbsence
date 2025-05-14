@@ -69,7 +69,7 @@ const MobileSidebar = () => {
     <aside 
       id="mobile-sidebar" 
       className={cn(
-        "fixed inset-y-0 left-0 z-40 w-64 bg-sidebar transform transition-transform duration-300 ease-in-out md:hidden",
+        "fixed inset-y-0 left-0 z-40 w-64 bg-white transform transition-transform duration-300 ease-in-out md:hidden",
         navigation.isMobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}
     >
