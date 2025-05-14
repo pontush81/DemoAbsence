@@ -134,16 +134,16 @@ const LeaveList = ({ onSelect }: LeaveListProps) => {
       <div>
         {renderFilters()}
         <div className="bg-white rounded-lg shadow-sm overflow-hidden mt-6">
-          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-            <Table>
+          <div className="responsive-table-wrapper">
+            <Table className="min-w-full">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="whitespace-nowrap">{t('leave.period')}</TableHead>
-                  <TableHead className="whitespace-nowrap">{t('leave.leaveType')}</TableHead>
-                  <TableHead className="whitespace-nowrap">{t('leave.scope')}</TableHead>
-                  <TableHead className="whitespace-nowrap">{t('deviations.status')}</TableHead>
-                  <TableHead className="whitespace-nowrap">{t('deviations.comment')}</TableHead>
-                  <TableHead className="text-right whitespace-nowrap">{t('deviations.actions')}</TableHead>
+                  <TableHead className="whitespace-nowrap min-width-cell">{t('leave.period')}</TableHead>
+                  <TableHead className="whitespace-nowrap min-width-cell">{t('leave.leaveType')}</TableHead>
+                  <TableHead className="whitespace-nowrap min-width-cell">{t('leave.scope')}</TableHead>
+                  <TableHead className="whitespace-nowrap status-cell">{t('deviations.status')}</TableHead>
+                  <TableHead className="whitespace-nowrap comment-cell">{t('deviations.comment')}</TableHead>
+                  <TableHead className="text-right whitespace-nowrap min-width-cell">{t('deviations.actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -168,21 +168,24 @@ const LeaveList = ({ onSelect }: LeaveListProps) => {
   // Render error state
   if (error) {
     return (
-      <div className="bg-white rounded-lg shadow-sm p-6 mt-6">
-        <p className="text-destructive">{t('leave.loadError')}: {(error as Error).message}</p>
-        <Button 
-          onClick={() => window.location.reload()} 
-          variant="outline" 
-          className="mt-4"
-        >
-          {t('action.retry')}
-        </Button>
+      <div>
+        {renderFilters()}
+        <div className="bg-white rounded-lg shadow-sm p-6 mt-6">
+          <p className="text-destructive">{t('leave.loadError')}: {(error as Error)?.message || 'Unknown error'}</p>
+          <Button 
+            onClick={() => window.location.reload()} 
+            variant="outline" 
+            className="mt-4"
+          >
+            {t('action.retry')}
+          </Button>
+        </div>
       </div>
     );
   }
   
   // Render empty state
-  if (leaveRequests?.length === 0) {
+  if (!leaveRequests || leaveRequests.length === 0) {
     return (
       <div>
         {renderFilters()}
@@ -229,43 +232,43 @@ const LeaveList = ({ onSelect }: LeaveListProps) => {
       {renderFilters()}
       
       <div className="bg-white rounded-lg shadow-sm overflow-hidden mt-6">
-        <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-          <Table>
+        <div className="responsive-table-wrapper">
+          <Table className="min-w-full">
             <TableHeader>
               <TableRow>
-                <TableHead className="whitespace-nowrap">{t('leave.period')}</TableHead>
-                <TableHead className="whitespace-nowrap">{t('leave.leaveType')}</TableHead>
-                <TableHead className="whitespace-nowrap">{t('leave.scope')}</TableHead>
-                <TableHead className="whitespace-nowrap">{t('deviations.status')}</TableHead>
-                <TableHead className="whitespace-nowrap">{t('deviations.comment')}</TableHead>
-                <TableHead className="text-right whitespace-nowrap">{t('deviations.actions')}</TableHead>
+                <TableHead className="whitespace-nowrap min-width-cell">{t('leave.period')}</TableHead>
+                <TableHead className="whitespace-nowrap min-width-cell">{t('leave.leaveType')}</TableHead>
+                <TableHead className="whitespace-nowrap min-width-cell">{t('leave.scope')}</TableHead>
+                <TableHead className="whitespace-nowrap status-cell">{t('deviations.status')}</TableHead>
+                <TableHead className="whitespace-nowrap comment-cell">{t('deviations.comment')}</TableHead>
+                <TableHead className="text-right whitespace-nowrap min-width-cell">{t('deviations.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {leaveRequests?.map((leave) => (
+              {leaveRequests.map((leave) => (
                 <TableRow 
                   key={leave.id} 
                   className="hover:bg-background-dark transition-colors cursor-pointer"
                   onClick={() => handleRowClick(leave)}
                 >
-                  <TableCell className="whitespace-nowrap">
+                  <TableCell className="whitespace-nowrap min-width-cell">
                     {leave.startDate === leave.endDate 
                       ? leave.startDate 
                       : `${leave.startDate} - ${leave.endDate}`}
                   </TableCell>
-                  <TableCell className="whitespace-nowrap">
+                  <TableCell className="whitespace-nowrap min-width-cell">
                     {getLeaveTypeLabel(leave.leaveType)}
                   </TableCell>
-                  <TableCell className="whitespace-nowrap">
-                    {getScopeLabel(leave.scope)}
+                  <TableCell className="whitespace-nowrap min-width-cell">
+                    {getScopeLabel(leave.scope || '')}
                   </TableCell>
-                  <TableCell className="whitespace-nowrap">
+                  <TableCell className="whitespace-nowrap status-cell">
                     <StatusBadge status={leave.status as any} />
                   </TableCell>
-                  <TableCell className="max-w-xs truncate-text">
+                  <TableCell className="comment-cell truncate-text">
                     {leave.comment || '-'}
                   </TableCell>
-                  <TableCell className="text-right whitespace-nowrap">
+                  <TableCell className="text-right whitespace-nowrap min-width-cell">
                     {leave.status === 'draft' ? (
                       <Button 
                         variant="link" 
@@ -297,7 +300,7 @@ const LeaveList = ({ onSelect }: LeaveListProps) => {
           <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
             <div>
               <p className="text-sm text-muted-foreground">
-                {t('pagination.showing')} <span className="font-medium">1</span> {t('pagination.to')} <span className="font-medium">{leaveRequests?.length}</span> {t('pagination.of')} <span className="font-medium">{leaveRequests?.length}</span> {t('pagination.results')}
+                {t('pagination.showing')} <span className="font-medium">1</span> {t('pagination.to')} <span className="font-medium">{leaveRequests.length}</span> {t('pagination.of')} <span className="font-medium">{leaveRequests.length}</span> {t('pagination.results')}
               </p>
             </div>
           </div>

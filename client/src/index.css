@@ -99,3 +99,38 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* Responsive table improvements */
+.responsive-table-wrapper {
+  @apply w-full overflow-x-auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Make sure table cells don't get too narrow */
+.min-width-cell {
+  min-width: 120px;
+}
+
+/* Make sure the comment column doesn't take too much space */
+.comment-cell {
+  max-width: 250px;
+  white-space: normal;
+  word-break: break-word;
+}
+
+/* Make sure status indicator has enough space */
+.status-cell {
+  min-width: 100px;
+}
+
+/* Make sure mobile view works well */
+@media (max-width: 640px) {
+  .responsive-table-wrapper table {
+    display: block;
+    width: 100%;
+  }
+  
+  .comment-cell {
+    max-width: 150px;
+  }
+}
