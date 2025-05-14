@@ -133,17 +133,17 @@ const LeaveList = ({ onSelect }: LeaveListProps) => {
     return (
       <div>
         {renderFilters()}
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden mt-6">
+        <div className="bg-white rounded-lg shadow-sm overflow-hidden responsive-table-card mt-6">
           <div className="responsive-table-wrapper">
-            <Table className="min-w-full">
+            <Table className="responsive-table">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="whitespace-nowrap min-width-cell">{t('leave.period')}</TableHead>
-                  <TableHead className="whitespace-nowrap min-width-cell">{t('leave.leaveType')}</TableHead>
-                  <TableHead className="whitespace-nowrap min-width-cell">{t('leave.scope')}</TableHead>
+                  <TableHead className="whitespace-nowrap date-cell">{t('leave.period')}</TableHead>
+                  <TableHead className="whitespace-nowrap type-cell">{t('leave.leaveType')}</TableHead>
+                  <TableHead className="whitespace-nowrap scope-cell">{t('leave.scope')}</TableHead>
                   <TableHead className="whitespace-nowrap status-cell">{t('deviations.status')}</TableHead>
-                  <TableHead className="whitespace-nowrap comment-cell">{t('deviations.comment')}</TableHead>
-                  <TableHead className="text-right whitespace-nowrap min-width-cell">{t('deviations.actions')}</TableHead>
+                  <TableHead className="comment-cell">{t('deviations.comment')}</TableHead>
+                  <TableHead className="text-right whitespace-nowrap actions-cell">{t('deviations.actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -231,17 +231,17 @@ const LeaveList = ({ onSelect }: LeaveListProps) => {
     <div>
       {renderFilters()}
       
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden mt-6">
+      <div className="bg-white rounded-lg shadow-sm overflow-hidden responsive-table-card mt-6">
         <div className="responsive-table-wrapper">
-          <Table className="min-w-full">
+          <Table className="responsive-table">
             <TableHeader>
               <TableRow>
-                <TableHead className="whitespace-nowrap min-width-cell">{t('leave.period')}</TableHead>
-                <TableHead className="whitespace-nowrap min-width-cell">{t('leave.leaveType')}</TableHead>
-                <TableHead className="whitespace-nowrap min-width-cell">{t('leave.scope')}</TableHead>
+                <TableHead className="whitespace-nowrap date-cell">{t('leave.period')}</TableHead>
+                <TableHead className="whitespace-nowrap type-cell">{t('leave.leaveType')}</TableHead>
+                <TableHead className="whitespace-nowrap scope-cell">{t('leave.scope')}</TableHead>
                 <TableHead className="whitespace-nowrap status-cell">{t('deviations.status')}</TableHead>
-                <TableHead className="whitespace-nowrap comment-cell">{t('deviations.comment')}</TableHead>
-                <TableHead className="text-right whitespace-nowrap min-width-cell">{t('deviations.actions')}</TableHead>
+                <TableHead className="comment-cell">{t('deviations.comment')}</TableHead>
+                <TableHead className="text-right whitespace-nowrap actions-cell">{t('deviations.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -251,15 +251,15 @@ const LeaveList = ({ onSelect }: LeaveListProps) => {
                   className="hover:bg-background-dark transition-colors cursor-pointer"
                   onClick={() => handleRowClick(leave)}
                 >
-                  <TableCell className="whitespace-nowrap min-width-cell">
+                  <TableCell className="whitespace-nowrap date-cell">
                     {leave.startDate === leave.endDate 
                       ? leave.startDate 
                       : `${leave.startDate} - ${leave.endDate}`}
                   </TableCell>
-                  <TableCell className="whitespace-nowrap min-width-cell">
+                  <TableCell className="whitespace-nowrap type-cell">
                     {getLeaveTypeLabel(leave.leaveType)}
                   </TableCell>
-                  <TableCell className="whitespace-nowrap min-width-cell">
+                  <TableCell className="whitespace-nowrap scope-cell">
                     {getScopeLabel(leave.scope || '')}
                   </TableCell>
                   <TableCell className="whitespace-nowrap status-cell">
@@ -268,7 +268,7 @@ const LeaveList = ({ onSelect }: LeaveListProps) => {
                   <TableCell className="comment-cell truncate-text">
                     {leave.comment || '-'}
                   </TableCell>
-                  <TableCell className="text-right whitespace-nowrap min-width-cell">
+                  <TableCell className="text-right whitespace-nowrap actions-cell">
                     {leave.status === 'draft' ? (
                       <Button 
                         variant="link" 

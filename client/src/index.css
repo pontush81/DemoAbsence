@@ -102,35 +102,47 @@
 
 /* Responsive table improvements */
 .responsive-table-wrapper {
-  @apply w-full overflow-x-auto;
+  @apply overflow-x-auto w-full;
   -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+  display: block;
+  overflow-scrolling: touch;
 }
 
-/* Make sure table cells don't get too narrow */
-.min-width-cell {
-  min-width: 120px;
-}
-
-/* Make sure the comment column doesn't take too much space */
-.comment-cell {
-  max-width: 250px;
-  white-space: normal;
-  word-break: break-word;
-}
-
-/* Make sure status indicator has enough space */
-.status-cell {
-  min-width: 100px;
-}
-
-/* Make sure mobile view works well */
+/* Improved table layout for mobile */
 @media (max-width: 640px) {
-  .responsive-table-wrapper table {
-    display: block;
+  .responsive-table {
     width: 100%;
+    min-width: 650px; /* Force horizontal scroll instead of cutting off */
+  }
+  
+  .responsive-table-card {
+    border-radius: 0.5rem;
+    overflow: hidden;
+    margin-bottom: 1rem;
+  }
+  
+  .actions-cell {
+    width: 100px;
   }
   
   .comment-cell {
     max-width: 150px;
   }
+}
+
+/* Default table settings */
+.comment-cell {
+  max-width: 280px;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.status-cell {
+  min-width: 100px;
+}
+
+.date-cell, .type-cell, .scope-cell {
+  min-width: 120px;
+  white-space: nowrap;
 }
