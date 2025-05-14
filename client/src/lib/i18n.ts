@@ -65,6 +65,18 @@ const translations: Translations = {
     sv: 'Förra månaden',
     en: 'Last Month',
   },
+  'dashboard.noSchedule': {
+    sv: 'Inget schema för idag',
+    en: 'No schedule for today',
+  },
+  'hours': {
+    sv: 'timmar',
+    en: 'hours',
+  },
+  'days': {
+    sv: 'dagar',
+    en: 'days',
+  },
   'dashboard.vacationBalance': {
     sv: 'Semestersaldo',
     en: 'Vacation Balance',
@@ -366,6 +378,60 @@ const translations: Translations = {
   'leave.commentPlaceholder': {
     sv: 'Lägg till en kommentar till din ledighetsansökan...',
     en: 'Add a comment to your leave request...',
+  },
+  'leave.newLeaveRequest': {
+    sv: 'Ny ledighetsansökan',
+    en: 'New Leave Request',
+  },
+  'leave.allPeriods': {
+    sv: 'Alla perioder',
+    en: 'All Periods',
+  },
+  'leave.upcoming': {
+    sv: 'Kommande',
+    en: 'Upcoming',
+  },
+  'leave.past': {
+    sv: 'Tidigare',
+    en: 'Past',
+  },
+  'leave.allTypes': {
+    sv: 'Alla typer',
+    en: 'All Types',
+  },
+  'leave.period': {
+    sv: 'Period',
+    en: 'Period',
+  },
+  'leave.noLeaveRequests': {
+    sv: 'Inga ledighetsansökningar',
+    en: 'No Leave Requests',
+  },
+  'leave.noLeaveRequestsDescription': {
+    sv: 'Du har inga registrerade ledighetsansökningar ännu.',
+    en: 'You have no registered leave requests yet.',
+  },
+  'leave.loadError': {
+    sv: 'Kunde inte läsa in ledighetsansökningar',
+    en: 'Failed to load leave requests',
+  },
+  
+  // Pagination
+  'pagination.showing': {
+    sv: 'Visar',
+    en: 'Showing',
+  },
+  'pagination.to': {
+    sv: 'till',
+    en: 'to',
+  },
+  'pagination.of': {
+    sv: 'av',
+    en: 'of',
+  },
+  'pagination.results': {
+    sv: 'resultat',
+    en: 'results',
   },
   
   // Manager view
