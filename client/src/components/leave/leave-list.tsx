@@ -149,12 +149,24 @@ const LeaveList = ({ onSelect }: LeaveListProps) => {
               <TableBody>
                 {Array.from({ length: 3 }).map((_, index) => (
                   <TableRow key={index}>
-                    <TableCell><Skeleton className="h-4 w-36" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-32" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                    <TableCell><Skeleton className="h-5 w-20 rounded-full" /></TableCell>
-                    <TableCell><Skeleton className="h-4 w-48" /></TableCell>
-                    <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
+                    <TableCell data-label={t('leave.period')}>
+                      <span><Skeleton className="h-4 w-36" /></span>
+                    </TableCell>
+                    <TableCell data-label={t('leave.leaveType')}>
+                      <span><Skeleton className="h-4 w-32" /></span>
+                    </TableCell>
+                    <TableCell data-label={t('leave.scope')}>
+                      <span><Skeleton className="h-4 w-24" /></span>
+                    </TableCell>
+                    <TableCell data-label={t('deviations.status')}>
+                      <span><Skeleton className="h-5 w-20 rounded-full" /></span>
+                    </TableCell>
+                    <TableCell data-label={t('deviations.comment')}>
+                      <span><Skeleton className="h-4 w-48" /></span>
+                    </TableCell>
+                    <TableCell data-label={t('deviations.actions')} className="text-right">
+                      <span><Skeleton className="h-4 w-16 ml-auto" /></span>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -251,24 +263,26 @@ const LeaveList = ({ onSelect }: LeaveListProps) => {
                   className="hover:bg-background-dark transition-colors cursor-pointer"
                   onClick={() => handleRowClick(leave)}
                 >
-                  <TableCell className="whitespace-nowrap date-cell">
-                    {leave.startDate === leave.endDate 
-                      ? leave.startDate 
-                      : `${leave.startDate} - ${leave.endDate}`}
+                  <TableCell className="whitespace-nowrap date-cell" data-label={t('leave.period')}>
+                    <span>
+                      {leave.startDate === leave.endDate 
+                        ? leave.startDate 
+                        : `${leave.startDate} - ${leave.endDate}`}
+                    </span>
                   </TableCell>
-                  <TableCell className="whitespace-nowrap type-cell">
-                    {getLeaveTypeLabel(leave.leaveType)}
+                  <TableCell className="whitespace-nowrap type-cell" data-label={t('leave.leaveType')}>
+                    <span>{getLeaveTypeLabel(leave.leaveType)}</span>
                   </TableCell>
-                  <TableCell className="whitespace-nowrap scope-cell">
-                    {getScopeLabel(leave.scope || '')}
+                  <TableCell className="whitespace-nowrap scope-cell" data-label={t('leave.scope')}>
+                    <span>{getScopeLabel(leave.scope || '')}</span>
                   </TableCell>
-                  <TableCell className="whitespace-nowrap status-cell">
+                  <TableCell className="whitespace-nowrap status-cell" data-label={t('deviations.status')}>
                     <StatusBadge status={leave.status as any} />
                   </TableCell>
-                  <TableCell className="comment-cell truncate-text">
-                    {leave.comment || '-'}
+                  <TableCell className="comment-cell truncate-text" data-label={t('deviations.comment')}>
+                    <span>{leave.comment || '-'}</span>
                   </TableCell>
-                  <TableCell className="text-right whitespace-nowrap actions-cell">
+                  <TableCell className="text-right whitespace-nowrap actions-cell" data-label={t('deviations.actions')}>
                     {leave.status === 'draft' ? (
                       <Button 
                         variant="link" 
