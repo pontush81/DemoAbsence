@@ -134,7 +134,7 @@ const MobileSidebar = () => {
               <a
                 href={travelExpensesMenuItem.href}
                 className={cn(
-                  "flex items-center px-4 py-3 hover:bg-sidebar-accent",
+                  "flex items-center px-4 py-3 hover:bg-sidebar-accent text-sidebar-foreground",
                   travelExpensesMenuItem.active && "bg-primary bg-opacity-10 text-primary border-l-4 border-primary"
                 )}
                 onClick={(e) => {
