@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 
 interface StatusCardProps {
   title: string;
-  value: string | number;
+  value: ReactNode;
   icon: string;
   footer?: ReactNode;
   className?: string;
@@ -17,7 +17,7 @@ const StatusCard = ({ title, value, icon, footer, className }: StatusCardProps) 
         <div className="flex items-start justify-between">
           <div>
             <h3 className="text-muted-foreground text-sm font-medium">{title}</h3>
-            <p className="text-lg font-bold mt-1">{value}</p>
+            <div className="text-lg font-bold mt-1">{value}</div>
           </div>
           <span className="material-icons text-primary">{icon}</span>
         </div>

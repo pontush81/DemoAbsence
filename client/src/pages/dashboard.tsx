@@ -114,12 +114,12 @@ export default function Dashboard() {
                 <Skeleton className="h-4 w-28" />
                 <Skeleton className="h-4 w-16" />
               </div>
-            ) : (
+            ) : timeBalance?.compensationTime ? (
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">{t('dashboard.lastMonth')}:</span>
-                <span>+2.5 {t('hours')}</span>
+                <span className="text-muted-foreground">{t('dashboard.compensationTime')}:</span>
+                <span>{formatDuration(timeBalance.compensationTime)}</span>
               </div>
-            )
+            ) : null
           }
         />
 
@@ -170,10 +170,10 @@ export default function Dashboard() {
             className="bg-[#FFC107] bg-opacity-5"
             footer={
               <Link href="/manager">
-                <a className="text-sm text-primary flex items-center">
+                <div className="text-sm text-primary flex items-center cursor-pointer">
                   {t('dashboard.viewAll')}
                   <span className="material-icons text-sm ml-1">arrow_forward</span>
-                </a>
+                </div>
               </Link>
             }
           />
@@ -190,10 +190,10 @@ export default function Dashboard() {
         </ul>
         <CardContent className="px-4 py-3 bg-background-dark">
           <Link href="#">
-            <a className="text-sm text-primary font-medium flex items-center justify-center">
+            <div className="text-sm text-primary font-medium flex items-center justify-center cursor-pointer">
               {t('dashboard.viewAllActivities')}
               <span className="material-icons text-sm ml-1">arrow_forward</span>
-            </a>
+            </div>
           </Link>
         </CardContent>
       </Card>
