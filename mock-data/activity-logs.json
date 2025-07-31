@@ -1,0 +1,52 @@
+[
+  {
+    "id": 1,
+    "employeeId": "E001",
+    "type": "deviation",
+    "action": "approved",
+    "description": "Din övertidsansökan för 12 april har godkänts av Mikael Svensson",
+    "timestamp": "2023-04-15T09:45:00.000Z",
+    "referenceId": "1",
+    "referenceType": "deviation"
+  },
+  {
+    "id": 2,
+    "employeeId": "E001",
+    "type": "leave",
+    "action": "created",
+    "description": "Du ansökte om semester 10-15 juli",
+    "timestamp": "2023-04-14T15:30:00.000Z",
+    "referenceId": "1",
+    "referenceType": "leave"
+  },
+  {
+    "id": 3,
+    "employeeId": "E001",
+    "type": "deviation",
+    "action": "returned",
+    "description": "Mikael har skickat tillbaka din avvikelserapport för 11 april med kommentar",
+    "timestamp": "2023-04-12T13:20:00.000Z",
+    "referenceId": "2",
+    "referenceType": "deviation"
+  },
+  {
+    "id": 4,
+    "employeeId": "E001",
+    "type": "payslip",
+    "action": "published",
+    "description": "Ny lönespecifikation för mars 2023 finns tillgänglig",
+    "timestamp": "2023-03-25T14:30:00.000Z",
+    "referenceId": "1",
+    "referenceType": "payslip"
+  },
+  {
+    "id": 5,
+    "employeeId": "E001",
+    "type": "leave",
+    "action": "approved",
+    "description": "Din ledighetsansökan för 26 maj har godkänts",
+    "timestamp": "2023-04-06T09:45:00.000Z",
+    "referenceId": "2",
+    "referenceType": "leave"
+  }
+]
