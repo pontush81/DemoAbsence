@@ -16,12 +16,10 @@ const MobileHeader = () => {
           <span className="material-icons">menu</span>
         </button>
         <div className="flex items-center">
-          <img 
-            src="https://pixabay.com/get/g71147032ef23548394939a9177a80ee6c469d108bf2fef71f6aae5036927c5fe34037a517d978a8abd60877a73f2bf4b4a26e41fa877986bf2d3cc41ff44950a_1280.jpg" 
-            alt="Kontek Lön Logo" 
-            className="h-8"
-          />
-          <span className="font-bold ml-2">Kontek Lön</span>
+          <div className="h-8 w-8 bg-primary rounded flex items-center justify-center mr-2">
+            <span className="material-icons text-white text-sm">business</span>
+          </div>
+          <span className="font-bold">Kontek Lön</span>
         </div>
         <div className="flex items-center">
           <Link href="/settings">

@@ -39,6 +39,10 @@ const translations: Translations = {
     sv: 'Attestering',
     en: 'Attestation',
   },
+  'nav.payrollExport': {
+    sv: 'Löneexport',
+    en: 'Payroll Export',
+  },
   'nav.expenses': {
     sv: 'Resa & Utlägg',
     en: 'Travel & Expenses',
@@ -46,6 +50,10 @@ const translations: Translations = {
   'nav.schedules': {
     sv: 'Scheman',
     en: 'Schedules',
+  },
+  'nav.paxml': {
+    sv: 'PAXML Export',
+    en: 'PAXML Export',
   },
   
   // Dashboard
@@ -69,6 +77,10 @@ const translations: Translations = {
     sv: 'Förra månaden',
     en: 'Last Month',
   },
+  'dashboard.compensationTime': {
+    sv: 'Komptid',
+    en: 'Comp Time',
+  },
   'dashboard.noSchedule': {
     sv: 'Inget schema för idag',
     en: 'No schedule for today',
@@ -80,6 +92,10 @@ const translations: Translations = {
   'days': {
     sv: 'dagar',
     en: 'days',
+  },
+  'items': {
+    sv: 'st',
+    en: 'items',
   },
   'dashboard.vacationBalance': {
     sv: 'Semestersaldo',
@@ -186,6 +202,44 @@ const translations: Translations = {
   'action.view': {
     sv: 'Visa',
     en: 'View',
+  },
+  'action.retry': {
+    sv: 'Försök igen',
+    en: 'Retry',
+  },
+  'action.return': {
+    sv: 'Skicka tillbaka',
+    en: 'Return',
+  },
+  
+  // Time codes
+  'timecode.100': {
+    sv: 'Arbetstid',
+    en: 'Working time',
+  },
+  'timecode.200': {
+    sv: 'Övertid 1',
+    en: 'Overtime 1',
+  },
+  'timecode.201': {
+    sv: 'Övertid 2',
+    en: 'Overtime 2',
+  },
+  'timecode.300': {
+    sv: 'Sjukdom',
+    en: 'Sick leave',
+  },
+  'timecode.301': {
+    sv: 'VAB',
+    en: 'Care of child',
+  },
+  'timecode.400': {
+    sv: 'Semester',
+    en: 'Vacation',
+  },
+  'timecode.500': {
+    sv: 'Kompledighet',
+    en: 'Compensatory leave',
   },
   
   // Deviations
@@ -300,6 +354,38 @@ const translations: Translations = {
   'deviations.actions': {
     sv: 'Åtgärder',
     en: 'Actions',
+  },
+  'deviations.loadError': {
+    sv: 'Kunde inte ladda avvikelser',
+    en: 'Failed to load deviations',
+  },
+  'deviations.deviationDetails': {
+    sv: 'Avvikelsedetaljer',
+    en: 'Deviation Details',
+  },
+  'deviations.viewDeviationDescription': {
+    sv: 'Visa detaljer för avvikelse',
+    en: 'View deviation details',
+  },
+  'deviations.deleteSuccess': {
+    sv: 'Avvikelse borttagen',
+    en: 'Deviation deleted',
+  },
+  'deviations.deleteSuccessDescription': {
+    sv: 'Avvikelsen har tagits bort',
+    en: 'The deviation has been deleted',
+  },
+  'deviations.deleteError': {
+    sv: 'Kunde inte ta bort avvikelse',
+    en: 'Failed to delete deviation',
+  },
+  'deviations.confirmDelete': {
+    sv: 'Är du säker på att du vill ta bort denna avvikelse?',
+    en: 'Are you sure you want to delete this deviation?',
+  },
+  'deviations.notFound': {
+    sv: 'Avvikelse hittades inte',
+    en: 'Deviation not found',
   },
   
   // Leave requests
@@ -470,6 +556,54 @@ const translations: Translations = {
   'manager.registered': {
     sv: 'Registrerad',
     en: 'Registered',
+  },
+  'manager.comment': {
+    sv: 'Kommentar från chef',
+    en: 'Manager comment',
+  },
+  'manager.approveSuccess': {
+    sv: 'Avvikelse godkänd',
+    en: 'Deviation approved',
+  },
+  'manager.approveSuccessDescription': {
+    sv: 'Avvikelsen har godkänts',
+    en: 'The deviation has been approved',
+  },
+  'manager.approveError': {
+    sv: 'Kunde inte godkänna avvikelse',
+    en: 'Failed to approve deviation',
+  },
+  'manager.rejectSuccess': {
+    sv: 'Avvikelse avslagen',
+    en: 'Deviation rejected',
+  },
+  'manager.rejectSuccessDescription': {
+    sv: 'Avvikelsen har avslagits',
+    en: 'The deviation has been rejected',
+  },
+  'manager.rejectError': {
+    sv: 'Kunde inte avslå avvikelse',
+    en: 'Failed to reject deviation',
+  },
+  'manager.returnSuccess': {
+    sv: 'Avvikelse skickad tillbaka',
+    en: 'Deviation returned',
+  },
+  'manager.returnSuccessDescription': {
+    sv: 'Avvikelsen har skickats tillbaka',
+    en: 'The deviation has been returned',
+  },
+  'manager.returnError': {
+    sv: 'Kunde inte skicka tillbaka avvikelse',
+    en: 'Failed to return deviation',
+  },
+  'manager.enterRejectionReason': {
+    sv: 'Varför avslås denna avvikelse?',
+    en: 'Why is this deviation being rejected?',
+  },
+  'manager.enterReturnReason': {
+    sv: 'Varför skickas denna avvikelse tillbaka?',
+    en: 'Why is this deviation being returned?',
   },
   
   // Attestation
@@ -784,6 +918,152 @@ const translations: Translations = {
   'settings.english': {
     sv: 'Engelska',
     en: 'English',
+  },
+  'settings.role': {
+    sv: 'Roll',
+    en: 'Role',
+  },
+  'settings.roleSwitch': {
+    sv: 'Rollinställningar',
+    en: 'Role Settings',
+  },
+  'settings.roleSwitchDescription': {
+    sv: 'Växla mellan medarbetar- och chefroll för att testa olika vyer.',
+    en: 'Switch between employee and manager roles to test different views.',
+  },
+  'settings.currentRole': {
+    sv: 'Nuvarande roll',
+    en: 'Current Role',
+  },
+  'settings.selectRole': {
+    sv: 'Välj roll',
+    en: 'Select role',
+  },
+  'settings.roleInfo': {
+    sv: 'Rollinformation',
+    en: 'Role Information',
+  },
+  'settings.managerInfo': {
+    sv: 'Du kan nu godkänna avvikelser och ledighetsansökningar i Chefsvyn.',
+    en: 'You can now approve deviations and leave requests in the Manager section.',
+  },
+  'settings.employeeInfo': {
+    sv: 'Du kan skicka in avvikelser och ledighetsansökningar för godkännande.',
+    en: 'You can submit deviations and leave requests for approval.',
+  },
+  'settings.goToManager': {
+    sv: 'Gå till Chefsvyn',
+    en: 'Go to Manager Area',
+  },
+  'settings.languageUpdated': {
+    sv: 'Språk uppdaterat',
+    en: 'Language updated',
+  },
+  'settings.selectLanguage': {
+    sv: 'Välj språk',
+    en: 'Select Language',
+  },
+  'settings.languageDescription': {
+    sv: 'Välj vilket språk du vill använda i applikationen.',
+    en: 'Choose which language you want to use in the application.',
+  },
+  'settings.updateSuccess': {
+    sv: 'Uppdaterat',
+    en: 'Updated',
+  },
+  'settings.personalInfoUpdated': {
+    sv: 'Personuppgifter har uppdaterats',
+    en: 'Personal information has been updated',
+  },
+  'settings.bankInfoUpdated': {
+    sv: 'Bankuppgifter har uppdaterats',
+    en: 'Bank information has been updated',
+  },
+  'settings.updateError': {
+    sv: 'Uppdateringsfel',
+    en: 'Update Error',
+  },
+  'settings.personnummer': {
+    sv: 'Personnummer',
+    en: 'Personal number',
+  },
+  'settings.firstName': {
+    sv: 'Förnamn',
+    en: 'First name',
+  },
+  'settings.lastName': {
+    sv: 'Efternamn',
+    en: 'Last name',
+  },
+  'settings.careOfAddress': {
+    sv: 'C/O adress',
+    en: 'Care of address',
+  },
+  'settings.streetAddress': {
+    sv: 'Gatuadress',
+    en: 'Street address',
+  },
+  'settings.postalCode': {
+    sv: 'Postnummer',
+    en: 'Postal code',
+  },
+  'settings.city': {
+    sv: 'Stad',
+    en: 'City',
+  },
+  'settings.country': {
+    sv: 'Land',
+    en: 'Country',
+  },
+  'settings.phoneNumber': {
+    sv: 'Telefonnummer',
+    en: 'Phone number',
+  },
+  'settings.personalEmail': {
+    sv: 'Personlig e-post',
+    en: 'Personal email',
+  },
+  'settings.workEmail': {
+    sv: 'Arbets e-post',
+    en: 'Work email',
+  },
+  'settings.bankClearingNumber': {
+    sv: 'Clearingnummer',
+    en: 'Clearing number',
+  },
+  'settings.bankAccountNumber': {
+    sv: 'Kontonummer',
+    en: 'Account number',
+  },
+  'settings.bankCountryCode': {
+    sv: 'Landskod',
+    en: 'Country code',
+  },
+  'settings.bankBIC': {
+    sv: 'BIC/SWIFT-kod',
+    en: 'BIC/SWIFT code',
+  },
+  'settings.bankIBAN': {
+    sv: 'IBAN',
+    en: 'IBAN',
+  },
+  
+  // Roles
+  'roles.employee': {
+    sv: 'Anställd',
+    en: 'Employee',
+  },
+  'roles.manager': {
+    sv: 'Chef',
+    en: 'Manager',
+  },
+  'roles.employeeActive': {
+    sv: 'Anställdroll aktiv',
+    en: 'Employee role active',
+  },
+  'roles.managerActive': {
+    sv: 'Chefroll aktiv',
+    en: 'Manager role active',
   },
   
   // Status messages

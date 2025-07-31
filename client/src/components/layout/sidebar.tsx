@@ -39,12 +39,6 @@ const Sidebar = () => {
       active: location === "/payslips"
     },
     {
-      href: "/paxml-export",
-      icon: "file_download",
-      label: "PAXML Export",
-      active: location === "/paxml-export"
-    },
-    {
       href: "/schedules",
       icon: "schedule",
       label: t('nav.schedules'),
@@ -70,6 +64,12 @@ const Sidebar = () => {
       icon: "fact_check",
       label: t('nav.attestation'),
       active: location === "/attestation"
+    },
+    {
+      href: "/paxml-export",
+      icon: "file_download",
+      label: t('nav.payrollExport'),
+      active: location === "/paxml-export"
     }
   ];
   
@@ -85,12 +85,10 @@ const Sidebar = () => {
     <aside className="hidden md:flex md:flex-col md:w-64 bg-white shadow-md z-10">
       <div className="flex flex-col p-4 border-b border-sidebar-border">
         <div className="flex items-center">
-          <img 
-            src="https://pixabay.com/get/g71147032ef23548394939a9177a80ee6c469d108bf2fef71f6aae5036927c5fe34037a517d978a8abd60877a73f2bf4b4a26e41fa877986bf2d3cc41ff44950a_1280.jpg" 
-            alt="Kontek Lön Logo" 
-            className="h-8"
-          />
-          <span className="font-bold ml-2 text-sidebar-foreground">Kontek Lön</span>
+          <div className="h-8 w-8 bg-primary rounded flex items-center justify-center mr-2">
+            <span className="material-icons text-white text-sm">business</span>
+          </div>
+          <span className="font-bold text-sidebar-foreground">Kontek Lön</span>
         </div>
         <div className="mt-3 flex items-center">
           <span className="text-xs font-medium mr-2 text-muted-foreground">Inloggad som:</span>
@@ -108,16 +106,15 @@ const Sidebar = () => {
         <ul>
           {menuItems.map((item) => (
             <li key={item.href}>
-              <Link href={item.href}>
-                <a
-                  className={cn(
-                    "flex items-center px-4 py-3 text-sidebar-foreground",
-                    item.active && "text-primary border-l-4 border-primary"
-                  )}
-                >
-                  <span className="material-icons mr-3">{item.icon}</span>
-                  {item.label}
-                </a>
+              <Link 
+                href={item.href}
+                className={cn(
+                  "flex items-center px-4 py-3 text-sidebar-foreground",
+                  item.active && "text-primary border-l-4 border-primary"
+                )}
+              >
+                <span className="material-icons mr-3">{item.icon}</span>
+                {item.label}
               </Link>
             </li>
           ))}
@@ -127,21 +124,20 @@ const Sidebar = () => {
             <>
               <li className="border-t mt-2 pt-2 border-sidebar-border">
                 <div className="px-4 py-2 text-xs font-semibold text-muted-foreground">
-                  Manager Functions
+                  {t('nav.managerFunctions')}
                 </div>
               </li>
               {managerMenuItems.map((item) => (
                 <li key={item.href}>
-                  <Link href={item.href}>
-                    <a
-                      className={cn(
-                        "flex items-center px-4 py-3 text-sidebar-foreground",
-                        item.active && "text-primary border-l-4 border-primary"
-                      )}
-                    >
-                      <span className="material-icons mr-3">{item.icon}</span>
-                      {item.label}
-                    </a>
+                  <Link 
+                    href={item.href}
+                    className={cn(
+                      "flex items-center px-4 py-3 text-sidebar-foreground",
+                      item.active && "text-primary border-l-4 border-primary"
+                    )}
+                  >
+                    <span className="material-icons mr-3">{item.icon}</span>
+                    {item.label}
                   </Link>
                 </li>
               ))}
