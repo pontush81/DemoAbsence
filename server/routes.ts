@@ -1,32 +1,129 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
-import fs from 'fs';
-import path from 'path';
+import { getMockData, saveMockData, saveFile, getFile, listFiles, generateId } from "./storage";
 import { generatePAXMLTransactions, generatePAXMLXML, generatePAXMLXMLWithSchedules, validatePAXMLData, convertXMLScheduleToAppSchedule, convertAppScheduleToXMLSchedule } from './lib/paxml.js';
-
-// Helper to read mock data from files
-const getMockData = (filename: string) => {
-  try {
-    const filePath = path.join(process.cwd(), 'mock-data', filename);
-    if (fs.existsSync(filePath)) {
-      const data = fs.readFileSync(filePath, 'utf8');
-      return JSON.parse(data);
-    }
-    console.warn(`Mock data file not found: ${filename}`);
-    return [];
-  } catch (error) {
-    console.error(`Error reading mock data file ${filename}:`, error);
-    return [];
-  }
-};
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // ---- API ROUTES ----
   
+  // Test endpoint
+  app.get('/api/test', (req, res) => {
+    res.json({ message: 'API is working', timestamp: new Date().toISOString() });
+  });
+
+  // Test getMockData endpoint
+  app.get('/api/test-data', async (req, res) => {
+    try {
+      const employees = await getMockData('employees.json');
+      res.json({ success: true, count: employees.length, first: employees[0] || null });
+    } catch (error) {
+      console.error('Test data error:', error);
+      res.status(500).json({ error: error.message, stack: error.stack });
+    }
+  });
+
+  // Demo PAXML export matching the test file exactly
+  app.post('/api/paxml/demo-franvaro', async (req, res) => {
+    try {
+      // Create demo transactions exactly like the test file
+      const demoTransactions = [
+        {
+          employeeId: "1001",
+          date: "2025-05-03", 
+          timeCode: "SEM",
+          hours: 8.00,
+          comment: "Planerad semester"
+        },
+        {
+          employeeId: "1001",
+          date: "2025-05-04",
+          timeCode: "SEM", 
+          hours: 8.00,
+          comment: "Planerad semester"
+        },
+        {
+          employeeId: "1001",
+          date: "2025-05-05",
+          timeCode: "SJK",
+          hours: 4.50,
+          comment: "Sjukdom - halvdag"
+        }
+      ];
+
+      const paXmlContent = generatePAXMLXML(demoTransactions);
+      const filename = `paxml-demo-franvaro-${new Date().toISOString().split('T')[0]}.xml`;
+      
+      // Save file to disk
+      try {
+        const filePath = saveFile(filename, paXmlContent, 'paxml');
+        console.log(`Demo PAXML file saved: ${filePath}`);
+      } catch (error) {
+        console.error('Error saving demo PAXML file:', error);
+      }
+      
+      res.setHeader('Content-Type', 'application/xml');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.send(paXmlContent);
+    } catch (error) {
+      console.error('Demo PAXML export error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Complete demo with both deviations and schedules
+  app.post('/api/paxml/demo-complete', async (req, res) => {
+    try {
+      console.log('Generating complete demo PAXML with deviations and schedules...');
+      
+      // Export approved deviations and schedules for May 2025
+      const { employeeIds = ["E001", "E002"], startDate = "2025-05-01", endDate = "2025-05-09" } = req.body;
+      
+      // Get deviations (already filtered in the existing logic)
+      let deviations = await getMockData('deviations.json');
+      deviations = deviations.filter((d: any) => 
+        d.status === 'approved' && 
+        employeeIds.includes(d.employeeId) &&
+        d.date >= startDate && 
+        d.date <= endDate
+      );
+      
+      // Get schedules
+      let schedules = await getMockData('schedules.json');
+      schedules = schedules.filter((s: any) => 
+        employeeIds.includes(s.employeeId) &&
+        s.date >= startDate && 
+        s.date <= endDate
+      );
+      
+      console.log(`Found ${deviations.length} approved deviations and ${schedules.length} schedule entries`);
+      
+      const employees = await getMockData('employees.json');
+      const transactions = generatePAXMLTransactions(deviations, employees);
+      const xmlSchedules = convertAppScheduleToXMLSchedule(schedules);
+      
+      const paXmlContent = generatePAXMLXMLWithSchedules(transactions, xmlSchedules);
+      const filename = `paxml-demo-complete-${new Date().toISOString().split('T')[0]}.xml`;
+      
+      // Save file to disk
+      try {
+        const filePath = saveFile(filename, paXmlContent, 'paxml');
+        console.log(`Complete demo PAXML file saved: ${filePath}`);
+      } catch (error) {
+        console.error('Error saving complete demo PAXML file:', error);
+      }
+      
+      res.setHeader('Content-Type', 'application/xml');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.send(paXmlContent);
+    } catch (error) {
+      console.error('Complete demo PAXML export error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+  
   // Current logged-in employee
-  app.get('/api/employee/current', (req, res) => {
-    const employees = getMockData('employees.json');
+  app.get('/api/employee/current', async (req, res) => {
+    const employees = await getMockData('employees.json');
     // Return the first employee as the current user
     if (employees && employees.length > 0) {
       res.json(employees[0]);
@@ -36,13 +133,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all employees
-  app.get('/api/employees', (req, res) => {
-    res.json(getMockData('employees.json'));
+  app.get('/api/employees', async (req, res) => {
+    const employees = await getMockData('employees.json');
+    res.json(employees);
   });
 
   // Get employee by ID
-  app.get('/api/employees/:id', (req, res) => {
-    const employees = getMockData('employees.json');
+  app.get('/api/employees/:id', async (req, res) => {
+    const employees = await getMockData('employees.json');
     const employee = employees.find((e: any) => e.employeeId === req.params.id);
     if (employee) {
       res.json(employee);
@@ -52,13 +150,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update employee
-  app.patch('/api/employees/:id', (req, res) => {
-    const employees = getMockData('employees.json');
+  app.patch('/api/employees/:id', async (req, res) => {
+    const employees = await getMockData('employees.json');
     const index = employees.findIndex((e: any) => e.employeeId === req.params.id);
     if (index !== -1) {
       // In a real implementation, we would validate and sanitize the input
       // and only update allowed fields
       employees[index] = { ...employees[index], ...req.body };
+      await saveMockData('employees.json', employees);
       res.json(employees[index]);
     } else {
       res.status(404).json({ message: 'Employee not found' });
@@ -66,11 +165,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get schedules
-  app.get('/api/schedules/:employeeId', (req, res) => {
+  app.get('/api/schedules/:employeeId', async (req, res) => {
     const { employeeId } = req.params;
     const { date } = req.query;
     
-    const schedules = getMockData('schedules.json');
+    const schedules = await getMockData('schedules.json');
     let filteredSchedules = schedules.filter((s: any) => s.employeeId === employeeId);
     
     if (date) {
@@ -81,15 +180,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get time codes
-  app.get('/api/timecodes', (req, res) => {
-    res.json(getMockData('timecodes.json'));
+  app.get('/api/timecodes', async (req, res) => {
+    res.json(await getMockData('timecodes.json'));
   });
 
   // Get deviations
-  app.get('/api/deviations', (req, res) => {
+  app.get('/api/deviations', async (req, res) => {
     const { employeeId, period, status, timeCode } = req.query;
     
-    let deviations = getMockData('deviations.json');
+    let deviations = await getMockData('deviations.json');
     
     // Filter by employee ID
     if (employeeId) {
@@ -125,7 +224,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     // Filter by time code
     if (timeCode && timeCode !== 'all') {
       // For category filtering (overtime, sick, vab)
-      const timeCodes = getMockData('timecodes.json');
+      const timeCodes = await getMockData('timecodes.json');
       const codesInCategory = timeCodes
         .filter((t: any) => t.category === timeCode)
         .map((t: any) => t.code);
@@ -139,8 +238,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get deviation by ID
-  app.get('/api/deviations/:id', (req, res) => {
-    const deviations = getMockData('deviations.json');
+  app.get('/api/deviations/:id', async (req, res) => {
+    const deviations = await getMockData('deviations.json');
     const deviation = deviations.find((d: any) => d.id === parseInt(req.params.id));
     if (deviation) {
       res.json(deviation);
@@ -150,22 +249,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create deviation
-  app.post('/api/deviations', (req, res) => {
-    const deviations = getMockData('deviations.json');
-    const newId = Math.max(0, ...deviations.map((d: any) => d.id)) + 1;
+  app.post('/api/deviations', async (req, res) => {
+    const deviations = await getMockData('deviations.json');
+    const newId = generateId(deviations);
     const newDeviation = {
       id: newId,
       ...req.body,
       lastUpdated: new Date().toISOString()
     };
     
+    deviations.push(newDeviation);
+    await saveMockData('deviations.json', deviations);
+    
     // Return the new deviation
     res.status(201).json(newDeviation);
   });
 
   // Update deviation
-  app.patch('/api/deviations/:id', (req, res) => {
-    const deviations = getMockData('deviations.json');
+  app.patch('/api/deviations/:id', async (req, res) => {
+    const deviations = await getMockData('deviations.json');
     const index = deviations.findIndex((d: any) => d.id === parseInt(req.params.id));
     if (index !== -1) {
       const updatedDeviation = {
@@ -174,6 +276,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         lastUpdated: new Date().toISOString()
       };
       
+      deviations[index] = updatedDeviation;
+      await saveMockData('deviations.json', deviations);
       res.json(updatedDeviation);
     } else {
       res.status(404).json({ message: 'Deviation not found' });
@@ -181,16 +285,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete deviation
-  app.delete('/api/deviations/:id', (req, res) => {
-    // In a real implementation we would remove the deviation from storage
-    res.status(204).send();
+  app.delete('/api/deviations/:id', async (req, res) => {
+    const deviations = await getMockData('deviations.json');
+    const index = deviations.findIndex((d: any) => d.id === parseInt(req.params.id));
+    if (index !== -1) {
+      deviations.splice(index, 1);
+      await saveMockData('deviations.json', deviations);
+      res.status(204).send();
+    } else {
+      res.status(404).json({ message: 'Deviation not found' });
+    }
   });
 
   // Get leave requests
-  app.get('/api/leave-requests', (req, res) => {
+  app.get('/api/leave-requests', async (req, res) => {
     const { employeeId, period, status, leaveType } = req.query;
     
-    let leaveRequests = getMockData('leave-requests.json');
+    let leaveRequests = await getMockData('leave-requests.json');
     
     // Filter by employee ID
     if (employeeId) {
@@ -229,8 +340,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get leave request by ID
-  app.get('/api/leave-requests/:id', (req, res) => {
-    const leaveRequests = getMockData('leave-requests.json');
+  app.get('/api/leave-requests/:id', async (req, res) => {
+    const leaveRequests = await getMockData('leave-requests.json');
     const leaveRequest = leaveRequests.find((l: any) => l.id === parseInt(req.params.id));
     if (leaveRequest) {
       res.json(leaveRequest);
@@ -240,21 +351,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create leave request
-  app.post('/api/leave-requests', (req, res) => {
-    const leaveRequests = getMockData('leave-requests.json');
-    const newId = Math.max(0, ...leaveRequests.map((l: any) => l.id)) + 1;
+  app.post('/api/leave-requests', async (req, res) => {
+    const leaveRequests = await getMockData('leave-requests.json');
+    const newId = generateId(leaveRequests);
     const newLeaveRequest = {
       id: newId,
       ...req.body,
       lastUpdated: new Date().toISOString()
     };
     
+    leaveRequests.push(newLeaveRequest);
+    await saveMockData('leave-requests.json', leaveRequests);
     res.status(201).json(newLeaveRequest);
   });
 
   // Update leave request
-  app.patch('/api/leave-requests/:id', (req, res) => {
-    const leaveRequests = getMockData('leave-requests.json');
+  app.patch('/api/leave-requests/:id', async (req, res) => {
+    const leaveRequests = await getMockData('leave-requests.json');
     const index = leaveRequests.findIndex((l: any) => l.id === parseInt(req.params.id));
     if (index !== -1) {
       const updatedLeaveRequest = {
@@ -263,6 +376,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         lastUpdated: new Date().toISOString()
       };
       
+      leaveRequests[index] = updatedLeaveRequest;
+      await saveMockData('leave-requests.json', leaveRequests);
       res.json(updatedLeaveRequest);
     } else {
       res.status(404).json({ message: 'Leave request not found' });
@@ -270,14 +385,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete leave request
-  app.delete('/api/leave-requests/:id', (req, res) => {
-    // In a real implementation we would remove the leave request from storage
-    res.status(204).send();
+  app.delete('/api/leave-requests/:id', async (req, res) => {
+    const leaveRequests = await getMockData('leave-requests.json');
+    const index = leaveRequests.findIndex((l: any) => l.id === parseInt(req.params.id));
+    if (index !== -1) {
+      leaveRequests.splice(index, 1);
+      await saveMockData('leave-requests.json', leaveRequests);
+      res.status(204).send();
+    } else {
+      res.status(404).json({ message: 'Leave request not found' });
+    }
   });
 
   // Get time balance for employee
-  app.get('/api/time-balances/:employeeId', (req, res) => {
-    const timeBalances = getMockData('timebalances.json');
+  app.get('/api/time-balances/:employeeId', async (req, res) => {
+    const timeBalances = await getMockData('timebalances.json');
     const timeBalance = timeBalances.find((t: any) => t.employeeId === req.params.employeeId);
     if (timeBalance) {
       res.json(timeBalance);
@@ -287,8 +409,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get payslips for employee
-  app.get('/api/payslips/:employeeId', (req, res) => {
-    const payslips = getMockData('payslips.json');
+  app.get('/api/payslips/:employeeId', async (req, res) => {
+    const payslips = await getMockData('payslips.json');
     const employeePayslips = payslips.filter((p: any) => p.employeeId === req.params.employeeId);
     res.json(employeePayslips);
   });
@@ -303,15 +425,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // --- MANAGER API ROUTES ---
 
   // Get pending deviations (for manager)
-  app.get('/api/manager/deviations/pending', (req, res) => {
-    const deviations = getMockData('deviations.json');
+  app.get('/api/manager/deviations/pending', async (req, res) => {
+    const deviations = await getMockData('deviations.json');
     const pendingDeviations = deviations.filter((d: any) => d.status === 'pending');
     res.json(pendingDeviations);
   });
 
   // Approve deviation
-  app.post('/api/manager/deviations/:id/approve', (req, res) => {
-    const deviations = getMockData('deviations.json');
+  app.post('/api/manager/deviations/:id/approve', async (req, res) => {
+    const deviations = await getMockData('deviations.json');
     const index = deviations.findIndex((d: any) => d.id === parseInt(req.params.id));
     if (index !== -1) {
       const approvedDeviation = {
@@ -323,6 +445,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         lastUpdated: new Date().toISOString()
       };
       
+      deviations[index] = approvedDeviation;
+      await saveMockData('deviations.json', deviations);
       res.json(approvedDeviation);
     } else {
       res.status(404).json({ message: 'Deviation not found' });
@@ -330,8 +454,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Reject deviation
-  app.post('/api/manager/deviations/:id/reject', (req, res) => {
-    const deviations = getMockData('deviations.json');
+  app.post('/api/manager/deviations/:id/reject', async (req, res) => {
+    const deviations = await getMockData('deviations.json');
     const index = deviations.findIndex((d: any) => d.id === parseInt(req.params.id));
     if (index !== -1) {
       const rejectedDeviation = {
@@ -343,6 +467,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         lastUpdated: new Date().toISOString()
       };
       
+      deviations[index] = rejectedDeviation;
+      await saveMockData('deviations.json', deviations);
       res.json(rejectedDeviation);
     } else {
       res.status(404).json({ message: 'Deviation not found' });
@@ -350,8 +476,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Return deviation for correction
-  app.post('/api/manager/deviations/:id/return', (req, res) => {
-    const deviations = getMockData('deviations.json');
+  app.post('/api/manager/deviations/:id/return', async (req, res) => {
+    const deviations = await getMockData('deviations.json');
     const index = deviations.findIndex((d: any) => d.id === parseInt(req.params.id));
     if (index !== -1) {
       const returnedDeviation = {
@@ -361,6 +487,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         lastUpdated: new Date().toISOString()
       };
       
+      deviations[index] = returnedDeviation;
+      await saveMockData('deviations.json', deviations);
       res.json(returnedDeviation);
     } else {
       res.status(404).json({ message: 'Deviation not found' });
@@ -388,6 +516,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         lastUpdated: new Date().toISOString()
       };
       
+      leaveRequests[index] = approvedLeaveRequest;
+      saveMockData('leave-requests.json', leaveRequests);
       res.json(approvedLeaveRequest);
     } else {
       res.status(404).json({ message: 'Leave request not found' });
@@ -408,16 +538,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         lastUpdated: new Date().toISOString()
       };
       
+      leaveRequests[index] = rejectedLeaveRequest;
+      saveMockData('leave-requests.json', leaveRequests);
       res.json(rejectedLeaveRequest);
     } else {
       res.status(404).json({ message: 'Leave request not found' });
     }
   });
 
-  app.post('/api/paxml/export', (req, res) => {
+  app.post('/api/paxml/export', async (req, res) => {
     const { employeeIds, startDate, endDate } = req.body;
     
-    let deviations = getMockData('deviations.json');
+    let deviations = await getMockData('deviations.json');
     deviations = deviations.filter((d: any) => d.status === 'approved');
     
     if (employeeIds && employeeIds.length > 0) {
@@ -432,7 +564,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       deviations = deviations.filter((d: any) => d.date <= endDate);
     }
     
-    const employees = getMockData('employees.json');
+    const employees = await getMockData('employees.json');
     const transactions = generatePAXMLTransactions(deviations, employees);
     
     const validationErrors = validatePAXMLData(transactions);
@@ -446,16 +578,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const paXmlContent = generatePAXMLXML(transactions);
     const filename = `paxml-export-${new Date().toISOString().split('T')[0]}.xml`;
     
+    // Save file to disk
+    try {
+      const filePath = saveFile(filename, paXmlContent, 'paxml');
+      console.log(`PAXML file saved: ${filePath}`);
+    } catch (error) {
+      console.error('Error saving PAXML file:', error);
+    }
+    
     res.setHeader('Content-Type', 'application/xml');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     res.send(paXmlContent);
   });
 
   // Get all schedules (extend existing endpoint)
-  app.get('/api/schedules', (req, res) => {
+  app.get('/api/schedules', async (req, res) => {
     const { employeeId, startDate, endDate } = req.query;
     
-    let schedules = getMockData('schedules.json');
+    let schedules = await getMockData('schedules.json');
     
     if (employeeId) {
       schedules = schedules.filter((s: any) => s.employeeId === employeeId);
@@ -521,11 +661,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/paxml/export-with-schedules', (req, res) => {
+  app.post('/api/paxml/export-with-schedules', async (req, res) => {
     const { employeeIds, startDate, endDate, includeSchedules = true } = req.body;
     
     // Get and filter deviations
-    let deviations = getMockData('deviations.json');
+    let deviations = await getMockData('deviations.json');
     deviations = deviations.filter((d: any) => d.status === 'approved');
     
     if (employeeIds && employeeIds.length > 0) {
@@ -543,7 +683,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     // Get and filter schedules
     let schedules: any[] = [];
     if (includeSchedules) {
-      schedules = getMockData('schedules.json');
+      schedules = await getMockData('schedules.json');
       
       if (employeeIds && employeeIds.length > 0) {
         schedules = schedules.filter((s: any) => employeeIds.includes(s.employeeId));
@@ -558,7 +698,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     }
     
-    const employees = getMockData('employees.json');
+    const employees = await getMockData('employees.json');
     const transactions = generatePAXMLTransactions(deviations, employees);
     const xmlSchedules = convertAppScheduleToXMLSchedule(schedules);
     
@@ -572,6 +712,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     const paXmlContent = generatePAXMLXMLWithSchedules(transactions, xmlSchedules);
     const filename = `paxml-export-with-schedules-${new Date().toISOString().split('T')[0]}.xml`;
+    
+    // Save file to disk
+    try {
+      const filePath = saveFile(filename, paXmlContent, 'paxml');
+      console.log(`PAXML file with schedules saved: ${filePath}`);
+    } catch (error) {
+      console.error('Error saving PAXML file with schedules:', error);
+    }
     
     res.setHeader('Content-Type', 'application/xml');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);

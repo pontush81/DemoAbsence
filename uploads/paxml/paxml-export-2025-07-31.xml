@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paxml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.paxml.se/2.2/paxml.xsd">
+	<header>
+		<format>LÖNIN</format>
+		<version>2.2</version>
+	</header>
+	<tidtransaktioner>
+		<tidtrans anstid="E001">
+			<tidkod>SEM</tidkod>
+			<datum>2025-05-03</datum>
+			<timmar>9.00</timmar>
+			<kommentar>Planerad semester - första dagen</kommentar>
+		</tidtrans>
+		<tidtrans anstid="E001">
+			<tidkod>SEM</tidkod>
+			<datum>2025-05-04</datum>
+			<timmar>9.00</timmar>
+			<kommentar>Planerad semester - andra dagen</kommentar>
+		</tidtrans>
+		<tidtrans anstid="E001">
+			<tidkod>SJK</tidkod>
+			<datum>2025-05-05</datum>
+			<timmar>4.50</timmar>
+			<kommentar>Sjukdom - halvdag (magsjuka)</kommentar>
+		</tidtrans>
+	</tidtransaktioner>
+</paxml>
