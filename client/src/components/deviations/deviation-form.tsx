@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { TimeInput } from "@/components/ui/time-input";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useI18n } from "@/lib/i18n";
@@ -36,7 +37,7 @@ const deviationFormSchema = insertDeviationSchema.extend({
   const end = new Date(`${data.date}T${data.endTime}`);
   return end > start;
 }, {
-  message: "End time must be after start time",
+  message: "Sluttid måste vara efter starttid",
   path: ["endTime"],
 });
 
@@ -46,6 +47,32 @@ interface DeviationFormProps {
   deviationId?: number;
   onCancel?: () => void;
 }
+
+// Helper function to calculate duration between two times
+const calculateDuration = (startTime: string, endTime: string): string => {
+  try {
+    const start = new Date(`2000-01-01T${startTime}:00`);
+    const end = new Date(`2000-01-01T${endTime}:00`);
+    
+    if (end <= start) {
+      return "Ogiltig tidsperiod";
+    }
+    
+    const diffMs = end.getTime() - start.getTime();
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+    
+    if (diffHours === 0) {
+      return `${diffMinutes} min`;
+    } else if (diffMinutes === 0) {
+      return `${diffHours} tim`;
+    } else {
+      return `${diffHours} tim ${diffMinutes} min`;
+    }
+  } catch {
+    return "Ogiltig tid";
+  }
+};
 
 const DeviationForm = ({ deviationId, onCancel }: DeviationFormProps) => {
   const { t } = useI18n();
@@ -205,34 +232,56 @@ const DeviationForm = ({ deviationId, onCancel }: DeviationFormProps) => {
               )}
             />
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="startTime"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('deviations.startTime')} *</FormLabel>
-                    <FormControl>
-                      <Input type="time" {...field} disabled={isLoading || isPending} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="startTime"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('deviations.startTime')} *</FormLabel>
+                      <FormControl>
+                        <TimeInput 
+                          {...field} 
+                          disabled={isLoading || isPending}
+                          placeholder="08:00"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="endTime"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('deviations.endTime')} *</FormLabel>
+                      <FormControl>
+                        <TimeInput 
+                          {...field} 
+                          disabled={isLoading || isPending}
+                          placeholder="17:00"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
               
-              <FormField
-                control={form.control}
-                name="endTime"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('deviations.endTime')} *</FormLabel>
-                    <FormControl>
-                      <Input type="time" {...field} disabled={isLoading || isPending} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {/* Duration display */}
+              {form.watch('startTime') && form.watch('endTime') && (
+                <div className="bg-muted/50 p-3 rounded-lg border">
+                  <div className="flex items-center gap-2">
+                    <span className="material-icons text-sm text-muted-foreground">schedule</span>
+                    <span className="text-sm font-medium">
+                      Total tid: {calculateDuration(form.watch('startTime'), form.watch('endTime'))}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
             
             <FormField
