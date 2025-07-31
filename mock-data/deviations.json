@@ -117,5 +117,28 @@
     "approvedAt": null,
     "rejectedBy": null,
     "rejectedAt": null
+  },
+  {
+    "id": 8,
+    "employeeId": "E001",
+    "date": "2025-07-31",
+    "startTime": "08:00",
+    "endTime": "17:00",
+    "timeCode": "300",
+    "comment": "",
+    "status": "pending",
+    "submitted": "2025-07-31T19:26:16.935Z",
+    "lastUpdated": "2025-07-31T19:26:16.994Z"
+  },
+  {
+    "id": 9,
+    "employeeId": "E001",
+    "date": "2025-07-31",
+    "startTime": "17:00:00",
+    "endTime": "19:00:00",
+    "timeCode": "200",
+    "comment": "Test avvikelse som ska sparas",
+    "status": "pending",
+    "lastUpdated": "2025-07-31T19:47:33.199Z"
   }
 ]
