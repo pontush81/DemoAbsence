@@ -186,14 +186,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Get deviations
   app.get('/api/deviations', async (req, res) => {
-    const { employeeId, period, status, timeCode } = req.query;
-    
-    let deviations = await getMockData('deviations.json');
-    
-    // Filter by employee ID
-    if (employeeId) {
-      deviations = deviations.filter((d: any) => d.employeeId === employeeId);
-    }
+    try {
+      const { employeeId, period, status, timeCode } = req.query;
+      
+      let deviations = await getMockData('deviations.json');
+      
+      if (!Array.isArray(deviations)) {
+        console.error('Deviations is not an array:', deviations);
+        return res.status(500).json({ error: 'Data format error' });
+      }
+      
+      // Filter by employee ID
+      if (employeeId) {
+        deviations = deviations.filter((d: any) => d.employeeId === employeeId);
+      }
     
     // Filter by period
     if (period) {
@@ -235,6 +241,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     res.json(deviations);
+    } catch (error) {
+      console.error('Error in deviations endpoint:', error);
+      res.status(500).json({ error: error.message });
+    }
   });
 
   // Get deviation by ID
@@ -250,50 +260,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Create deviation
   app.post('/api/deviations', async (req, res) => {
-    const deviations = await getMockData('deviations.json');
-    const newId = generateId(deviations);
-    const newDeviation = {
-      id: newId,
-      ...req.body,
-      lastUpdated: new Date().toISOString()
-    };
-    
-    deviations.push(newDeviation);
-    await saveMockData('deviations.json', deviations);
-    
-    // Return the new deviation
-    res.status(201).json(newDeviation);
+    try {
+      const deviations = await getMockData('deviations.json');
+      const newId = generateId(deviations);
+      const newDeviation = {
+        id: newId,
+        ...req.body,
+        startTime: req.body.startTime + ':00', // Add seconds for consistency
+        endTime: req.body.endTime + ':00',     // Add seconds for consistency
+        lastUpdated: new Date().toISOString()
+      };
+      
+      deviations.push(newDeviation);
+      await saveMockData('deviations.json', deviations);
+      
+      console.log('Created new deviation:', newDeviation);
+      res.status(201).json(newDeviation);
+    } catch (error) {
+      console.error('Error creating deviation:', error);
+      res.status(500).json({ 
+        error: 'Failed to create deviation', 
+        details: error.message 
+      });
+    }
   });
 
   // Update deviation
   app.patch('/api/deviations/:id', async (req, res) => {
-    const deviations = await getMockData('deviations.json');
-    const index = deviations.findIndex((d: any) => d.id === parseInt(req.params.id));
-    if (index !== -1) {
-      const updatedDeviation = {
-        ...deviations[index],
-        ...req.body,
-        lastUpdated: new Date().toISOString()
-      };
-      
-      deviations[index] = updatedDeviation;
-      await saveMockData('deviations.json', deviations);
-      res.json(updatedDeviation);
-    } else {
-      res.status(404).json({ message: 'Deviation not found' });
+    try {
+      const deviations = await getMockData('deviations.json');
+      const index = deviations.findIndex((d: any) => d.id === parseInt(req.params.id));
+      if (index !== -1) {
+        const updatedDeviation = {
+          ...deviations[index],
+          ...req.body,
+          startTime: req.body.startTime ? req.body.startTime + ':00' : deviations[index].startTime,
+          endTime: req.body.endTime ? req.body.endTime + ':00' : deviations[index].endTime,
+          lastUpdated: new Date().toISOString()
+        };
+        
+        deviations[index] = updatedDeviation;
+        await saveMockData('deviations.json', deviations);
+        res.json(updatedDeviation);
+      } else {
+        res.status(404).json({ message: 'Deviation not found' });
+      }
+    } catch (error) {
+      console.error('Error updating deviation:', error);
+      res.status(500).json({ 
+        error: 'Failed to update deviation', 
+        details: error.message 
+      });
     }
   });
 
   // Delete deviation
   app.delete('/api/deviations/:id', async (req, res) => {
-    const deviations = await getMockData('deviations.json');
-    const index = deviations.findIndex((d: any) => d.id === parseInt(req.params.id));
-    if (index !== -1) {
-      deviations.splice(index, 1);
-      await saveMockData('deviations.json', deviations);
-      res.status(204).send();
-    } else {
-      res.status(404).json({ message: 'Deviation not found' });
+    try {
+      const deviations = await getMockData('deviations.json');
+      const index = deviations.findIndex((d: any) => d.id === parseInt(req.params.id));
+      if (index !== -1) {
+        deviations.splice(index, 1);
+        await saveMockData('deviations.json', deviations);
+        res.status(204).send();
+      } else {
+        res.status(404).json({ message: 'Deviation not found' });
+      }
+    } catch (error) {
+      console.error('Error deleting deviation:', error);
+      res.status(500).json({ 
+        error: 'Failed to delete deviation', 
+        details: error.message 
+      });
     }
   });
 
@@ -496,15 +534,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get pending leave requests (for manager)
-  app.get('/api/manager/leave-requests/pending', (req, res) => {
-    const leaveRequests = getMockData('leave-requests.json');
+  app.get('/api/manager/leave-requests/pending', async (req, res) => {
+    const leaveRequests = await getMockData('leave-requests.json');
     const pendingLeaveRequests = leaveRequests.filter((l: any) => l.status === 'pending');
     res.json(pendingLeaveRequests);
   });
 
   // Approve leave request
-  app.post('/api/manager/leave-requests/:id/approve', (req, res) => {
-    const leaveRequests = getMockData('leave-requests.json');
+  app.post('/api/manager/leave-requests/:id/approve', async (req, res) => {
+    const leaveRequests = await getMockData('leave-requests.json');
     const index = leaveRequests.findIndex((l: any) => l.id === parseInt(req.params.id));
     if (index !== -1) {
       const approvedLeaveRequest = {
@@ -517,7 +555,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       leaveRequests[index] = approvedLeaveRequest;
-      saveMockData('leave-requests.json', leaveRequests);
+      await saveMockData('leave-requests.json', leaveRequests);
       res.json(approvedLeaveRequest);
     } else {
       res.status(404).json({ message: 'Leave request not found' });
@@ -525,8 +563,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Reject leave request
-  app.post('/api/manager/leave-requests/:id/reject', (req, res) => {
-    const leaveRequests = getMockData('leave-requests.json');
+  app.post('/api/manager/leave-requests/:id/reject', async (req, res) => {
+    const leaveRequests = await getMockData('leave-requests.json');
     const index = leaveRequests.findIndex((l: any) => l.id === parseInt(req.params.id));
     if (index !== -1) {
       const rejectedLeaveRequest = {
@@ -539,7 +577,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       leaveRequests[index] = rejectedLeaveRequest;
-      saveMockData('leave-requests.json', leaveRequests);
+      await saveMockData('leave-requests.json', leaveRequests);
       res.json(rejectedLeaveRequest);
     } else {
       res.status(404).json({ message: 'Leave request not found' });

@@ -1,11 +1,12 @@
 import fs from 'fs';
 import path from 'path';
+// Database imports for Supabase integration
 import { db } from './db';
 import { employees, deviations, leaveRequests, timeCodes, schedules, timeBalances, payslips, activityLogs } from '@shared/schema';
 import { eq, and, gte, lte } from 'drizzle-orm';
 
 // Use database if available, fallback to JSON files
-const USE_DATABASE = false; // Temporarily disabled for demo - use JSON files
+const USE_DATABASE = true; // Using Supabase database - JSON files as fallback
 
 // Helper to read mock data from files (fallback)
 export const getMockData = async (filename: string) => {
@@ -53,6 +54,13 @@ const getDatabaseData = async (filename: string) => {
     }
   } catch (error) {
     console.error(`Error reading from database for ${filename}:`, error);
+    // Fallback to JSON files if database fails
+    console.log(`Falling back to JSON for ${filename}`);
+    const filePath = path.join(process.cwd(), 'mock-data', filename);
+    if (fs.existsSync(filePath)) {
+      const data = fs.readFileSync(filePath, 'utf8');
+      return JSON.parse(data);
+    }
     return [];
   }
 };
