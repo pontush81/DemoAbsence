@@ -15,23 +15,23 @@ export interface ProductionUser {
 }
 
 export const productionUsers: ProductionUser[] = [
-  // Grundläggande medarbetare - bara en roll
+  // Grundläggande medarbetare - bara en roll (matchar databas E001)
   {
-    id: "emp-001",
+    id: "E001",
     name: "Anna Andersson",
     email: "anna.andersson@kontek.se", 
-    department: "Utveckling",
+    department: "Ekonomi",
     assignedRoles: ["employee"],
     defaultRole: "employee",
     canSwitchRoles: false
   },
   
-  // Chef - kan vara både medarbetare och chef
+  // Chef - kan vara både medarbetare och chef (matchar databas E005)  
   {
-    id: "mgr-001", 
-    name: "Erik Eriksson",
-    email: "erik.eriksson@kontek.se",
-    department: "Utveckling",
+    id: "E005", 
+    name: "Mikael Svensson",
+    email: "mikael.svensson@kontek.se",
+    department: "Ledning",
     assignedRoles: ["employee", "manager"],
     defaultRole: "manager", 
     canSwitchRoles: true

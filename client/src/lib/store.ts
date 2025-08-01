@@ -51,7 +51,7 @@ export const useStore = create<AppState>()(
         isDemoMode: true, // Demo mode - växla fritt mellan roller
         timeBalance: null,
         todaySchedule: null,
-        demoPersonaId: 'emp-001-employee', // Anna Andersson (Medarbetare) som standard
+        demoPersonaId: 'E001-employee', // Anna Andersson (Medarbetare) som standard
       },
       setCurrentUser: (user) => set((state) => ({ 
         user: { ...state.user, currentUser: user, isAuthenticated: true } 
