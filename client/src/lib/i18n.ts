@@ -387,6 +387,14 @@ const translations: Translations = {
     sv: 'Avvikelse hittades inte',
     en: 'Deviation not found',
   },
+  'deviations.noDeviations': {
+    sv: 'Inga avvikelser',
+    en: 'No Deviations',
+  },
+  'deviations.noDeviationsDescription': {
+    sv: 'Du har inga registrerade avvikelser för denna period.',
+    en: 'You have no registered deviations for this period.',
+  },
   
   // Leave requests
   'leave.title': {
