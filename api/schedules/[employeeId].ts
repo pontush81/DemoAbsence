@@ -1,20 +1,67 @@
 import 'dotenv/config';
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { restStorage } from '../../server/supabase-rest-storage';
+import { createClient } from '@supabase/supabase-js';
+import fs from 'fs';
+import path from 'path';
+
+// Initialize Supabase client
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_ANON_KEY;
+const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
+
+// Helper to read mock data
+async function getMockData(filename: string) {
+  try {
+    const filePath = path.join(process.cwd(), 'mock-data', filename);
+    const fileContent = fs.readFileSync(filePath, 'utf8');
+    return JSON.parse(fileContent);
+  } catch (error) {
+    console.error(`Error reading mock data ${filename}:`, error);
+    return [];
+  }
+}
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
-    const { employeeId } = req.query;
-    const { date } = req.query;
+    const { employeeId, date } = req.query;
+    let schedules;
     
-    const filters: any = { employeeId };
-    if (date) {
-      filters.date = date;
+    // Try Supabase first, fallback to mock data
+    if (supabase) {
+      try {
+        let query = supabase.from('schedules').select('*');
+        
+        // Apply filters
+        if (employeeId) {
+          query = query.eq('employee_id', employeeId);
+        }
+        if (date) {
+          query = query.eq('date', date);
+        }
+        
+        const { data, error } = await query;
+        if (error) throw error;
+        schedules = data || [];
+      } catch (error) {
+        console.log('Supabase failed, using mock data:', error);
+        const mockSchedules = await getMockData('schedules.json');
+        schedules = mockSchedules.filter((s: any) => {
+          const employeeMatch = !employeeId || (s.employeeId === employeeId || s.employee_id === employeeId);
+          const dateMatch = !date || s.date === date;
+          return employeeMatch && dateMatch;
+        });
+      }
+    } else {
+      console.log('Supabase not configured, using mock data');
+      const mockSchedules = await getMockData('schedules.json');
+      schedules = mockSchedules.filter((s: any) => {
+        const employeeMatch = !employeeId || (s.employeeId === employeeId || s.employee_id === employeeId);
+        const dateMatch = !date || s.date === date;
+        return employeeMatch && dateMatch;
+      });
     }
     
-    const schedules = await restStorage.getSchedules(filters);
-    
-    // Map snake_case to camelCase for frontend compatibility (same as server/routes.ts)
+    // Map snake_case to camelCase for frontend compatibility
     const mappedSchedules = schedules.map((schedule: any) => ({
       ...schedule,
       employeeId: schedule.employee_id || schedule.employeeId,

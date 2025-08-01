@@ -1,28 +1,60 @@
 import 'dotenv/config';
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { restStorage } from '../../server/supabase-rest-storage';
-import { getMockData } from '../../server/storage';
+import { createClient } from '@supabase/supabase-js';
+import fs from 'fs';
+import path from 'path';
+
+// Initialize Supabase client
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_ANON_KEY;
+const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
+
+// Helper to read mock data
+async function getMockData(filename: string) {
+  try {
+    const filePath = path.join(process.cwd(), 'mock-data', filename);
+    const fileContent = fs.readFileSync(filePath, 'utf8');
+    return JSON.parse(fileContent);
+  } catch (error) {
+    console.error(`Error reading mock data ${filename}:`, error);
+    return [];
+  }
+}
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const { employeeId } = req.query;
     let timeBalance;
     
-    // Try restStorage first (same logic as server/routes.ts)
-    try {
-      timeBalance = await restStorage.getTimeBalance(employeeId as string);
-    } catch (error) {
-      console.log('restStorage failed, trying direct mock fallback:', error);
+    // Try Supabase first, fallback to mock data
+    if (supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('time_balances')
+          .select('*')
+          .eq('employee_id', employeeId)
+          .single();
+        
+        if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+          throw error;
+        }
+        timeBalance = data;
+      } catch (error) {
+        console.log('Supabase failed, using mock data:', error);
+      }
     }
     
-    // If restStorage didn't work, try direct mock data fallback
+    // If Supabase didn't work or no data found, try mock data
     if (!timeBalance) {
+      console.log('Using mock data for time balance');
       const mockTimeBalances = await getMockData('timebalances.json');
-      timeBalance = mockTimeBalances.find((tb: any) => tb.employeeId === employeeId);
+      timeBalance = mockTimeBalances.find((tb: any) => 
+        tb.employeeId === employeeId || tb.employee_id === employeeId
+      );
     }
     
     if (timeBalance) {
-      // Map snake_case to camelCase for frontend compatibility (same as server/routes.ts)
+      // Map snake_case to camelCase for frontend compatibility
       const mappedTimeBalance = {
         ...timeBalance,
         employeeId: timeBalance.employee_id || timeBalance.employeeId,
