@@ -325,7 +325,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/employees', async (req, res) => {
     try {
       const employees = await restStorage.getEmployees();
-      res.json(employees);
+      
+      // Map snake_case to camelCase for frontend compatibility
+      const mappedEmployees = employees.map((employee: any) => ({
+        ...employee,
+        employeeId: employee.employee_id || employee.employeeId,
+        firstName: employee.first_name || employee.firstName,
+        lastName: employee.last_name || employee.lastName,
+      }));
+      
+      res.json(mappedEmployees);
     } catch (error) {
       console.error('Error fetching employees:', error);
       res.status(500).json({ error: (error as Error).message });
@@ -337,7 +346,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const employee = await restStorage.getEmployee(req.params.id);
       if (employee) {
-        res.json(employee);
+        // Map snake_case to camelCase for frontend compatibility
+        const mappedEmployee = {
+          ...employee,
+          employeeId: employee.employee_id || employee.employeeId,
+          firstName: employee.first_name || employee.firstName,
+          lastName: employee.last_name || employee.lastName,
+        };
+        
+        res.json(mappedEmployee);
       } else {
         res.status(404).json({ message: 'Employee not found' });
       }
@@ -374,7 +391,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const schedules = await restStorage.getSchedules(filters);
-      res.json(schedules);
+      
+      // Map snake_case to camelCase for frontend compatibility
+      const mappedSchedules = schedules.map((schedule: any) => ({
+        ...schedule,
+        employeeId: schedule.employee_id || schedule.employeeId,
+        startTime: schedule.start_time || schedule.startTime,
+        endTime: schedule.end_time || schedule.endTime,
+        breakStart: schedule.break_start || schedule.breakStart,
+        breakEnd: schedule.break_end || schedule.breakEnd,
+      }));
+      
+      res.json(mappedSchedules);
     } catch (error) {
       console.error('Error fetching schedules:', error);
       res.status(500).json({ error: (error as Error).message });
@@ -472,7 +500,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         );
       }
       
-      res.json(deviations);
+      // Map snake_case to camelCase for frontend compatibility
+      const mappedDeviations = deviations.map((deviation: any) => ({
+        ...deviation,
+        employeeId: deviation.employee_id || deviation.employeeId,
+        timeCode: deviation.time_code || deviation.timeCode,
+        startTime: deviation.start_time || deviation.startTime,
+        endTime: deviation.end_time || deviation.endTime,
+      }));
+      
+      res.json(mappedDeviations);
     } catch (error) {
       console.error('Error in deviations endpoint:', error);
       res.status(500).json({ error: (error as Error).message });
@@ -617,7 +654,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         leaveRequests = leaveRequests.filter((l: any) => l.leaveType === leaveType);
       }
       
-      res.json(leaveRequests);
+      // Map snake_case to camelCase for frontend compatibility
+      const mappedLeaveRequests = leaveRequests.map((leave: any) => ({
+        ...leave,
+        employeeId: leave.employee_id || leave.employeeId,
+        startDate: leave.start_date || leave.startDate,
+        endDate: leave.end_date || leave.endDate,
+        leaveType: leave.leave_type || leave.leaveType,
+      }));
+      
+      res.json(mappedLeaveRequests);
     } catch (error) {
       console.error('Error fetching leave requests:', error);
       res.status(500).json({ error: (error as Error).message });
@@ -733,7 +779,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       if (timeBalance) {
-        res.json(timeBalance);
+        // Map snake_case to camelCase for frontend compatibility
+        const mappedTimeBalance = {
+          ...timeBalance,
+          employeeId: timeBalance.employee_id || timeBalance.employeeId,
+          timeBalance: timeBalance.time_balance || timeBalance.timeBalance,
+          vacationDays: timeBalance.vacation_days || timeBalance.vacationDays,
+          savedVacationDays: timeBalance.saved_vacation_days || timeBalance.savedVacationDays,
+          vacationUnit: timeBalance.vacation_unit || timeBalance.vacationUnit,
+          compensationTime: timeBalance.compensation_time || timeBalance.compensationTime,
+          lastUpdated: timeBalance.last_updated || timeBalance.lastUpdated,
+        };
+        
+        res.json(mappedTimeBalance);
       } else {
         res.status(404).json({ message: 'Time balance not found' });
       }
