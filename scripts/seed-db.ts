@@ -4,8 +4,7 @@ import {
   mockDeviations, 
   mockLeaveRequests,
   mockTimeBalances,
-  mockPayslips,
-  mockActivityLogs
+  mockPayslips
 } from "../client/src/lib/mockData";
 import { 
   employees, 

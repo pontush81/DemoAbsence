@@ -26,9 +26,9 @@ export const productionUsers: ProductionUser[] = [
     canSwitchRoles: false
   },
   
-  // Chef - kan vara både medarbetare och chef (matchar databas E005)  
+  // Chef - kan vara både medarbetare och chef (matchar mock data mgr-001)  
   {
-    id: "E005", 
+    id: "mgr-001", 
     name: "Mikael Svensson",
     email: "mikael.svensson@kontek.se",
     department: "Ledning",
@@ -37,11 +37,11 @@ export const productionUsers: ProductionUser[] = [
     canSwitchRoles: true
   },
   
-  // HR-specialist - också chef funktioner
+  // HR-specialist - också chef funktioner (matchar databas hr-001)
   {
     id: "hr-001",
-    name: "Maria Larsson", 
-    email: "maria.larsson@kontek.se",
+    name: "Lisa Nilsson", 
+    email: "lisa.nilsson@kontek.se",
     department: "HR",
     assignedRoles: ["employee", "hr", "manager"],
     defaultRole: "hr",
@@ -57,6 +57,28 @@ export const productionUsers: ProductionUser[] = [
     assignedRoles: ["employee", "payroll"],
     defaultRole: "payroll",
     canSwitchRoles: true
+  },
+  
+  // Utvecklingschef - matchar databas E006
+  {
+    id: "E006",
+    name: "Emma Pettersson",
+    email: "emma.pettersson@kontek.se",
+    department: "Utveckling",
+    assignedRoles: ["employee", "manager"],
+    defaultRole: "manager",
+    canSwitchRoles: true
+  },
+  
+  // Utvecklare under Emma
+  {
+    id: "E007", 
+    name: "Oliver Berg",
+    email: "oliver.berg@kontek.se",
+    department: "Utveckling",
+    assignedRoles: ["employee"],
+    defaultRole: "employee",
+    canSwitchRoles: false
   },
   
   // Systemadmin - alla roller för support

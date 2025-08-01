@@ -25,6 +25,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { apiService } from "@/lib/apiService";
 import { useStore } from "@/lib/store";
 import { format } from "date-fns";
+import { getWorkflowInfo } from "@/lib/approvalWorkflows";
 
 // Create the schema with custom validation using translations
 const createDeviationFormSchema = (t: (key: string) => string) => insertDeviationSchema.extend({
@@ -48,8 +49,8 @@ interface DeviationFormProps {
   onCancel?: () => void;
 }
 
-// Helper function to calculate duration between two times
-const createCalculateDuration = (t: (key: string) => string) => (startTime: string, endTime: string): string => {
+// Helper function to calculate duration between two times, accounting for breaks
+const createCalculateDuration = (t: (key: string) => string, schedule?: any) => (startTime: string, endTime: string): string => {
   try {
     const start = new Date(`2000-01-01T${startTime}:00`);
     const end = new Date(`2000-01-01T${endTime}:00`);
@@ -58,16 +59,33 @@ const createCalculateDuration = (t: (key: string) => string) => (startTime: stri
       return t('validation.invalidTimePeriod');
     }
     
+    // Calculate total time
     const diffMs = end.getTime() - start.getTime();
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+    let totalMinutes = Math.floor(diffMs / (1000 * 60));
     
-    if (diffHours === 0) {
-      return `${diffMinutes} min`;
-    } else if (diffMinutes === 0) {
-      return `${diffHours} tim`;
+    // Subtract break time if schedule has breaks and work period overlaps with break
+    if (schedule?.breakStart && schedule?.breakEnd) {
+      const breakStart = new Date(`2000-01-01T${schedule.breakStart}`);
+      const breakEnd = new Date(`2000-01-01T${schedule.breakEnd}`);
+      
+      // Check if work period overlaps with break period
+      if (start < breakEnd && end > breakStart) {
+        const overlapStart = new Date(Math.max(start.getTime(), breakStart.getTime()));
+        const overlapEnd = new Date(Math.min(end.getTime(), breakEnd.getTime()));
+        const breakMinutes = Math.floor((overlapEnd.getTime() - overlapStart.getTime()) / (1000 * 60));
+        totalMinutes = Math.max(0, totalMinutes - breakMinutes);
+      }
+    }
+    
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    
+    if (hours === 0) {
+      return `${minutes} min`;
+    } else if (minutes === 0) {
+      return `${hours} tim`;
     } else {
-      return `${diffHours} tim ${diffMinutes} min`;
+      return `${hours} tim ${minutes} min`;
     }
   } catch {
     return t('validation.invalidTime');
@@ -93,10 +111,31 @@ const DeviationForm = ({ deviationId, onCancel }: DeviationFormProps) => {
     queryFn: () => deviationId ? apiService.getDeviation(deviationId) : null,
     enabled: !!deviationId,
   });
+
+  // Fetch schedule for the selected date to calculate duration correctly
+  const selectedDate = form.watch('date');
+  const { data: scheduleForDate } = useQuery({
+    queryKey: ['/api/schedules', user.currentUser?.employeeId, selectedDate],
+    queryFn: async () => {
+      if (!user.currentUser?.employeeId || !selectedDate) return null;
+      try {
+        // Try to get the specific schedule for this date
+        const response = await fetch(`/api/schedules/${user.currentUser.employeeId}?date=${selectedDate}`);
+        if (response.ok) {
+          const schedules = await response.json();
+          return schedules.find((s: any) => s.date === selectedDate) || null;
+        }
+        return null;
+      } catch {
+        return null;
+      }
+    },
+    enabled: !!user.currentUser?.employeeId && !!selectedDate,
+  });
   
   // Form setup with default values
   const deviationFormSchema = createDeviationFormSchema(t);
-  const calculateDuration = createCalculateDuration(t);
+  const calculateDuration = createCalculateDuration(t, scheduleForDate);
   const form = useForm<DeviationFormValues>({
     resolver: zodResolver(deviationFormSchema),
     defaultValues: {
@@ -286,6 +325,16 @@ const DeviationForm = ({ deviationId, onCancel }: DeviationFormProps) => {
                       Total tid: {calculateDuration(form.watch('startTime'), form.watch('endTime'))}
                     </span>
                   </div>
+                  {scheduleForDate && scheduleForDate.breakStart && scheduleForDate.breakEnd && (
+                    <div className="text-xs text-muted-foreground mt-1">
+                      Rast {scheduleForDate.breakStart.slice(0, 5)}-{scheduleForDate.breakEnd.slice(0, 5)} är avdragen från arbetstiden
+                    </div>
+                  )}
+                  {!scheduleForDate && (
+                    <div className="text-xs text-orange-600 mt-1">
+                      ⚠️ Inget schema hittat för detta datum - beräknar utan raster
+                    </div>
+                  )}
                 </div>
               )}
             </div>

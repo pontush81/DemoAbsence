@@ -1,7 +1,7 @@
 [
   {
     "id": 1,
-    "employeeId": "emp-001",
+    "employeeId": "E001",
     "personnummer": "19850512-1234",
     "firstName": "Anna",
     "lastName": "Andersson",
@@ -23,7 +23,7 @@
     "bankIBAN": "",
     "department": "Ekonomi",
     "position": "Ekonomiassistent",
-    "manager": "mgr-001",
+    "manager": "E005",
     "scheduleTemplate": "standard"
   },
   {
@@ -50,7 +50,7 @@
     "bankIBAN": "",
     "department": "Utveckling",
     "position": "Utvecklare",
-    "manager": "E005",
+    "manager": "E006",
     "scheduleTemplate": "standard"
   },
   {
@@ -160,5 +160,59 @@
     "position": "HR-specialist",
     "manager": "E005",
     "scheduleTemplate": "standard"
+  },
+  {
+    "id": 7,
+    "employeeId": "E006",
+    "personnummer": "19750310-1357",
+    "firstName": "Emma",
+    "lastName": "Pettersson",
+    "careOfAddress": "",
+    "streetAddress": "Strandvägen 8",
+    "postalCode": "11456",
+    "city": "Stockholm",
+    "country": "Sverige",
+    "phoneNumber": "070-789 01 23",
+    "email": "emma.pettersson@gmail.com",
+    "workEmail": "emma.pettersson@kontek.se",
+    "preferredEmail": "work",
+    "status": "active",
+    "role": "manager",
+    "bankClearingNumber": "2468",
+    "bankAccountNumber": "135792468",
+    "bankBIC": "",
+    "bankCountryCode": "SE",
+    "bankIBAN": "",
+    "department": "Utveckling",
+    "position": "Utvecklingschef",
+    "manager": "E005",
+    "scheduleTemplate": "manager"
+  },
+  {
+    "id": 8,
+    "employeeId": "E007",
+    "personnummer": "19920708-9876",
+    "firstName": "Oliver",
+    "lastName": "Berg",
+    "careOfAddress": "",
+    "streetAddress": "Smålandsgatan 12",
+    "postalCode": "11146",
+    "city": "Stockholm",
+    "country": "Sverige",
+    "phoneNumber": "070-890 12 34",
+    "email": "oliver.berg@gmail.com",
+    "workEmail": "oliver.berg@kontek.se",
+    "preferredEmail": "work",
+    "status": "active",
+    "role": "employee",
+    "bankClearingNumber": "1111",
+    "bankAccountNumber": "987654123",
+    "bankBIC": "",
+    "bankCountryCode": "SE",
+    "bankIBAN": "",
+    "department": "Utveckling",
+    "position": "Frontend-utvecklare",
+    "manager": "E006",
+    "scheduleTemplate": "flexible"
   }
 ]
