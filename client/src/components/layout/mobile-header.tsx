@@ -1,5 +1,6 @@
 import { useStore } from "@/lib/store";
 import RoleDropdown from "./role-dropdown";
+import UserSwitcher from "./user-switcher";
 
 const MobileHeader = () => {
   const { toggleMobileSidebar, user } = useStore();
@@ -22,9 +23,7 @@ const MobileHeader = () => {
         </div>
         <div className="flex items-center">
           <RoleDropdown variant="compact" className="mr-2" />
-          <button className="ml-1">
-            <span className="material-icons">account_circle</span>
-          </button>
+          <UserSwitcher />
         </div>
       </div>
     </header>

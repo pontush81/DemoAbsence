@@ -52,12 +52,14 @@ const RoleDropdown = ({ variant = "compact", className = "" }: RoleDropdownProps
     }
   ];
 
-  // Filtrera roller baserat på vad användaren har tillgång till
-  // Fallback till alla roller om availableRoles inte finns (för bakåtkompatibilitet)
-  const userAvailableRoles = user.availableRoles || ['employee', 'manager', 'hr', 'payroll'];
+  // Filtrera roller baserat på vad användaren faktiskt har tillgång till
+  const userAvailableRoles = user.availableRoles || ['employee'];
   const availableRoleData = roles.filter(role => 
     userAvailableRoles.includes(role.value)
   );
+
+  // Om användaren bara har en roll, visa ingen dropdown
+  const shouldShowDropdown = availableRoleData.length > 1;
 
   const currentRoleData = roles.find(role => role.value === user.currentRole);
 
@@ -69,6 +71,19 @@ const RoleDropdown = ({ variant = "compact", className = "" }: RoleDropdownProps
   const handleDropdownOpen = () => {
     console.log('Dropdown clicked/opened');
   };
+
+  // Om användaren bara har en roll, visa bara en badge utan dropdown
+  if (!shouldShowDropdown) {
+    return (
+      <div className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded-full ${currentRoleData?.color} ${className}`}>
+        {variant === "full" && (
+          <span className="material-icons text-sm mr-1">{currentRoleData?.icon}</span>
+        )}
+        {currentRoleData?.label}
+        <span className="material-icons text-sm ml-1 opacity-50">lock</span>
+      </div>
+    );
+  }
 
   return (
     <DropdownMenu onOpenChange={(open) => console.log('Dropdown state:', open)}>
@@ -86,7 +101,7 @@ const RoleDropdown = ({ variant = "compact", className = "" }: RoleDropdownProps
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel>
-          Växla roll {user.isDemoMode ? '(Demo)' : '(Produktion)'}
+          Tillgängliga roller ({availableRoleData.length})
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         {availableRoleData.map((role) => (

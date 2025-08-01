@@ -16,9 +16,13 @@ import PAXMLExportPage from "@/pages/paxml-export";
 import SchedulesPage from "@/pages/schedules";
 import { useEffect } from "react";
 import { useStore } from "./lib/store";
+import { useDemoInitialization } from "./hooks/use-demo-initialization";
 
 function Router() {
   const { setCurrentRoute } = useStore();
+  
+  // Initiera demosystemet
+  useDemoInitialization();
   
   useEffect(() => {
     const handleLocationChange = () => {

@@ -12,6 +12,7 @@ export type UserState = {
   isDemoMode: boolean; // Demo vs Production
   timeBalance: TimeBalance | null;
   todaySchedule: Schedule | null;
+  demoUserId?: string; // För att hålla koll på vilken demo-användare som är aktiv
 };
 
 type NavigationState = {
@@ -26,6 +27,7 @@ type AppState = {
   setCurrentRole: (role: UserRole) => void;
   setTimeBalance: (timeBalance: TimeBalance) => void;
   setTodaySchedule: (schedule: Schedule) => void;
+  setDemoUser: (userId: string) => void; // Ny funktion för att växla demo-användare
   logout: () => void;
   
   // Navigation state
@@ -38,15 +40,16 @@ type AppState = {
 export const useStore = create<AppState>()(
   persist(
     (set) => ({
-      // User state
+      // User state - starta med första demo-användaren
       user: {
         isAuthenticated: true, // Simulate being authenticated
         currentUser: null,
         currentRole: 'employee',
-        availableRoles: ['employee', 'manager', 'hr', 'payroll'], // Demo: alla roller
+        availableRoles: ['employee'], // Kommer uppdateras när demo-användare väljs
         isDemoMode: true, // Demo mode - växla fritt mellan roller
         timeBalance: null,
         todaySchedule: null,
+        demoUserId: 'emp-001', // Anna Andersson som standard
       },
       setCurrentUser: (user) => set((state) => ({ 
         user: { ...state.user, currentUser: user, isAuthenticated: true } 
@@ -87,6 +90,58 @@ export const useStore = create<AppState>()(
       setTodaySchedule: (todaySchedule) => set((state) => ({ 
         user: { ...state.user, todaySchedule } 
       })),
+      setDemoUser: (userId) => set((state) => {
+        // Importera produktionsanvändare
+        const { simulateProductionLogin } = require('./productionUsers');
+        const demoUserData = simulateProductionLogin(userId);
+        
+        if (!demoUserData) {
+          console.warn(`Demo user not found: ${userId}`);
+          return state;
+        }
+
+        // Skapa Employee objekt från demo-användaren
+        const employeeUser: Employee = {
+          id: 0, // Mock ID
+          employeeId: demoUserData.id,
+          personnummer: "000000-0000", // Mock
+          firstName: demoUserData.name.split(' ')[0],
+          lastName: demoUserData.name.split(' ')[1] || '',
+          careOfAddress: null,
+          streetAddress: "Mock Address",
+          postalCode: "12345",
+          city: "Stockholm",
+          country: "Sverige",
+          phoneNumber: null,
+          email: demoUserData.email,
+          workEmail: demoUserData.email,
+          preferredEmail: "work",
+          status: "active",
+          role: demoUserData.defaultRole,
+          bankClearingNumber: null,
+          bankAccountNumber: null,
+          bankBIC: null,
+          bankCountryCode: null,
+          bankIBAN: null,
+          department: demoUserData.department,
+          position: null,
+          manager: null,
+          scheduleTemplate: null
+        };
+
+        console.log(`Demo: Switched to user ${demoUserData.name} (${userId}) with role ${demoUserData.defaultRole}`);
+        
+        return {
+          user: {
+            ...state.user,
+            currentUser: employeeUser,
+            currentRole: demoUserData.defaultRole,
+            availableRoles: demoUserData.assignedRoles,
+            demoUserId: userId,
+            isDemoMode: true
+          }
+        };
+      }),
       logout: () => set((state) => ({ 
         user: { 
           ...state.user, 
@@ -94,7 +149,8 @@ export const useStore = create<AppState>()(
           currentUser: null,
           currentRole: 'employee',
           availableRoles: ['employee'], // Reset till grundroll
-          isDemoMode: true
+          isDemoMode: true,
+          demoUserId: undefined
         } 
       })),
       
@@ -124,6 +180,7 @@ export const useStore = create<AppState>()(
           currentRole: state.user.currentRole,
           availableRoles: state.user.availableRoles,
           isDemoMode: state.user.isDemoMode,
+          demoUserId: state.user.demoUserId,
         }
       }),
     }

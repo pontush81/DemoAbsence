@@ -4,6 +4,7 @@ import { useI18n } from "@/lib/i18n";
 import { useFeatureFlags } from "@/lib/featureFlags";
 import { useStore } from "@/lib/store";
 import RoleDropdown from "./role-dropdown";
+import UserSwitcher from "./user-switcher";
 
 const Sidebar = () => {
   const [location] = useLocation();
@@ -219,7 +220,12 @@ const Sidebar = () => {
         </ul>
       </nav>
       
-      <div className="p-4 border-t border-sidebar-border">
+      <div className="p-4 border-t border-sidebar-border space-y-3">
+        {/* Demo User Switcher */}
+        <div className="mb-3">
+          <UserSwitcher />
+        </div>
+        
         <div className="flex items-center">
           <button className="flex items-center text-sm text-secondary-light">
             <span className="material-icons mr-2">translate</span>
