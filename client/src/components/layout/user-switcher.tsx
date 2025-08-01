@@ -13,48 +13,20 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useStore } from "@/lib/store";
-import { productionUsers } from "@/lib/productionUsers";
+import { demoPersonas, getRoleLabel, getRoleIcon, getRoleColor } from "@/lib/demoPersonas";
 
 const UserSwitcher = () => {
-  const { user, setDemoUser } = useStore();
+  const { user, setDemoPersona } = useStore();
   const [isOpen, setIsOpen] = useState(false);
 
-  const currentDemoUser = productionUsers.find(u => u.id === user.demoUserId);
+  const currentPersona = demoPersonas.find(p => p.id === user.demoPersonaId);
 
-  const handleUserSwitch = (userId: string) => {
-    setDemoUser(userId);
+  const handlePersonaSwitch = (personaId: string) => {
+    setDemoPersona(personaId);
     setIsOpen(false);
   };
 
-  const getRoleColor = (role: string) => {
-    switch (role) {
-      case 'employee': return 'bg-green-100 text-green-800';
-      case 'manager': return 'bg-blue-100 text-blue-800';
-      case 'hr': return 'bg-purple-100 text-purple-800';
-      case 'payroll': return 'bg-orange-100 text-orange-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getRoleIcon = (role: string) => {
-    switch (role) {
-      case 'employee': return 'person';
-      case 'manager': return 'supervisor_account';
-      case 'hr': return 'people';
-      case 'payroll': return 'account_balance_wallet';
-      default: return 'person';
-    }
-  };
-
-  const getRoleLabel = (role: string) => {
-    switch (role) {
-      case 'employee': return 'Medarbetare';
-      case 'manager': return 'Chef';
-      case 'hr': return 'HR-specialist';
-      case 'payroll': return 'Löneadministratör';
-      default: return role;
-    }
-  };
+  // Helper functions moved to demoPersonas.ts
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -62,12 +34,12 @@ const UserSwitcher = () => {
         <Button variant="ghost" size="sm" className="flex items-center gap-2 h-auto p-2">
           <Avatar className="h-8 w-8">
             <AvatarFallback className="text-xs">
-              {currentDemoUser ? currentDemoUser.name.split(' ').map(n => n[0]).join('') : 'U'}
+              {currentPersona ? currentPersona.name.split(' ').map(n => n[0]).join('') : 'U'}
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-col items-start text-left">
             <span className="text-sm font-medium">
-              {currentDemoUser?.name || 'Välj användare'}
+              {currentPersona?.name || 'Välj persona'}
             </span>
             <span className="text-xs text-muted-foreground">
               Demo · {getRoleLabel(user.currentRole)}
@@ -80,69 +52,56 @@ const UserSwitcher = () => {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <span className="material-icons">people</span>
-            Välj demo-användare
+            Välj demo-persona
           </DialogTitle>
           <DialogDescription>
-            Växla mellan olika användare för att demonstrera systemets funktionalitet
+            Växla mellan olika användare och roller för att demonstrera systemets funktionalitet
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-3 max-h-96 overflow-y-auto">
-          {productionUsers.map((demoUser) => (
+        <div className="space-y-2 max-h-96 overflow-y-auto">
+          {demoPersonas.map((persona) => (
             <Card 
-              key={demoUser.id} 
+              key={persona.id} 
               className={`cursor-pointer transition-all hover:shadow-md ${
-                user.demoUserId === demoUser.id 
+                user.demoPersonaId === persona.id 
                   ? 'ring-2 ring-primary bg-primary/5' 
                   : 'hover:bg-gray-50'
               }`}
-              onClick={() => handleUserSwitch(demoUser.id)}
+              onClick={() => handlePersonaSwitch(persona.id)}
             >
-              <CardContent className="p-4">
-                <div className="flex items-start gap-3">
+              <CardContent className="p-3">
+                <div className="flex items-center gap-3">
                   <Avatar className="h-10 w-10">
                     <AvatarFallback>
-                      {demoUser.name.split(' ').map(n => n[0]).join('')}
+                      {persona.name.split(' ').map(n => n[0]).join('')}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-medium text-sm">{demoUser.name}</h4>
-                      {user.demoUserId === demoUser.id && (
+                      <h4 className="font-medium text-sm">{persona.name}</h4>
+                      <Badge
+                        variant={persona.isPrimary ? "default" : "secondary"}
+                        className={`text-xs ${getRoleColor(persona.role)}`}
+                      >
+                        <span className="material-icons text-xs mr-1">
+                          {getRoleIcon(persona.role)}
+                        </span>
+                        {getRoleLabel(persona.role)}
+                        {persona.isPrimary && (
+                          <span className="material-icons text-xs ml-1">star</span>
+                        )}
+                      </Badge>
+                      {user.demoPersonaId === persona.id && (
                         <Badge variant="outline" className="text-xs">
                           Aktiv
                         </Badge>
                       )}
                     </div>
-                    <p className="text-xs text-muted-foreground mb-2">
-                      {demoUser.email} · {demoUser.department}
+                    <p className="text-xs text-muted-foreground mb-1">
+                      {persona.email} · {persona.department}
                     </p>
-                    <div className="flex flex-wrap gap-1">
-                      {demoUser.assignedRoles.map((role) => (
-                        <Badge
-                          key={role}
-                          variant={role === demoUser.defaultRole ? "default" : "secondary"}
-                          className={`text-xs ${getRoleColor(role)} ${
-                            role === demoUser.defaultRole ? 'ring-1 ring-current' : ''
-                          }`}
-                        >
-                          <span className="material-icons text-xs mr-1">
-                            {getRoleIcon(role)}
-                          </span>
-                          {getRoleLabel(role)}
-                          {role === demoUser.defaultRole && (
-                            <span className="material-icons text-xs ml-1">star</span>
-                          )}
-                        </Badge>
-                      ))}
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {demoUser.assignedRoles.length === 1 
-                        ? "Fast roll" 
-                        : `Kan växla mellan ${demoUser.assignedRoles.length} roller`
-                      }
-                      {demoUser.assignedRoles.length > 1 && (
-                        <> · Standard: {getRoleLabel(demoUser.defaultRole)}</>
-                      )}
+                    <p className="text-xs text-muted-foreground">
+                      {persona.description}
                     </p>
                   </div>
                 </div>
@@ -151,9 +110,9 @@ const UserSwitcher = () => {
           ))}
         </div>
         <Separator />
-        <div className="text-center">
+        <div className="text-center space-y-2">
           <p className="text-xs text-muted-foreground">
-            💡 Varje användare har olika roller och behörigheter
+            ⭐ Stjärna = Huvudroll · 🔄 En klick växlar både användare och roll
           </p>
         </div>
       </DialogContent>

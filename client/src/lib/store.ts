@@ -12,7 +12,7 @@ export type UserState = {
   isDemoMode: boolean; // Demo vs Production
   timeBalance: TimeBalance | null;
   todaySchedule: Schedule | null;
-  demoUserId?: string; // För att hålla koll på vilken demo-användare som är aktiv
+  demoPersonaId?: string; // För att hålla koll på vilken demo-persona som är aktiv
 };
 
 type NavigationState = {
@@ -27,7 +27,7 @@ type AppState = {
   setCurrentRole: (role: UserRole) => void;
   setTimeBalance: (timeBalance: TimeBalance) => void;
   setTodaySchedule: (schedule: Schedule) => void;
-  setDemoUser: (userId: string) => void; // Ny funktion för att växla demo-användare
+  setDemoPersona: (personaId: string) => void; // Funktion för att växla demo-persona (användare + roll)
   logout: () => void;
   
   // Navigation state
@@ -49,7 +49,7 @@ export const useStore = create<AppState>()(
         isDemoMode: true, // Demo mode - växla fritt mellan roller
         timeBalance: null,
         todaySchedule: null,
-        demoUserId: 'emp-001', // Anna Andersson som standard
+        demoPersonaId: 'emp-001-employee', // Anna Andersson (Medarbetare) som standard
       },
       setCurrentUser: (user) => set((state) => ({ 
         user: { ...state.user, currentUser: user, isAuthenticated: true } 
@@ -90,17 +90,24 @@ export const useStore = create<AppState>()(
       setTodaySchedule: (todaySchedule) => set((state) => ({ 
         user: { ...state.user, todaySchedule } 
       })),
-      setDemoUser: (userId) => set((state) => {
-        // Importera produktionsanvändare
+      setDemoPersona: (personaId) => set((state) => {
+        // Importera demo personas
+        const { demoPersonas } = require('./demoPersonas');
         const { simulateProductionLogin } = require('./productionUsers');
-        const demoUserData = simulateProductionLogin(userId);
         
-        if (!demoUserData) {
-          console.warn(`Demo user not found: ${userId}`);
+        const persona = demoPersonas.find((p: any) => p.id === personaId);
+        if (!persona) {
+          console.warn(`Demo persona not found: ${personaId}`);
           return state;
         }
 
-        // Skapa Employee objekt från demo-användaren
+        const demoUserData = simulateProductionLogin(persona.userId);
+        if (!demoUserData) {
+          console.warn(`Demo user not found: ${persona.userId}`);
+          return state;
+        }
+
+        // Skapa Employee objekt från demo-persona
         const employeeUser: Employee = {
           id: 0, // Mock ID
           employeeId: demoUserData.id,
@@ -117,7 +124,7 @@ export const useStore = create<AppState>()(
           workEmail: demoUserData.email,
           preferredEmail: "work",
           status: "active",
-          role: demoUserData.defaultRole,
+          role: persona.role,
           bankClearingNumber: null,
           bankAccountNumber: null,
           bankBIC: null,
@@ -129,15 +136,15 @@ export const useStore = create<AppState>()(
           scheduleTemplate: null
         };
 
-        console.log(`Demo: Switched to user ${demoUserData.name} (${userId}) with role ${demoUserData.defaultRole}`);
+        console.log(`Demo: Switched to ${persona.name} as ${persona.role} (${personaId})`);
         
         return {
           user: {
             ...state.user,
             currentUser: employeeUser,
-            currentRole: demoUserData.defaultRole,
-            availableRoles: demoUserData.assignedRoles,
-            demoUserId: userId,
+            currentRole: persona.role,
+            availableRoles: [persona.role], // Bara den valda rollen
+            demoPersonaId: personaId,
             isDemoMode: true
           }
         };
@@ -150,7 +157,7 @@ export const useStore = create<AppState>()(
           currentRole: 'employee',
           availableRoles: ['employee'], // Reset till grundroll
           isDemoMode: true,
-          demoUserId: undefined
+          demoPersonaId: undefined
         } 
       })),
       
@@ -180,7 +187,7 @@ export const useStore = create<AppState>()(
           currentRole: state.user.currentRole,
           availableRoles: state.user.availableRoles,
           isDemoMode: state.user.isDemoMode,
-          demoUserId: state.user.demoUserId,
+          demoPersonaId: state.user.demoPersonaId,
         }
       }),
     }

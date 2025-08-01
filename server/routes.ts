@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { getMockData, saveMockData, saveFile, getFile, listFiles, generateId } from "./storage";
+import { saveFile, getFile, listFiles, generateId } from "./storage";
+import { storage } from "./supabase-storage";
 import { generatePAXMLTransactions, generatePAXMLXML, generatePAXMLXMLWithSchedules, validatePAXMLData, convertXMLScheduleToAppSchedule, convertAppScheduleToXMLSchedule } from './lib/paxml.js';
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -11,14 +12,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ message: 'API is working', timestamp: new Date().toISOString() });
   });
 
-  // Test getMockData endpoint
+  // Test database connection
   app.get('/api/test-data', async (req, res) => {
     try {
-      const employees = await getMockData('employees.json');
+      const employees = await storage.getEmployees();
       res.json({ success: true, count: employees.length, first: employees[0] || null });
     } catch (error) {
       console.error('Test data error:', error);
-      res.status(500).json({ error: error.message, stack: error.stack });
+      res.status(500).json({ error: (error as Error).message, stack: (error as Error).stack });
     }
   });
 
@@ -134,54 +135,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Get all employees
   app.get('/api/employees', async (req, res) => {
-    const employees = await getMockData('employees.json');
-    res.json(employees);
+    try {
+      const employees = await storage.getEmployees();
+      res.json(employees);
+    } catch (error) {
+      console.error('Error fetching employees:', error);
+      res.status(500).json({ error: (error as Error).message });
+    }
   });
 
   // Get employee by ID
   app.get('/api/employees/:id', async (req, res) => {
-    const employees = await getMockData('employees.json');
-    const employee = employees.find((e: any) => e.employeeId === req.params.id);
-    if (employee) {
-      res.json(employee);
-    } else {
-      res.status(404).json({ message: 'Employee not found' });
+    try {
+      const employee = await storage.getEmployee(req.params.id);
+      if (employee) {
+        res.json(employee);
+      } else {
+        res.status(404).json({ message: 'Employee not found' });
+      }
+    } catch (error) {
+      console.error('Error fetching employee:', error);
+      res.status(500).json({ error: (error as Error).message });
     }
   });
 
   // Update employee
   app.patch('/api/employees/:id', async (req, res) => {
-    const employees = await getMockData('employees.json');
-    const index = employees.findIndex((e: any) => e.employeeId === req.params.id);
-    if (index !== -1) {
-      // In a real implementation, we would validate and sanitize the input
-      // and only update allowed fields
-      employees[index] = { ...employees[index], ...req.body };
-      await saveMockData('employees.json', employees);
-      res.json(employees[index]);
-    } else {
-      res.status(404).json({ message: 'Employee not found' });
+    try {
+      const updated = await storage.updateEmployee(req.params.id, req.body);
+      if (updated) {
+        res.json(updated);
+      } else {
+        res.status(404).json({ message: 'Employee not found' });
+      }
+    } catch (error) {
+      console.error('Error updating employee:', error);
+      res.status(500).json({ error: (error as Error).message });
     }
   });
 
   // Get schedules
   app.get('/api/schedules/:employeeId', async (req, res) => {
-    const { employeeId } = req.params;
-    const { date } = req.query;
-    
-    const schedules = await getMockData('schedules.json');
-    let filteredSchedules = schedules.filter((s: any) => s.employeeId === employeeId);
-    
-    if (date) {
-      filteredSchedules = filteredSchedules.filter((s: any) => s.date === date);
+    try {
+      const { employeeId } = req.params;
+      const { date } = req.query;
+      
+      const filters: any = { employeeId };
+      if (date) {
+        filters.date = date;
+      }
+      
+      const schedules = await storage.getSchedules(filters);
+      res.json(schedules);
+    } catch (error) {
+      console.error('Error fetching schedules:', error);
+      res.status(500).json({ error: (error as Error).message });
     }
-    
-    res.json(filteredSchedules);
   });
 
   // Get time codes
   app.get('/api/timecodes', async (req, res) => {
-    res.json(await getMockData('timecodes.json'));
+    try {
+      const timeCodes = await storage.getTimeCodes();
+      res.json(timeCodes);
+    } catch (error) {
+      console.error('Error fetching time codes:', error);
+      res.status(500).json({ error: (error as Error).message });
+    }
   });
 
   // Get deviations
@@ -189,90 +209,93 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { employeeId, period, status, timeCode } = req.query;
       
-      let deviations = await getMockData('deviations.json');
+      // Prepare filters for database query
+      const filters: any = {};
       
-      if (!Array.isArray(deviations)) {
-        console.error('Deviations is not an array:', deviations);
-        return res.status(500).json({ error: 'Data format error' });
-      }
-      
-      // Filter by employee ID
       if (employeeId) {
-        deviations = deviations.filter((d: any) => d.employeeId === employeeId);
+        filters.employeeId = employeeId;
       }
-    
-    // Filter by period
-    if (period) {
-      const today = new Date();
-      const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-      const startOfLastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-      const endOfLastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
       
-      if (period === 'current-month') {
-        deviations = deviations.filter((d: any) => {
-          const deviationDate = new Date(d.date);
-          return deviationDate >= startOfMonth;
-        });
-      } else if (period === 'last-month') {
-        deviations = deviations.filter((d: any) => {
-          const deviationDate = new Date(d.date);
-          return deviationDate >= startOfLastMonth && deviationDate <= endOfLastMonth;
-        });
+      if (status && status !== 'all') {
+        filters.status = status;
       }
-      // 'custom' period would be handled with additional query parameters
-    }
-    
-    // Filter by status
-    if (status && status !== 'all') {
-      deviations = deviations.filter((d: any) => d.status === status);
-    }
-    
-    // Filter by time code
-    if (timeCode && timeCode !== 'all') {
-      // For category filtering (overtime, sick, vab)
-      const timeCodes = await getMockData('timecodes.json');
-      const codesInCategory = timeCodes
-        .filter((t: any) => t.category === timeCode)
-        .map((t: any) => t.code);
       
-      deviations = deviations.filter((d: any) => 
-        timeCode === d.timeCode || codesInCategory.includes(d.timeCode)
-      );
-    }
-    
-    res.json(deviations);
+      // Handle period filtering with date ranges
+      if (period) {
+        const today = new Date();
+        if (period === 'current-month') {
+          const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+          filters.startDate = startOfMonth.toISOString().split('T')[0];
+        } else if (period === 'last-month') {
+          const startOfLastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+          const endOfLastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+          filters.startDate = startOfLastMonth.toISOString().split('T')[0];
+          filters.endDate = endOfLastMonth.toISOString().split('T')[0];
+        }
+      }
+      
+      // Handle time code filtering
+      if (timeCode && timeCode !== 'all') {
+        // Check if it's a direct code match or category
+        const timeCodes = await storage.getTimeCodes();
+        const directMatch = timeCodes.find((t: any) => t.code === timeCode);
+        
+        if (directMatch) {
+          filters.timeCode = timeCode;
+        } else {
+          // It's a category filter - we'll need to post-filter this
+          filters.timeCodeCategory = timeCode;
+        }
+      }
+      
+      let deviations = await storage.getDeviations(filters);
+      
+      // Post-filter for time code categories if needed
+      if (timeCode && timeCode !== 'all' && filters.timeCodeCategory) {
+        const timeCodes = await storage.getTimeCodes();
+        const codesInCategory = timeCodes
+          .filter((t: any) => t.category === timeCode)
+          .map((t: any) => t.code);
+        
+        deviations = deviations.filter((d: any) => 
+          codesInCategory.includes(d.timeCode)
+        );
+      }
+      
+      res.json(deviations);
     } catch (error) {
       console.error('Error in deviations endpoint:', error);
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: (error as Error).message });
     }
   });
 
   // Get deviation by ID
   app.get('/api/deviations/:id', async (req, res) => {
-    const deviations = await getMockData('deviations.json');
-    const deviation = deviations.find((d: any) => d.id === parseInt(req.params.id));
-    if (deviation) {
-      res.json(deviation);
-    } else {
-      res.status(404).json({ message: 'Deviation not found' });
+    try {
+      const deviation = await storage.getDeviation(parseInt(req.params.id));
+      if (deviation) {
+        res.json(deviation);
+      } else {
+        res.status(404).json({ message: 'Deviation not found' });
+      }
+    } catch (error) {
+      console.error('Error fetching deviation:', error);
+      res.status(500).json({ error: (error as Error).message });
     }
   });
 
   // Create deviation
   app.post('/api/deviations', async (req, res) => {
     try {
-      const deviations = await getMockData('deviations.json');
-      const newId = generateId(deviations);
-      const newDeviation = {
-        id: newId,
+      const deviationData = {
         ...req.body,
         startTime: req.body.startTime + ':00', // Add seconds for consistency
         endTime: req.body.endTime + ':00',     // Add seconds for consistency
-        lastUpdated: new Date().toISOString()
+        status: req.body.status || 'pending',
+        submitted: new Date().toISOString()
       };
       
-      deviations.push(newDeviation);
-      await saveMockData('deviations.json', deviations);
+      const newDeviation = await storage.createDeviation(deviationData);
       
       console.log('Created new deviation:', newDeviation);
       res.status(201).json(newDeviation);
@@ -280,7 +303,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('Error creating deviation:', error);
       res.status(500).json({ 
         error: 'Failed to create deviation', 
-        details: error.message 
+        details: (error as Error).message 
       });
     }
   });
@@ -288,19 +311,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update deviation
   app.patch('/api/deviations/:id', async (req, res) => {
     try {
-      const deviations = await getMockData('deviations.json');
-      const index = deviations.findIndex((d: any) => d.id === parseInt(req.params.id));
-      if (index !== -1) {
-        const updatedDeviation = {
-          ...deviations[index],
-          ...req.body,
-          startTime: req.body.startTime ? req.body.startTime + ':00' : deviations[index].startTime,
-          endTime: req.body.endTime ? req.body.endTime + ':00' : deviations[index].endTime,
-          lastUpdated: new Date().toISOString()
-        };
-        
-        deviations[index] = updatedDeviation;
-        await saveMockData('deviations.json', deviations);
+      const updateData = { ...req.body };
+      
+      // Add seconds for time consistency if provided
+      if (updateData.startTime) {
+        updateData.startTime = updateData.startTime + ':00';
+      }
+      if (updateData.endTime) {
+        updateData.endTime = updateData.endTime + ':00';
+      }
+      
+      const updatedDeviation = await storage.updateDeviation(parseInt(req.params.id), updateData);
+      
+      if (updatedDeviation) {
         res.json(updatedDeviation);
       } else {
         res.status(404).json({ message: 'Deviation not found' });
@@ -309,7 +332,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('Error updating deviation:', error);
       res.status(500).json({ 
         error: 'Failed to update deviation', 
-        details: error.message 
+        details: (error as Error).message 
       });
     }
   });
@@ -317,11 +340,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Delete deviation
   app.delete('/api/deviations/:id', async (req, res) => {
     try {
-      const deviations = await getMockData('deviations.json');
-      const index = deviations.findIndex((d: any) => d.id === parseInt(req.params.id));
-      if (index !== -1) {
-        deviations.splice(index, 1);
-        await saveMockData('deviations.json', deviations);
+      const success = await storage.deleteDeviation(parseInt(req.params.id));
+      if (success) {
         res.status(204).send();
       } else {
         res.status(404).json({ message: 'Deviation not found' });
@@ -330,61 +350,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error('Error deleting deviation:', error);
       res.status(500).json({ 
         error: 'Failed to delete deviation', 
-        details: error.message 
+        details: (error as Error).message 
       });
     }
   });
 
   // Get leave requests
   app.get('/api/leave-requests', async (req, res) => {
-    const { employeeId, period, status, leaveType } = req.query;
-    
-    let leaveRequests = await getMockData('leave-requests.json');
-    
-    // Filter by employee ID
-    if (employeeId) {
-      leaveRequests = leaveRequests.filter((l: any) => l.employeeId === employeeId);
-    }
-    
-    // Filter by period (all, upcoming, past)
-    if (period && period !== 'all') {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+    try {
+      const { employeeId, period, status, leaveType } = req.query;
       
-      if (period === 'upcoming') {
-        leaveRequests = leaveRequests.filter((l: any) => {
-          const endDate = new Date(l.endDate);
-          return endDate >= today;
-        });
-      } else if (period === 'past') {
-        leaveRequests = leaveRequests.filter((l: any) => {
-          const endDate = new Date(l.endDate);
-          return endDate < today;
-        });
+      const filters: any = {};
+      if (employeeId) filters.employeeId = employeeId;
+      if (status && status !== 'all') filters.status = status;
+      
+      let leaveRequests = await storage.getLeaveRequests(filters);
+      
+      // Post-filter for complex filtering not supported by database layer
+      if (period && period !== 'all') {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        if (period === 'upcoming') {
+          leaveRequests = leaveRequests.filter((l: any) => {
+            const endDate = new Date(l.endDate);
+            return endDate >= today;
+          });
+        } else if (period === 'past') {
+          leaveRequests = leaveRequests.filter((l: any) => {
+            const endDate = new Date(l.endDate);
+            return endDate < today;
+          });
+        }
       }
+      
+      // Filter by leave type
+      if (leaveType && leaveType !== 'all') {
+        leaveRequests = leaveRequests.filter((l: any) => l.leaveType === leaveType);
+      }
+      
+      res.json(leaveRequests);
+    } catch (error) {
+      console.error('Error fetching leave requests:', error);
+      res.status(500).json({ error: (error as Error).message });
     }
-    
-    // Filter by status
-    if (status && status !== 'all') {
-      leaveRequests = leaveRequests.filter((l: any) => l.status === status);
-    }
-    
-    // Filter by leave type
-    if (leaveType && leaveType !== 'all') {
-      leaveRequests = leaveRequests.filter((l: any) => l.leaveType === leaveType);
-    }
-    
-    res.json(leaveRequests);
   });
 
   // Get leave request by ID
   app.get('/api/leave-requests/:id', async (req, res) => {
-    const leaveRequests = await getMockData('leave-requests.json');
-    const leaveRequest = leaveRequests.find((l: any) => l.id === parseInt(req.params.id));
-    if (leaveRequest) {
-      res.json(leaveRequest);
-    } else {
-      res.status(404).json({ message: 'Leave request not found' });
+    try {
+      const leaveRequest = await storage.getLeaveRequest(parseInt(req.params.id));
+      if (leaveRequest) {
+        res.json(leaveRequest);
+      } else {
+        res.status(404).json({ message: 'Leave request not found' });
+      }
+    } catch (error) {
+      console.error('Error fetching leave request:', error);
+      res.status(500).json({ error: (error as Error).message });
     }
   });
 

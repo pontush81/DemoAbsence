@@ -6,13 +6,13 @@ import { useStore } from '@/lib/store';
  * Kör bara en gång när appen startar
  */
 export const useDemoInitialization = () => {
-  const { user, setDemoUser } = useStore();
+  const { user, setDemoPersona } = useStore();
 
   useEffect(() => {
-    // Om ingen användare är satt och vi har en demoUserId, initiera användaren
-    if (!user.currentUser && user.demoUserId && user.isDemoMode) {
-      console.log('Initializing demo system with user:', user.demoUserId);
-      setDemoUser(user.demoUserId);
+    // Om ingen användare är satt och vi har en demoPersonaId, initiera persona
+    if (!user.currentUser && user.demoPersonaId && user.isDemoMode) {
+      console.log('Initializing demo system with persona:', user.demoPersonaId);
+      setDemoPersona(user.demoPersonaId);
     }
-  }, [user.currentUser, user.demoUserId, user.isDemoMode, setDemoUser]);
+  }, [user.currentUser, user.demoPersonaId, user.isDemoMode, setDemoPersona]);
 };

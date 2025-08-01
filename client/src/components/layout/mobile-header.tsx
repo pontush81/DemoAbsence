@@ -1,5 +1,4 @@
 import { useStore } from "@/lib/store";
-import RoleDropdown from "./role-dropdown";
 import UserSwitcher from "./user-switcher";
 
 const MobileHeader = () => {
@@ -22,7 +21,6 @@ const MobileHeader = () => {
           <span className="font-bold">Kontek Lön</span>
         </div>
         <div className="flex items-center">
-          <RoleDropdown variant="compact" className="mr-2" />
           <UserSwitcher />
         </div>
       </div>

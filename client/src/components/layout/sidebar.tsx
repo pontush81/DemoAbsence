@@ -3,7 +3,6 @@ import { cn } from "@/lib/utils";
 import { useI18n } from "@/lib/i18n";
 import { useFeatureFlags } from "@/lib/featureFlags";
 import { useStore } from "@/lib/store";
-import RoleDropdown from "./role-dropdown";
 import UserSwitcher from "./user-switcher";
 
 const Sidebar = () => {
@@ -17,6 +16,8 @@ const Sidebar = () => {
   const isHR = user.currentRole === 'hr';
   const isPayroll = user.currentRole === 'payroll';
   const isEmployee = user.currentRole === 'employee';
+  
+  // Rollväxling hanteras nu via persona-växlaren
   
   // Roles that can access manager functions
   const canAccessManagerFunctions = isManager || isHR || isPayroll;
@@ -221,7 +222,7 @@ const Sidebar = () => {
       </nav>
       
       <div className="p-4 border-t border-sidebar-border space-y-3">
-        {/* Demo User Switcher */}
+        {/* Demo Persona Switcher */}
         <div className="mb-3">
           <UserSwitcher />
         </div>
