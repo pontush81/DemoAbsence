@@ -857,7 +857,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         rejectedAt: new Date()
       };
       
-      const rejectedDeviation = await restStorage.updateDeviation(parseInt(req.params.id), updateData);
+      let rejectedDeviation;
+      
+      // Try storage first, fallback to mock data update
+      try {
+        rejectedDeviation = await restStorage.updateDeviation(parseInt(req.params.id), updateData);
+      } catch (storageError) {
+        console.log('Storage update failed, using mock data fallback:', storageError);
+        // Fallback to mock data update
+        const deviations = await getMockData('deviations.json');
+        const index = deviations.findIndex((d: any) => d.id === parseInt(req.params.id));
+        if (index !== -1) {
+          rejectedDeviation = {
+            ...deviations[index],
+            ...updateData,
+            lastUpdated: new Date()
+          };
+          deviations[index] = rejectedDeviation;
+          await saveMockData('deviations.json', deviations);
+        }
+      }
+      
       if (rejectedDeviation) {
         res.json(rejectedDeviation);
       } else {
@@ -877,7 +897,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         managerComment: req.body.comment || 'Needs correction'
       };
       
-      const returnedDeviation = await restStorage.updateDeviation(parseInt(req.params.id), updateData);
+      let returnedDeviation;
+      
+      // Try storage first, fallback to mock data update
+      try {
+        returnedDeviation = await restStorage.updateDeviation(parseInt(req.params.id), updateData);
+      } catch (storageError) {
+        console.log('Storage update failed, using mock data fallback:', storageError);
+        // Fallback to mock data update
+        const deviations = await getMockData('deviations.json');
+        const index = deviations.findIndex((d: any) => d.id === parseInt(req.params.id));
+        if (index !== -1) {
+          returnedDeviation = {
+            ...deviations[index],
+            ...updateData,
+            lastUpdated: new Date()
+          };
+          deviations[index] = returnedDeviation;
+          await saveMockData('deviations.json', deviations);
+        }
+      }
+      
       if (returnedDeviation) {
         res.json(returnedDeviation);
       } else {
@@ -920,7 +960,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         approvedAt: new Date()
       };
       
-      const approvedLeaveRequest = await restStorage.updateLeaveRequest(parseInt(req.params.id), updateData);
+      let approvedLeaveRequest;
+      
+      // Try storage first, fallback to mock data update
+      try {
+        approvedLeaveRequest = await restStorage.updateLeaveRequest(parseInt(req.params.id), updateData);
+      } catch (storageError) {
+        console.log('Storage update failed, using mock data fallback:', storageError);
+        // Fallback to mock data update
+        const leaveRequests = await getMockData('leave-requests.json');
+        const index = leaveRequests.findIndex((lr: any) => lr.id === parseInt(req.params.id));
+        if (index !== -1) {
+          approvedLeaveRequest = {
+            ...leaveRequests[index],
+            ...updateData,
+            lastUpdated: new Date()
+          };
+          leaveRequests[index] = approvedLeaveRequest;
+          await saveMockData('leave-requests.json', leaveRequests);
+        }
+      }
+      
       if (approvedLeaveRequest) {
         res.json(approvedLeaveRequest);
       } else {

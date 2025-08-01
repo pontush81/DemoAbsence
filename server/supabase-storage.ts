@@ -227,7 +227,9 @@ export class SupabaseStorage {
       let filteredData = data;
       
       if (filters.employeeId) {
-        filteredData = filteredData.filter((s: any) => s.employeeId === filters.employeeId);
+        filteredData = filteredData.filter((s: any) => 
+          (s.employeeId === filters.employeeId) || (s.employee_id === filters.employeeId)
+        );
       }
       
       if (filters.date) {

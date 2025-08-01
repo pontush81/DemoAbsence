@@ -75,6 +75,11 @@ export function formatTime(timeString?: string | null, locale: string = 'sv-SE')
  * @returns Duration in hours (e.g., 2.5)
  */
 export function calculateDuration(startTime: string, endTime: string): number {
+  // Handle null/undefined values
+  if (!startTime || !endTime) {
+    return 0;
+  }
+  
   const [startHours, startMinutes] = startTime.split(':').map(Number);
   const [endHours, endMinutes] = endTime.split(':').map(Number);
   

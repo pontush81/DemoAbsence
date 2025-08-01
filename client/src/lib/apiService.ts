@@ -39,7 +39,15 @@ class ApiService {
         throw new ApiError(`Failed to fetch employees: ${response.statusText}`, response.status);
       }
       
-      return await response.json();
+      const rawData = await response.json();
+      
+      // Map snake_case fields to camelCase for TypeScript compatibility
+      return rawData.map((emp: any) => ({
+        ...emp,
+        employeeId: emp.employee_id || emp.employeeId,
+        firstName: emp.first_name || emp.firstName,
+        lastName: emp.last_name || emp.lastName,
+      }));
     } catch (error) {
       console.error('Error fetching employees:', error);
       throw error;
@@ -95,7 +103,17 @@ class ApiService {
         throw new ApiError(`Failed to fetch employee schedule: ${response.statusText}`, response.status);
       }
       
-      return await response.json();
+      const rawData = await response.json();
+      
+      // Map snake_case fields to camelCase for TypeScript compatibility
+      return rawData.map((schedule: any) => ({
+        ...schedule,
+        employeeId: schedule.employee_id || schedule.employeeId,
+        startTime: schedule.start_time || schedule.startTime,
+        endTime: schedule.end_time || schedule.endTime,
+        breakStart: schedule.break_start || schedule.breakStart,
+        breakEnd: schedule.break_end || schedule.breakEnd,
+      }));
     } catch (error) {
       console.error('Error fetching employee schedule:', error);
       throw error;
@@ -113,7 +131,14 @@ class ApiService {
         throw new ApiError(`Failed to fetch time codes: ${response.statusText}`, response.status);
       }
       
-      return await response.json();
+      const rawData = await response.json();
+      
+      // Map snake_case fields to camelCase for TypeScript compatibility
+      return rawData.map((tc: any) => ({
+        ...tc,
+        nameSV: tc.name_sv || tc.nameSV,
+        nameEN: tc.name_en || tc.nameEN,
+      }));
     } catch (error) {
       console.error('Error fetching time codes:', error);
       throw error;
@@ -148,7 +173,14 @@ class ApiService {
         throw new ApiError(`Failed to fetch all deviations: ${response.statusText}`, response.status);
       }
       
-      return await response.json();
+      const rawData = await response.json();
+      
+      // Map snake_case fields to camelCase for TypeScript compatibility
+      return rawData.map((dev: any) => ({
+        ...dev,
+        employeeId: dev.employee_id || dev.employeeId,
+        timeCode: dev.time_code || dev.timeCode,
+      }));
     } catch (error) {
       console.error('Error fetching all deviations:', error);
       throw error;
@@ -178,7 +210,14 @@ class ApiService {
         throw new ApiError(`Failed to fetch deviations: ${response.statusText}`, response.status);
       }
       
-      return await response.json();
+      const rawData = await response.json();
+      
+      // Map snake_case fields to camelCase for TypeScript compatibility
+      return rawData.map((dev: any) => ({
+        ...dev,
+        employeeId: dev.employee_id || dev.employeeId,
+        timeCode: dev.time_code || dev.timeCode,
+      }));
     } catch (error) {
       console.error('Error fetching deviations:', error);
       throw error;
@@ -372,7 +411,14 @@ class ApiService {
         throw new ApiError(`Failed to fetch leave requests: ${response.statusText}`, response.status);
       }
       
-      return await response.json();
+      const rawData = await response.json();
+      
+      // Map snake_case fields to camelCase for TypeScript compatibility
+      return rawData.map((leave: any) => ({
+        ...leave,
+        employeeId: leave.employee_id || leave.employeeId,
+        leaveType: leave.leave_type || leave.leaveType,
+      }));
     } catch (error) {
       console.error('Error fetching leave requests:', error);
       throw error;
@@ -528,7 +574,19 @@ class ApiService {
         throw new ApiError(`Failed to fetch time balance: ${response.statusText}`, response.status);
       }
       
-      return await response.json();
+      const rawData = await response.json();
+      
+      // Map snake_case fields to camelCase for TypeScript compatibility
+      return {
+        ...rawData,
+        employeeId: rawData.employee_id || rawData.employeeId,
+        timeBalance: rawData.time_balance || rawData.timeBalance,
+        vacationDays: rawData.vacation_days || rawData.vacationDays,
+        savedVacationDays: rawData.saved_vacation_days || rawData.savedVacationDays,
+        vacationUnit: rawData.vacation_unit || rawData.vacationUnit,
+        compensationTime: rawData.compensation_time || rawData.compensationTime,
+        lastUpdated: rawData.last_updated || rawData.lastUpdated,
+      };
     } catch (error) {
       console.error('Error fetching time balance:', error);
       throw error;
@@ -546,7 +604,13 @@ class ApiService {
         throw new ApiError(`Failed to fetch payslips: ${response.statusText}`, response.status);
       }
       
-      return await response.json();
+      const rawData = await response.json();
+      
+      // Map snake_case fields to camelCase for TypeScript compatibility
+      return rawData.map((payslip: any) => ({
+        ...payslip,
+        employeeId: payslip.employee_id || payslip.employeeId,
+      }));
     } catch (error) {
       console.error('Error fetching payslips:', error);
       throw error;
@@ -621,7 +685,18 @@ class ApiService {
       if (!response.ok) {
         throw new ApiError(`Failed to fetch schedules: ${response.statusText}`, response.status);
       }
-      return response.json();
+      
+      const rawData = await response.json();
+      
+      // Map snake_case fields to camelCase for TypeScript compatibility
+      return rawData.map((schedule: any) => ({
+        ...schedule,
+        employeeId: schedule.employee_id || schedule.employeeId,
+        startTime: schedule.start_time || schedule.startTime,
+        endTime: schedule.end_time || schedule.endTime,
+        breakStart: schedule.break_start || schedule.breakStart,
+        breakEnd: schedule.break_end || schedule.breakEnd,
+      }));
     } catch (error) {
       console.error('Error fetching schedules:', error);
       throw error;

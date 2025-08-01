@@ -111,8 +111,8 @@ export const useStore = create<AppState>()(
           id: 0, // Mock ID
           employeeId: demoUserData.id,
           personnummer: "000000-0000", // Mock
-          firstName: demoUserData.name.split(' ')[0],
-          lastName: demoUserData.name.split(' ')[1] || '',
+          firstName: demoUserData.name ? demoUserData.name.split(' ')[0] : 'Unknown',
+          lastName: demoUserData.name ? (demoUserData.name.split(' ')[1] || '') : '',
           careOfAddress: null,
           streetAddress: "Mock Address",
           postalCode: "12345",

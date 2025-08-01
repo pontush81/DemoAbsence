@@ -76,17 +76,13 @@ export default function SchedulesPage() {
     setError(null);
 
     try {
-      const params = new URLSearchParams();
-      if (selectedEmployeeId) params.append('employeeId', selectedEmployeeId);
-      if (startDate) params.append('startDate', startDate);
-      if (endDate) params.append('endDate', endDate);
+      const filters: any = {};
+      if (selectedEmployeeId) filters.employeeId = selectedEmployeeId;
+      if (startDate) filters.startDate = startDate;
+      if (endDate) filters.endDate = endDate;
 
-      const response = await fetch(`/api/schedules?${params.toString()}`);
-      if (!response.ok) {
-        throw new Error('Failed to load schedules');
-      }
-
-      const schedulesData = await response.json();
+      // Use apiService instead of direct fetch to get proper snake_case→camelCase mapping
+      const schedulesData = await apiService.getSchedules(filters);
       setSchedules(schedulesData);
     } catch (err) {
       setError('Kunde inte ladda scheman');
@@ -96,8 +92,12 @@ export default function SchedulesPage() {
   };
 
   const getEmployeeName = (employeeId: string) => {
-    const employee = employees.find(e => e.employeeId === employeeId);
-    return employee ? `${employee.firstName} ${employee.lastName}` : employeeId;
+    const employee = employees.find(e => 
+      (e.employeeId === employeeId) || (e.employee_id === employeeId)
+    );
+    const firstName = employee?.firstName || (employee as any)?.first_name;
+    const lastName = employee?.lastName || (employee as any)?.last_name;
+    return firstName && lastName ? `${firstName} ${lastName}` : employeeId;
   };
 
   const calculateWorkHours = (schedule: Schedule) => {

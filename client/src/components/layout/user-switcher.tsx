@@ -34,7 +34,7 @@ const UserSwitcher = () => {
         <Button variant="ghost" size="sm" className="flex items-center gap-2 h-auto p-2">
           <Avatar className="h-8 w-8">
             <AvatarFallback className="text-xs">
-              {currentPersona ? currentPersona.name.split(' ').map(n => n[0]).join('') : 'U'}
+              {currentPersona && currentPersona.name ? currentPersona.name.split(' ').map(n => n[0]).join('') : 'U'}
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-col items-start text-left">
@@ -73,7 +73,7 @@ const UserSwitcher = () => {
                 <div className="flex items-center gap-3">
                   <Avatar className="h-10 w-10">
                     <AvatarFallback>
-                      {persona.name.split(' ').map(n => n[0]).join('')}
+                      {persona.name ? persona.name.split(' ').map(n => n[0]).join('') : '??'}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">

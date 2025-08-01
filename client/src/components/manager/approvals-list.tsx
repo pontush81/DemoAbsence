@@ -48,6 +48,24 @@ const ApprovalsList = ({ type }: ApprovalsListProps) => {
     queryFn: () => apiService.getTimeCodes(),
   });
 
+  // Fetch employees to display names instead of just IDs
+  const { data: employees = [] } = useQuery({
+    queryKey: ['/api/employees'],
+    queryFn: () => apiService.getAllEmployees(),
+  });
+
+  // Helper function to get employee name
+  const getEmployeeName = (employeeId: string) => {
+    const employee = employees.find((e: any) => 
+      (e.employeeId === employeeId) || (e.employee_id === employeeId)
+    );
+    const firstName = (employee as any)?.firstName || (employee as any)?.first_name;
+    const lastName = (employee as any)?.lastName || (employee as any)?.last_name;
+    return firstName && lastName 
+      ? `${firstName} ${lastName}` 
+      : employeeId;
+  };
+
   // Helper function to get time code for a deviation
   const getTimeCodeForDeviation = (timeCodeStr: string): TimeCode | undefined => {
     return timeCodes.find(tc => tc.code === timeCodeStr);
@@ -90,8 +108,69 @@ const ApprovalsList = ({ type }: ApprovalsListProps) => {
     }
   };
   
+  // Single item approve mutation
+  const approveSingleMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const endpoint = type === 'deviations' 
+        ? `/api/manager/deviations/${id}/approve` 
+        : `/api/manager/leave-requests/${id}/approve`;
+      return apiRequest('POST', endpoint, { comment: 'Approved from list' });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/manager/${type}/pending`] });
+      toast({
+        title: t('manager.approveSuccess'),
+        description: t('manager.approveSuccessDescription'),
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: t('manager.approveError'),
+        description: (error as Error).message,
+        variant: 'destructive',
+      });
+    }
+  });
+
+  // Single item reject mutation
+  const rejectSingleMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const comment = window.prompt(t('manager.enterRejectionReason'));
+      if (!comment) throw new Error('Rejection cancelled');
+      
+      const endpoint = type === 'deviations' 
+        ? `/api/manager/deviations/${id}/reject` 
+        : `/api/manager/leave-requests/${id}/reject`;
+      return apiRequest('POST', endpoint, { comment });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/manager/${type}/pending`] });
+      toast({
+        title: t('manager.rejectSuccess'),
+        description: t('manager.rejectSuccessDescription'),
+      });
+    },
+    onError: (error) => {
+      if ((error as Error).message !== 'Rejection cancelled') {
+        toast({
+          title: t('manager.rejectError'),
+          description: (error as Error).message,
+          variant: 'destructive',
+        });
+      }
+    }
+  });
+  
   const handleSelectItem = (id: number) => {
     setSelectedItemId(id);
+  };
+  
+  const handleApproveItem = (id: number) => {
+    approveSingleMutation.mutate(id);
+  };
+  
+  const handleRejectItem = (id: number) => {
+    rejectSingleMutation.mutate(id);
   };
   
   const handleBackToList = () => {
@@ -209,7 +288,8 @@ const ApprovalsList = ({ type }: ApprovalsListProps) => {
               </TableHeader>
               <TableBody>
                 {(pendingItems as any[]).map((deviation: any) => {
-                  const timeCode = getTimeCodeForDeviation(deviation.timeCode);
+                  const timeCodeStr = deviation.timeCode || deviation.time_code;
+                  const timeCode = getTimeCodeForDeviation(timeCodeStr);
                   const workflow = timeCode ? getWorkflowInfo(timeCode) : null;
                   const actionText = workflow ? getManagerActionText(workflow.type) : { approveText: 'Godkänn', rejectText: 'Avslå' };
                   
@@ -223,19 +303,29 @@ const ApprovalsList = ({ type }: ApprovalsListProps) => {
                         <div className="flex items-center">
                           <Avatar className="h-8 w-8 bg-primary bg-opacity-10">
                             <AvatarFallback className="text-primary">
-                              {deviation.employeeId ? deviation.employeeId.substring(0, 2).toUpperCase() : '??'}
+                              {(() => {
+                                const employeeId = deviation.employeeId || deviation.employee_id;
+                                const employee = employees.find((e: any) => 
+                                  (e.employeeId === employeeId) || (e.employee_id === employeeId)
+                                );
+                                const firstName = (employee as any)?.firstName || (employee as any)?.first_name;
+                                const lastName = (employee as any)?.lastName || (employee as any)?.last_name;
+                                return firstName && lastName 
+                                  ? `${firstName.charAt(0)}${lastName.charAt(0)}` 
+                                  : employeeId?.substring(0, 2).toUpperCase() || '??';
+                              })()}
                             </AvatarFallback>
                           </Avatar>
                           <div className="ml-4">
-                            <div className="text-sm font-medium">{deviation.employeeId}</div>
-                            <div className="text-sm text-muted-foreground">ID: {deviation.employeeId}</div>
+                            <div className="text-sm font-medium">{getEmployeeName(deviation.employeeId || deviation.employee_id)}</div>
+                            <div className="text-sm text-muted-foreground">ID: {deviation.employeeId || deviation.employee_id}</div>
                           </div>
                         </div>
                       </TableCell>
                       <TableCell className="whitespace-nowrap">{deviation.date}</TableCell>
                       <TableCell className="whitespace-nowrap">
                         <div>
-                          <div className="font-medium">{deviation.timeCode}</div>
+                          <div className="font-medium">{timeCodeStr}</div>
                           <div className="text-xs text-muted-foreground">{timeCode?.name}</div>
                         </div>
                       </TableCell>
@@ -252,7 +342,13 @@ const ApprovalsList = ({ type }: ApprovalsListProps) => {
                         )}
                       </TableCell>
                       <TableCell className="whitespace-nowrap">
-                        {formatTime(deviation.startTime)} - {formatTime(deviation.endTime)}
+                        {(() => {
+                          const startTime = deviation.startTime || deviation.start_time;
+                          const endTime = deviation.endTime || deviation.end_time;
+                          return startTime && endTime ? (
+                            `${formatTime(startTime)} - ${formatTime(endTime)}`
+                          ) : '-';
+                        })()}
                       </TableCell>
                       <TableCell className="max-w-xs truncate-text">
                         {deviation.comment || '-'}
@@ -263,8 +359,9 @@ const ApprovalsList = ({ type }: ApprovalsListProps) => {
                           className="text-[#4CAF50] hover:text-green-600 mr-3"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleSelectItem(deviation.id);
+                            handleApproveItem(deviation.id);
                           }}
+                          disabled={approveSingleMutation.isPending}
                         >
                           {actionText.approveText}
                         </Button>
@@ -273,8 +370,9 @@ const ApprovalsList = ({ type }: ApprovalsListProps) => {
                           className="text-destructive hover:text-red-600"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleSelectItem(deviation.id);
+                            handleRejectItem(deviation.id);
                           }}
+                          disabled={rejectSingleMutation.isPending}
                         >
                           {actionText.rejectText}
                         </Button>
@@ -326,21 +424,35 @@ const ApprovalsList = ({ type }: ApprovalsListProps) => {
                     <div className="flex items-center">
                       <Avatar className="h-8 w-8 bg-primary bg-opacity-10">
                         <AvatarFallback className="text-primary">
-                          {leave.employeeId.substring(0, 2)}
+                          {(() => {
+                            const employeeId = leave.employeeId || leave.employee_id;
+                            const employee = employees.find((e: any) => 
+                              (e.employeeId === employeeId) || ((e as any).employee_id === employeeId)
+                            );
+                            const firstName = (employee as any)?.firstName || (employee as any)?.first_name;
+                            const lastName = (employee as any)?.lastName || (employee as any)?.last_name;
+                            return firstName && lastName 
+                              ? `${firstName.charAt(0)}${lastName.charAt(0)}` 
+                              : employeeId?.substring(0, 2);
+                          })()}
                         </AvatarFallback>
                       </Avatar>
                       <div className="ml-4">
-                        <div className="text-sm font-medium">{leave.employeeId}</div>
-                        <div className="text-sm text-muted-foreground">ID: {leave.employeeId}</div>
+                        <div className="text-sm font-medium">{getEmployeeName(leave.employeeId || leave.employee_id)}</div>
+                        <div className="text-sm text-muted-foreground">ID: {leave.employeeId || leave.employee_id}</div>
                       </div>
                     </div>
                   </TableCell>
                   <TableCell className="whitespace-nowrap">
-                    {leave.startDate === leave.endDate 
-                      ? leave.startDate 
-                      : `${leave.startDate} - ${leave.endDate}`}
+                    {(() => {
+                      const startDate = leave.startDate || leave.start_date;
+                      const endDate = leave.endDate || leave.end_date;
+                      return startDate === endDate 
+                        ? startDate 
+                        : `${startDate} - ${endDate}`;
+                    })()}
                   </TableCell>
-                  <TableCell className="whitespace-nowrap">{leave.leaveType}</TableCell>
+                  <TableCell className="whitespace-nowrap">{leave.leaveType || leave.leave_type}</TableCell>
                   <TableCell className="whitespace-nowrap">{leave.scope}</TableCell>
                   <TableCell className="max-w-xs truncate-text">
                     {leave.comment || '-'}
@@ -351,8 +463,9 @@ const ApprovalsList = ({ type }: ApprovalsListProps) => {
                       className="text-[#4CAF50] hover:text-green-600 mr-3"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleSelectItem(leave.id);
+                        handleApproveItem(leave.id);
                       }}
+                      disabled={approveSingleMutation.isPending}
                     >
                       {t('action.approve')}
                     </Button>
@@ -361,8 +474,9 @@ const ApprovalsList = ({ type }: ApprovalsListProps) => {
                       className="text-destructive hover:text-red-600"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleSelectItem(leave.id);
+                        handleRejectItem(leave.id);
                       }}
+                      disabled={rejectSingleMutation.isPending}
                     >
                       {t('action.reject')}
                     </Button>

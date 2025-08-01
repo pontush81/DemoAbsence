@@ -118,7 +118,9 @@ export class SupabaseRestStorage {
     let filteredData = Array.isArray(data) ? data : [];
     
     if (filters.employeeId) {
-      filteredData = filteredData.filter((lr: any) => lr.employeeId === filters.employeeId);
+      filteredData = filteredData.filter((lr: any) => 
+        (lr.employeeId === filters.employeeId) || (lr.employee_id === filters.employeeId)
+      );
     }
     
     if (filters.status && filters.status !== 'all') {
@@ -164,13 +166,17 @@ export class SupabaseRestStorage {
   // Time balances
   async getTimeBalance(employeeId: string) {
     const balances = await this.getDataWithFallback('time_balances', 'timebalances.json');
-    return Array.isArray(balances) ? balances.find((tb: any) => tb.employeeId === employeeId) : null;
+    return Array.isArray(balances) ? balances.find((tb: any) => 
+      (tb.employeeId === employeeId) || (tb.employee_id === employeeId)
+    ) : null;
   }
 
   // Payslips
   async getPayslips(employeeId: string) {
     const payslips = await this.getDataWithFallback('payslips', 'payslips.json');
-    return Array.isArray(payslips) ? payslips.filter((p: any) => p.employeeId === employeeId) : [];
+    return Array.isArray(payslips) ? payslips.filter((p: any) => 
+      (p.employeeId === employeeId) || (p.employee_id === employeeId)
+    ) : [];
   }
 
   // Time codes
@@ -328,7 +334,25 @@ export class SupabaseRestStorage {
   // Update leave request
   async updateLeaveRequest(id: number, updates: any) {
     if (!this.isSupabaseAvailable()) {
-      throw new Error('Supabase not available for update operations');
+      // Fallback to mock data update when Supabase not available
+      const leaveRequests = await getMockData('leave-requests.json');
+      const index = leaveRequests.findIndex((lr: any) => lr.id === id);
+      
+      if (index === -1) {
+        throw new Error(`Leave request with id ${id} not found`);
+      }
+      
+      // Update the leave request in mock data
+      const updatedLeaveRequest = {
+        ...leaveRequests[index],
+        ...updates,
+        lastUpdated: new Date().toISOString()
+      };
+      
+      leaveRequests[index] = updatedLeaveRequest;
+      await saveMockData('leave-requests.json', leaveRequests);
+      
+      return updatedLeaveRequest;
     }
 
     try {
