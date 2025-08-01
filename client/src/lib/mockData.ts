@@ -5,8 +5,7 @@ import {
   Deviation, 
   LeaveRequest, 
   TimeBalance, 
-  Payslip,
-  ActivityLog
+  Payslip
 } from '@shared/schema';
 
 // MOCKED data for development purposes
@@ -675,64 +674,7 @@ export const mockPayslips: Payslip[] = [
   },
 ];
 
-// Mock Activity Logs
-export const mockActivityLogs: ActivityLog[] = [
-  {
-    id: 1,
-    employeeId: 'E001',
-    type: 'deviation',
-    action: 'approved',
-    description: 'Din övertidsansökan för 12 april har godkänts av Mikael Svensson',
-    timestamp: new Date(),
-    referenceId: '1',
-    referenceType: 'deviation',
-    performedBy: null,
-  },
-  {
-    id: 2,
-    employeeId: 'E001',
-    type: 'leave',
-    action: 'created',
-    description: 'Du ansökte om semester 10-15 juli',
-    timestamp: new Date(new Date().setDate(new Date().getDate() - 1)),
-    referenceId: '1',
-    referenceType: 'leave',
-    performedBy: null,
-  },
-  {
-    id: 3,
-    employeeId: 'E001',
-    type: 'deviation',
-    action: 'returned',
-    description: 'Mikael har skickat tillbaka din avvikelserapport för 11 april med kommentar',
-    timestamp: new Date(new Date().setDate(new Date().getDate() - 2)),
-    referenceId: '2',
-    referenceType: 'deviation',
-    performedBy: null,
-  },
-  {
-    id: 4,
-    employeeId: 'E001',
-    type: 'payslip',
-    action: 'published',
-    description: 'Ny lönespecifikation för mars 2023 finns tillgänglig',
-    timestamp: new Date(new Date().setDate(new Date().getDate() - 5)),
-    referenceId: '1',
-    referenceType: 'payslip',
-    performedBy: null,
-  },
-  {
-    id: 5,
-    employeeId: 'E001',
-    type: 'leave',
-    action: 'approved',
-    description: 'Din ledighetsansökan för 26 maj har godkänts',
-    timestamp: new Date(new Date().setDate(new Date().getDate() - 9)),
-    referenceId: '2',
-    referenceType: 'leave',
-    performedBy: null,
-  },
-];
+
 
 // Get the current employee (for development)
 export const getCurrentEmployee = () => mockEmployees[0];

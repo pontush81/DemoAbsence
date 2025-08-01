@@ -102,8 +102,8 @@ const DeviationForm = ({ deviationId, onCancel }: DeviationFormProps) => {
     defaultValues: {
       employeeId: user.currentUser?.employeeId || '',
       date: format(new Date(), 'yyyy-MM-dd'),
-      startTime: '',
-      endTime: '',
+      startTime: '08:00',
+      endTime: '17:00',
       timeCode: '',
       comment: '',
       status: 'pending',

@@ -399,6 +399,38 @@ const translations: Translations = {
     sv: 'Du har inga registrerade avvikelser för denna period.',
     en: 'You have no registered deviations for this period.',
   },
+  'deviations.submitSuccess': {
+    sv: 'Avvikelse skickad',
+    en: 'Deviation submitted',
+  },
+  'deviations.submitSuccessDescription': {
+    sv: 'Din avvikelse har skickats för godkännande.',
+    en: 'Your deviation has been submitted for approval.',
+  },
+  'deviations.draftSaved': {
+    sv: 'Utkast sparat',
+    en: 'Draft saved',
+  },
+  'deviations.draftSavedDescription': {
+    sv: 'Ditt utkast har sparats och kan redigeras senare.',
+    en: 'Your draft has been saved and can be edited later.',
+  },
+  'deviations.submitError': {
+    sv: 'Fel vid skickning',
+    en: 'Submission error',
+  },
+  'deviations.updateSuccess': {
+    sv: 'Avvikelse uppdaterad',
+    en: 'Deviation updated',
+  },
+  'deviations.updateSuccessDescription': {
+    sv: 'Din avvikelse har uppdaterats framgångsrikt.',
+    en: 'Your deviation has been updated successfully.',
+  },
+  'deviations.updateError': {
+    sv: 'Fel vid uppdatering',
+    en: 'Update error',
+  },
   
   // Leave requests
   'leave.title': {
@@ -541,6 +573,14 @@ const translations: Translations = {
     sv: 'Ledighetsansökan uppdaterad',
     en: 'Leave request updated',
   },
+  'leave.updateSuccessDescription': {
+    sv: 'Din ledighetsansökan har uppdaterats framgångsrikt.',
+    en: 'Your leave request has been updated successfully.',
+  },
+  'leave.updateError': {
+    sv: 'Fel vid uppdatering',
+    en: 'Update error',
+  },
   
   // Pagination
   'pagination.showing': {
@@ -640,6 +680,14 @@ const translations: Translations = {
   'manager.enterReturnReason': {
     sv: 'Varför skickas denna avvikelse tillbaka?',
     en: 'Why is this deviation being returned?',
+  },
+  'manager.historyTitle': {
+    sv: 'Historik',
+    en: 'History',
+  },
+  'manager.historyDescription': {
+    sv: 'Visa tidigare behandlade avvikelser och ledighetsansökningar',
+    en: 'View previously processed deviations and leave requests',
   },
   
   // Attestation

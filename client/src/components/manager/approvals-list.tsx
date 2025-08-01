@@ -200,7 +200,7 @@ const ApprovalsList = ({ type }: ApprovalsListProps) => {
                       <div className="flex items-center">
                         <Avatar className="h-8 w-8 bg-primary bg-opacity-10">
                           <AvatarFallback className="text-primary">
-                            {deviation.employeeId.substring(0, 2)}
+                            {deviation.employeeId ? deviation.employeeId.substring(0, 2).toUpperCase() : '??'}
                           </AvatarFallback>
                         </Avatar>
                         <div className="ml-4">

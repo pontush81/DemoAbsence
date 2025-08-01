@@ -1,6 +1,5 @@
-import { ReactNode, useEffect } from "react";
-import { getCurrentEmployee } from "@/lib/mockData";
-import { useStore } from "@/lib/store";
+import { ReactNode } from "react";
+import { useDemoInitialization } from '@/hooks/use-demo-initialization';
 import MobileHeader from "./mobile-header";
 import MobileSidebar from "./mobile-sidebar";
 import Sidebar from "./sidebar";
@@ -10,14 +9,8 @@ interface AppShellProps {
 }
 
 const AppShell = ({ children }: AppShellProps) => {
-  const { setCurrentUser, setCurrentRole } = useStore();
-  
-  // Load the current user on mount (simulated with mock data)
-  useEffect(() => {
-    const currentEmployee = getCurrentEmployee();
-    setCurrentUser(currentEmployee);
-    setCurrentRole(currentEmployee.role as 'employee' | 'manager');
-  }, [setCurrentUser, setCurrentRole]);
+  // Initialize demo system
+  useDemoInitialization();
   
   return (
     <div id="app-shell" className="flex h-screen overflow-hidden">

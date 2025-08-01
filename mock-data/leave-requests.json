@@ -1,7 +1,7 @@
 [
   {
     "id": 1,
-    "employeeId": "E001",
+    "employeeId": "emp-001",
     "startDate": "2023-07-10",
     "endDate": "2023-07-15",
     "leaveType": "vacation",
@@ -20,7 +20,7 @@
   },
   {
     "id": 2,
-    "employeeId": "E001",
+    "employeeId": "emp-001",
     "startDate": "2023-05-26",
     "endDate": "2023-05-26",
     "leaveType": "comp-leave",
@@ -77,7 +77,7 @@
   },
   {
     "id": 5,
-    "employeeId": "E001",
+    "employeeId": "emp-001",
     "startDate": "2023-08-07",
     "endDate": "2023-08-11",
     "leaveType": "vacation",

@@ -4,12 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import StatusCard from "@/components/dashboard/status-card";
-import ActivityItem from "@/components/dashboard/activity-item";
+
 import { useI18n } from "@/lib/i18n";
 import { useStore } from "@/lib/store";
 import { apiService } from "@/lib/apiService";
 import { formatDateWithDay, formatTime, formatDuration } from "@/lib/utils/date";
-import { getRoleSpecificActivities, getRoleSpecificActivityTitle } from "@/lib/roleSpecificData";
+
 
 export default function Dashboard() {
   const { t } = useI18n();
@@ -18,9 +18,7 @@ export default function Dashboard() {
   const currentUser = user.currentUser;
   const isManager = user.currentRole === 'manager';
   
-  // Hämta rollspecifika aktiviteter
-  const roleSpecificActivities = getRoleSpecificActivities(user.currentRole);
-  const activityTitle = getRoleSpecificActivityTitle(user.currentRole);
+
   
   // Get current date and format it
   const currentDate = new Date();
@@ -184,23 +182,7 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* Recent Activity Section - Role Specific */}
-      <h2 className="text-xl font-bold mb-4">{activityTitle}</h2>
-      <Card className="bg-white rounded-lg shadow-sm overflow-hidden mb-8">
-        <ul className="divide-y divide-gray-200">
-          {roleSpecificActivities.slice(0, 3).map((activity) => (
-            <ActivityItem key={activity.id} activity={activity} />
-          ))}
-        </ul>
-        <CardContent className="px-4 py-3 bg-background-dark">
-          <Link href="#">
-            <div className="text-sm text-primary font-medium flex items-center justify-center cursor-pointer">
-              {t('dashboard.viewAllActivities')}
-              <span className="material-icons text-sm ml-1">arrow_forward</span>
-            </div>
-          </Link>
-        </CardContent>
-      </Card>
+
 
 
     </section>

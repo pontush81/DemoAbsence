@@ -1,7 +1,7 @@
 [
   {
     "id": 1,
-    "employeeId": "E001",
+    "employeeId": "emp-001",
     "date": "2025-05-01",
     "startTime": "08:00:00",
     "endTime": "17:00:00",
@@ -11,7 +11,7 @@
   },
   {
     "id": 2,
-    "employeeId": "E001",
+    "employeeId": "emp-001",
     "date": "2025-05-02",
     "startTime": "08:00:00",
     "endTime": "17:00:00",
@@ -21,7 +21,7 @@
   },
   {
     "id": 3,
-    "employeeId": "E001",
+    "employeeId": "emp-001",
     "date": "2025-05-05",
     "startTime": "08:00:00",
     "endTime": "17:00:00",
@@ -31,7 +31,7 @@
   },
   {
     "id": 4,
-    "employeeId": "E001",
+    "employeeId": "emp-001",
     "date": "2025-05-06",
     "startTime": "08:00:00",
     "endTime": "17:00:00",
@@ -41,7 +41,7 @@
   },
   {
     "id": 5,
-    "employeeId": "E001",
+    "employeeId": "emp-001",
     "date": "2025-05-07",
     "startTime": "08:00:00",
     "endTime": "17:00:00",
@@ -51,7 +51,7 @@
   },
   {
     "id": 6,
-    "employeeId": "E001",
+    "employeeId": "emp-001",
     "date": "2025-05-08",
     "startTime": "08:00:00",
     "endTime": "17:00:00",
@@ -61,7 +61,7 @@
   },
   {
     "id": 7,
-    "employeeId": "E001",
+    "employeeId": "emp-001",
     "date": "2025-05-09",
     "startTime": "08:00:00",
     "endTime": "17:00:00",

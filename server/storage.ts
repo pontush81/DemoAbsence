@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 // Database imports for Supabase integration
 import { db } from './db';
-import { employees, deviations, leaveRequests, timeCodes, schedules, timeBalances, payslips, activityLogs } from '@shared/schema';
+import { employees, deviations, leaveRequests, timeCodes, schedules, timeBalances, payslips } from '@shared/schema';
 import { eq, and, gte, lte } from 'drizzle-orm';
 
 // Use database if available, fallback to JSON files
@@ -50,8 +50,7 @@ const getDatabaseData = async (filename: string) => {
         return await db.select().from(timeBalances);
       case 'payslips.json':
         return await db.select().from(payslips);
-      case 'activity-logs.json':
-        return await db.select().from(activityLogs);
+
       default:
         console.warn(`Unknown database table for filename: ${filename}`);
         return [];
