@@ -6,7 +6,8 @@ export class SupabaseRestStorage {
   
   // Helper method to check if Supabase client is available
   private isSupabaseAvailable(): boolean {
-    return supabase !== null;
+    // Force JSON fallback mode for development
+    return false; // Changed from: return supabase !== null;
   }
   
   // Helper method to get data with fallback to JSON
@@ -63,7 +64,9 @@ export class SupabaseRestStorage {
     let filteredData = Array.isArray(data) ? data : [];
     
     if (filters.employeeId) {
-      filteredData = filteredData.filter((d: any) => d.employeeId === filters.employeeId);
+      filteredData = filteredData.filter((d: any) => 
+        (d.employeeId === filters.employeeId) || (d.employee_id === filters.employeeId)
+      );
     }
     
     if (filters.status && filters.status !== 'all') {
@@ -117,7 +120,9 @@ export class SupabaseRestStorage {
     let filteredData = Array.isArray(data) ? data : [];
     
     if (filters.employeeId) {
-      filteredData = filteredData.filter((s: any) => s.employeeId === filters.employeeId);
+      filteredData = filteredData.filter((s: any) => 
+        (s.employeeId === filters.employeeId) || (s.employee_id === filters.employeeId)
+      );
     }
     
     if (filters.date) {

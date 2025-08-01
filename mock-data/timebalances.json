@@ -1,7 +1,7 @@
 [
   {
     "id": 1,
-    "employeeId": "emp-001",
+    "employeeId": "E001",
     "timeBalance": 270,
     "vacationDays": 20,
     "savedVacationDays": {
@@ -103,7 +103,7 @@
   },
   {
     "id": 7,
-    "employeeId": "mgr-001",
+    "employeeId": "E005",
     "timeBalance": 200,
     "vacationDays": 25,
     "savedVacationDays": {
@@ -120,7 +120,7 @@
   },
   {
     "id": 8,
-    "employeeId": "emp-001",
+    "employeeId": "E001",
     "timeBalance": 150,
     "vacationDays": 25,
     "savedVacationDays": {
