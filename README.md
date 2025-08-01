@@ -48,12 +48,14 @@ Skapa en `.env` fil i projektets rot:
 ```env
 NODE_ENV=development
 
-# Supabase Configuration (för production)
-DATABASE_URL=postgresql://postgres:DIN_LÖSENORD@db.DITT_PROJECT_ID.supabase.co:5432/postgres
-SUPABASE_URL=https://DITT_PROJECT_ID.supabase.co
-SUPABASE_ANON_KEY=din_anon_key_här
-SUPABASE_SERVICE_ROLE_KEY=din_service_role_key_här
-SUPABASE_JWT_SECRET=din_jwt_secret_här
+# Supabase Configuration
+DATABASE_URL=postgresql://postgres:[YOUR-PASSWORD]@db.[YOUR-PROJECT-REF].supabase.co:5432/postgres
+SUPABASE_URL=https://[YOUR-PROJECT-REF].supabase.co
+SUPABASE_SERVICE_ROLE_KEY=[YOUR-SERVICE-ROLE-KEY]
+
+# Optional (för framtida auth funktionalitet)
+SUPABASE_ANON_KEY=[YOUR-ANON-KEY]
+SUPABASE_JWT_SECRET=[YOUR-JWT-SECRET]
 
 # Server Configuration  
 PORT=3000

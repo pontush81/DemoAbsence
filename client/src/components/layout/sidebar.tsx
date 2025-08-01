@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { useI18n } from "@/lib/i18n";
 import { useFeatureFlags } from "@/lib/featureFlags";
 import { useStore } from "@/lib/store";
+import RoleDropdown from "./role-dropdown";
 
 const Sidebar = () => {
   const [location] = useLocation();
@@ -12,6 +13,12 @@ const Sidebar = () => {
   
   const showTravelExpenses = isFeatureEnabled('enableTravelExpenses');
   const isManager = user.currentRole === 'manager';
+  const isHR = user.currentRole === 'hr';
+  const isPayroll = user.currentRole === 'payroll';
+  const isEmployee = user.currentRole === 'employee';
+  
+  // Roles that can access manager functions
+  const canAccessManagerFunctions = isManager || isHR || isPayroll;
   
   const menuItems = [
     {
@@ -52,26 +59,47 @@ const Sidebar = () => {
     }
   ];
   
+  // Role-specific menu items
   const managerMenuItems = [
-    {
+    ...(isManager || isHR ? [{
       href: "/manager",
       icon: "supervisor_account",
       label: t('nav.manager'),
       active: location === "/manager"
-    },
-    {
+    }] : []),
+    ...(isManager || isHR ? [{
       href: "/attestation",
       icon: "fact_check",
       label: t('nav.attestation'),
       active: location === "/attestation"
-    },
-    {
+    }] : []),
+    ...(isPayroll || isHR ? [{
       href: "/paxml-export",
       icon: "file_download",
       label: t('nav.payrollExport'),
       active: location === "/paxml-export"
-    }
+    }] : [])
   ];
+
+  // HR-specific items
+  const hrMenuItems = isHR ? [
+    {
+      href: "/hr-dashboard",
+      icon: "people",
+      label: "HR Översikt",
+      active: location === "/hr-dashboard"
+    }
+  ] : [];
+
+  // Payroll-specific items  
+  const payrollMenuItems = isPayroll ? [
+    {
+      href: "/payroll-dashboard", 
+      icon: "account_balance_wallet",
+      label: "Löneoversikt",
+      active: location === "/payroll-dashboard"
+    }
+  ] : [];
   
   const travelExpensesMenuItem = {
     href: "#",
@@ -90,15 +118,9 @@ const Sidebar = () => {
           </div>
           <span className="font-bold text-sidebar-foreground">Kontek Lön</span>
         </div>
-        <div className="mt-3 flex items-center">
-          <span className="text-xs font-medium mr-2 text-muted-foreground">Inloggad som:</span>
-          <div className={`text-xs font-bold py-1 px-2 rounded-full ${
-            user.currentRole === 'manager' 
-              ? 'bg-blue-100 text-blue-800' 
-              : 'bg-green-100 text-green-800'
-          }`}>
-            {user.currentRole === 'manager' ? 'Chef' : 'Anställd'}
-          </div>
+        <div className="mt-3 flex items-center justify-between">
+          <span className="text-xs font-medium text-muted-foreground">Inloggad som:</span>
+          <RoleDropdown variant="compact" />
         </div>
       </div>
       
@@ -119,15 +141,49 @@ const Sidebar = () => {
             </li>
           ))}
           
-          {/* Manager section */}
-          {isManager && (
+          {/* Role-specific sections */}
+          {canAccessManagerFunctions && (managerMenuItems.length > 0 || hrMenuItems.length > 0 || payrollMenuItems.length > 0) && (
             <>
               <li className="border-t mt-2 pt-2 border-sidebar-border">
                 <div className="px-4 py-2 text-xs font-semibold text-muted-foreground">
-                  {t('nav.managerFunctions')}
+                  {isHR ? 'HR-funktioner' : isPayroll ? 'Lönefunktioner' : t('nav.managerFunctions')}
                 </div>
               </li>
+              
+              {/* Manager/HR functions */}
               {managerMenuItems.map((item) => (
+                <li key={item.href}>
+                  <Link 
+                    href={item.href}
+                    className={cn(
+                      "flex items-center px-4 py-3 text-sidebar-foreground",
+                      item.active && "text-primary border-l-4 border-primary"
+                    )}
+                  >
+                    <span className="material-icons mr-3">{item.icon}</span>
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+              
+              {/* HR-specific functions */}
+              {hrMenuItems.map((item) => (
+                <li key={item.href}>
+                  <Link 
+                    href={item.href}
+                    className={cn(
+                      "flex items-center px-4 py-3 text-sidebar-foreground",
+                      item.active && "text-primary border-l-4 border-primary"
+                    )}
+                  >
+                    <span className="material-icons mr-3">{item.icon}</span>
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+              
+              {/* Payroll-specific functions */}
+              {payrollMenuItems.map((item) => (
                 <li key={item.href}>
                   <Link 
                     href={item.href}

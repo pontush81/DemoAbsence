@@ -1,6 +1,5 @@
 import { useStore } from "@/lib/store";
-import { Badge } from "@/components/ui/badge";
-import { Link } from "wouter";
+import RoleDropdown from "./role-dropdown";
 
 const MobileHeader = () => {
   const { toggleMobileSidebar, user } = useStore();
@@ -22,14 +21,7 @@ const MobileHeader = () => {
           <span className="font-bold">Kontek Lön</span>
         </div>
         <div className="flex items-center">
-          <Link href="/settings">
-            <Badge 
-              variant={user.currentRole === 'manager' ? 'secondary' : 'default'}
-              className="mr-2 py-1 px-2 cursor-pointer"
-            >
-              {user.currentRole === 'manager' ? 'Chef' : 'Anställd'}
-            </Badge>
-          </Link>
+          <RoleDropdown variant="compact" className="mr-2" />
           <button className="ml-1">
             <span className="material-icons">account_circle</span>
           </button>

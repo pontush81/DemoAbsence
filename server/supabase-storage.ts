@@ -29,26 +29,32 @@ export class SupabaseStorage {
 
   // Deviation operations
   async getDeviations(filters: any = {}) {
-    let query = db.select().from(deviations);
+    const conditions = [];
     
     if (filters.employeeId) {
-      query = query.where(eq(deviations.employeeId, filters.employeeId));
+      conditions.push(eq(deviations.employeeId, filters.employeeId));
     }
     
     if (filters.status && filters.status !== 'all') {
-      query = query.where(eq(deviations.status, filters.status));
+      conditions.push(eq(deviations.status, filters.status));
     }
     
     if (filters.timeCode && filters.timeCode !== 'all') {
-      query = query.where(eq(deviations.timeCode, filters.timeCode));
+      conditions.push(eq(deviations.timeCode, filters.timeCode));
     }
     
     if (filters.startDate) {
-      query = query.where(gte(deviations.date, filters.startDate));
+      conditions.push(gte(deviations.date, filters.startDate));
     }
     
     if (filters.endDate) {
-      query = query.where(lte(deviations.date, filters.endDate));
+      conditions.push(lte(deviations.date, filters.endDate));
+    }
+    
+    let query = db.select().from(deviations);
+    
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
     }
     
     return await query.orderBy(desc(deviations.lastUpdated));
@@ -84,19 +90,25 @@ export class SupabaseStorage {
 
   async deleteDeviation(id: number) {
     const result = await db.delete(deviations).where(eq(deviations.id, id));
-    return result.rowCount > 0;
+    return result.count > 0;
   }
 
   // Leave request operations
   async getLeaveRequests(filters: any = {}) {
-    let query = db.select().from(leaveRequests);
+    const conditions = [];
     
     if (filters.employeeId) {
-      query = query.where(eq(leaveRequests.employeeId, filters.employeeId));
+      conditions.push(eq(leaveRequests.employeeId, filters.employeeId));
     }
     
     if (filters.status && filters.status !== 'all') {
-      query = query.where(eq(leaveRequests.status, filters.status));
+      conditions.push(eq(leaveRequests.status, filters.status));
+    }
+    
+    let query = db.select().from(leaveRequests);
+    
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
     }
     
     return await query.orderBy(desc(leaveRequests.lastUpdated));
@@ -132,7 +144,7 @@ export class SupabaseStorage {
 
   async deleteLeaveRequest(id: number) {
     const result = await db.delete(leaveRequests).where(eq(leaveRequests.id, id));
-    return result.rowCount > 0;
+    return result.count > 0;
   }
 
   // Time codes
@@ -142,22 +154,28 @@ export class SupabaseStorage {
 
   // Schedules
   async getSchedules(filters: any = {}) {
-    let query = db.select().from(schedules);
+    const conditions = [];
     
     if (filters.employeeId) {
-      query = query.where(eq(schedules.employeeId, filters.employeeId));
+      conditions.push(eq(schedules.employeeId, filters.employeeId));
     }
     
     if (filters.date) {
-      query = query.where(eq(schedules.date, filters.date));
+      conditions.push(eq(schedules.date, filters.date));
     }
     
     if (filters.startDate) {
-      query = query.where(gte(schedules.date, filters.startDate));
+      conditions.push(gte(schedules.date, filters.startDate));
     }
     
     if (filters.endDate) {
-      query = query.where(lte(schedules.date, filters.endDate));
+      conditions.push(lte(schedules.date, filters.endDate));
+    }
+    
+    let query = db.select().from(schedules);
+    
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
     }
     
     return await query;

@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { Employee, Deviation, LeaveRequest, TimeBalance, Schedule } from '@shared/schema';
 import { persist } from 'zustand/middleware';
 
-export type UserRole = 'employee' | 'manager';
+export type UserRole = 'employee' | 'manager' | 'hr' | 'payroll';
 
 export type UserState = {
   isAuthenticated: boolean;
