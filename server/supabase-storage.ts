@@ -4,7 +4,7 @@ import {
   employees, deviations, leaveRequests, timeCodes, schedules, 
   timeBalances, payslips, activityLogs, periods, reminders
 } from '@shared/schema';
-import { eq, and, gte, lte, desc } from 'drizzle-orm';
+import { eq, and, gte, lte, desc, asc } from 'drizzle-orm';
 
 // Supabase-based storage operations
 export class SupabaseStorage {
@@ -72,14 +72,31 @@ export class SupabaseStorage {
       conditions.push(lte(deviations.date, filters.endDate));
     }
     
+    // Determine sort order
+    let orderClause;
+    switch (filters.sortBy) {
+      case 'date-desc':
+        orderClause = desc(deviations.date);
+        break;
+      case 'date-asc':
+        orderClause = asc(deviations.date);
+        break;
+      case 'status':
+        orderClause = asc(deviations.status);
+        break;
+      default:
+        orderClause = desc(deviations.date); // Default to newest first
+        break;
+    }
+    
     if (conditions.length > 0) {
       return await db.select().from(deviations)
         .where(and(...conditions))
-        .orderBy(desc(deviations.lastUpdated));
+        .orderBy(orderClause);
     }
     
     return await db.select().from(deviations)
-      .orderBy(desc(deviations.lastUpdated));
+      .orderBy(orderClause);
   }
 
   async getDeviation(id: number) {

@@ -395,7 +395,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get deviations
   app.get('/api/deviations', async (req, res) => {
     try {
-      const { employeeId, period, status, timeCode } = req.query;
+      const { employeeId, period, status, timeCode, sortBy } = req.query;
       
       // Prepare filters for database query
       const filters: any = {};
@@ -448,6 +448,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // It's a category filter - we'll need to post-filter this
           filters.timeCodeCategory = timeCode;
         }
+      }
+      
+      // Add sortBy to filters
+      if (sortBy) {
+        filters.sortBy = sortBy;
       }
       
       let deviations = await restStorage.getDeviations(filters);

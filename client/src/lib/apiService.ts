@@ -158,7 +158,8 @@ class ApiService {
   async getDeviations(employeeId: string, filters?: {
     period?: string, 
     status?: string, 
-    timeCode?: string 
+    timeCode?: string,
+    sortBy?: string
   }): Promise<Deviation[]> {
     try {
       await delay(MOCK_DELAY);
@@ -168,6 +169,7 @@ class ApiService {
         if (filters.period) url += `&period=${filters.period}`;
         if (filters.status) url += `&status=${filters.status}`;
         if (filters.timeCode) url += `&timeCode=${filters.timeCode}`;
+        if (filters.sortBy) url += `&sortBy=${filters.sortBy}`;
       }
       
       const response = await fetch(url);

@@ -22,11 +22,12 @@ const DeviationList = ({ onSelect }: DeviationListProps) => {
   const { user } = useStore();
   const employeeId = user.currentUser?.employeeId;
   
-  // Filters - default to all-time so demo data from 2023 shows up
+  // Filters - default to newest first and all-time so demo data from 2023 shows up
   const [filters, setFilters] = useState({
     period: 'all-time',
     status: 'all',
     timeCode: 'all',
+    sortBy: 'date-desc', // Newest first by default
   });
   
   // Fetch deviations

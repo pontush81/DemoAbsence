@@ -81,6 +81,27 @@ export class SupabaseRestStorage {
       filteredData = filteredData.filter((d: any) => d.date <= filters.endDate);
     }
     
+    // Apply sorting
+    if (filters.sortBy) {
+      filteredData.sort((a: any, b: any) => {
+        switch (filters.sortBy) {
+          case 'date-desc':
+            return new Date(b.date).getTime() - new Date(a.date).getTime();
+          case 'date-asc':
+            return new Date(a.date).getTime() - new Date(b.date).getTime();
+          case 'status':
+            return a.status.localeCompare(b.status);
+          default:
+            return new Date(b.date).getTime() - new Date(a.date).getTime(); // Default to newest first
+        }
+      });
+    } else {
+      // Default sort by newest first
+      filteredData.sort((a: any, b: any) => 
+        new Date(b.date).getTime() - new Date(a.date).getTime()
+      );
+    }
+    
     return filteredData;
   }
 

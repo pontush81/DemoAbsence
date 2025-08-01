@@ -311,6 +311,22 @@ const translations: Translations = {
     sv: 'Alla tider',
     en: 'All Time',
   },
+  'deviations.sortBy': {
+    sv: 'Sortera efter',
+    en: 'Sort by',
+  },
+  'deviations.newestFirst': {
+    sv: 'Senaste först',
+    en: 'Newest first',
+  },
+  'deviations.oldestFirst': {
+    sv: 'Äldsta först',
+    en: 'Oldest first',
+  },
+  'deviations.byStatus': {
+    sv: 'Efter status',
+    en: 'By status',
+  },
   'deviations.status': {
     sv: 'Status',
     en: 'Status',

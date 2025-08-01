@@ -8,6 +8,7 @@ export type DeviationFilters = {
   period: string;
   status: string;
   timeCode: string;
+  sortBy: string;
 };
 
 interface DeviationFiltersProps {
@@ -89,6 +90,25 @@ const DeviationFilters = ({ filters, onFilterChange }: DeviationFiltersProps) =>
                 <SelectItem value="overtime">{t('deviations.overtime')}</SelectItem>
                 <SelectItem value="sick">{t('deviations.sick')}</SelectItem>
                 <SelectItem value="vab">{t('deviations.vab')}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex-1">
+            <label htmlFor="filter-sortBy" className="block text-sm font-medium text-secondary mb-2">
+              {t('deviations.sortBy')}
+            </label>
+            <Select
+              value={localFilters.sortBy}
+              onValueChange={(value) => handleFilterChange('sortBy', value)}
+            >
+              <SelectTrigger id="filter-sortBy">
+                <SelectValue placeholder={t('deviations.sortBy')} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="date-desc">{t('deviations.newestFirst')}</SelectItem>
+                <SelectItem value="date-asc">{t('deviations.oldestFirst')}</SelectItem>
+                <SelectItem value="status">{t('deviations.byStatus')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
