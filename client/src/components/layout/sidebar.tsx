@@ -120,9 +120,8 @@ const Sidebar = () => {
           </div>
           <span className="font-bold text-sidebar-foreground">Kontek Lön</span>
         </div>
-        <div className="mt-3 flex items-center justify-between">
-          <span className="text-xs font-medium text-muted-foreground">Inloggad som:</span>
-          <RoleDropdown variant="compact" />
+        <div className="mt-3">
+          <span className="text-xs font-medium text-muted-foreground">Demo-läge aktivt</span>
         </div>
       </div>
       
