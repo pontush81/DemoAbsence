@@ -261,10 +261,14 @@ class ApiService {
   
   // --------------- Manager Approvals APIs ---------------
   
-  async getPendingDeviations(): Promise<Deviation[]> {
+  async getPendingDeviations(managerId?: string): Promise<Deviation[]> {
     try {
       await delay(MOCK_DELAY);
-      const response = await fetch('/api/manager/deviations/pending');
+      let url = '/api/manager/deviations/pending';
+      if (managerId) {
+        url += `?managerId=${encodeURIComponent(managerId)}`;
+      }
+      const response = await fetch(url);
       
       if (!response.ok) {
         throw new ApiError(`Failed to fetch pending deviations: ${response.statusText}`, response.status);

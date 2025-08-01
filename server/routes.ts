@@ -747,6 +747,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get pending deviations (for manager)
   app.get('/api/manager/deviations/pending', async (req, res) => {
     try {
+      const { managerId } = req.query;
       let pendingDeviations;
       
       // Try storage first, fallback to restStorage
@@ -756,6 +757,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log('Storage failed, using restStorage fallback:', storageError);
         const allDeviations = await restStorage.getDeviations({ status: 'pending' });
         pendingDeviations = allDeviations.filter((d: any) => d.status === 'pending');
+      }
+      
+      // Filter by manager-employee relationship if managerId is provided
+      if (managerId && pendingDeviations) {
+        try {
+          // Get all employees to find which ones report to this manager
+          const allEmployees = await restStorage.getEmployees();
+          const managerEmployees = allEmployees.filter((emp: any) => emp.manager === managerId);
+          const employeeIds = managerEmployees.map((emp: any) => emp.employeeId);
+          
+          // Filter deviations to only include those from employees who report to this manager
+          pendingDeviations = pendingDeviations.filter((deviation: any) => 
+            employeeIds.includes(deviation.employeeId)
+          );
+          
+          console.log(`Manager ${managerId} has ${pendingDeviations.length} pending deviations from employees: ${employeeIds.join(', ')}`);
+        } catch (filterError) {
+          console.error('Error filtering deviations by manager:', filterError);
+          // If filtering fails, return all pending deviations as fallback
+        }
       }
       
       res.json(pendingDeviations);

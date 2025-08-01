@@ -22,6 +22,15 @@ export default defineConfig({
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
+    
+    /* 🎥 VIDEO RECORDING - för demo och debugging */
+    video: 'retain-on-failure', // 'on' för alla tester, 'retain-on-failure' för bara misslyckade
+    
+    /* 📸 SCREENSHOTS - ta bilder vid fel */
+    screenshot: 'only-on-failure', // 'on' för alla steg, 'only-on-failure' för bara fel
+    
+    /* 🐌 DEMO-MODE - långsammare för att kunna följa med */
+    // slowMo: 1000, // Uncomment för långsam demo (1000ms mellan actions)
   },
 
   /* Configure projects for major browsers */

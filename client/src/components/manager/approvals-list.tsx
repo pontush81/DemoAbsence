@@ -25,11 +25,14 @@ const ApprovalsList = ({ type }: ApprovalsListProps) => {
   const [selectedItemId, setSelectedItemId] = useState<number | null>(null);
   
   // Fetch pending approvals
+  const { user } = useStore();
+  const managerId = user.currentUser?.employeeId;
+  
   const { data: pendingItems = [], isLoading, error, refetch } = useQuery({
-    queryKey: [`/api/manager/${type}/pending`],
+    queryKey: [`/api/manager/${type}/pending`, managerId],
     queryFn: async () => {
       if (type === 'deviations') {
-        return await apiService.getPendingDeviations();
+        return await apiService.getPendingDeviations(managerId);
       } else {
         return await apiService.getPendingLeaveRequests();
       }

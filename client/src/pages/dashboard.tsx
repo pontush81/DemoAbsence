@@ -44,9 +44,9 @@ export default function Dashboard() {
   
   // Fetch pending approvals (for manager)
   const { data: pendingDeviations, isLoading: isLoadingPendingDeviations } = useQuery({
-    queryKey: ['/api/manager/deviations/pending'],
-    queryFn: () => apiService.getPendingDeviations(),
-    enabled: isManager,
+    queryKey: ['/api/manager/deviations/pending', employeeId],
+    queryFn: () => apiService.getPendingDeviations(employeeId),
+    enabled: isManager && !!employeeId,
   });
   
   // Get today's schedule

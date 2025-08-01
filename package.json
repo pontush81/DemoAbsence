@@ -11,7 +11,12 @@
     "db:push": "drizzle-kit push",
     "test": "playwright test",
     "test:ui": "playwright test --ui",
-    "test:report": "playwright show-report"
+    "test:report": "playwright show-report",
+    "demo": "playwright test tests/real-workflow-demo.spec.ts --config=playwright.demo.config.ts",
+    "demo:record": "playwright test tests/real-workflow-demo.spec.ts --config=playwright.demo.config.ts --headed",
+    "demo:show": "playwright show-report demo-report",
+    "demo:fast": "playwright test tests/simple-workflow.spec.ts --config=playwright.demo.config.ts --project=demo-chrome",
+    "demo:full": "playwright test tests/real-workflow-demo.spec.ts --config=playwright.demo.config.ts --project=demo-chrome"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

@@ -1,7 +1,5 @@
 import { db } from "../server/db";
 import { 
-  mockEmployees, 
-  mockSchedules, 
   mockTimeCodes, 
   mockDeviations, 
   mockLeaveRequests,
@@ -19,6 +17,16 @@ import {
   payslips,
   activityLogs
 } from "../shared/schema";
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Läs data från JSON-filer
+const employeesData = JSON.parse(fs.readFileSync(path.join(__dirname, '../mock-data/employees.json'), 'utf8'));
+const schedulesData = JSON.parse(fs.readFileSync(path.join(__dirname, '../mock-data/schedules.json'), 'utf8'));
 
 async function seedDatabase() {
   console.log("Starting database seeding...");
@@ -37,7 +45,7 @@ async function seedDatabase() {
     
     // Insert data
     console.log("Inserting employees...");
-    for (const employee of mockEmployees) {
+    for (const employee of employeesData) {
       await db.insert(employees).values({
         id: employee.id,
         employeeId: employee.employeeId,
@@ -81,7 +89,8 @@ async function seedDatabase() {
     }
     
     console.log("Inserting schedules...");
-    for (const schedule of mockSchedules) {
+    console.log(`Found ${schedulesData.length} schedules to insert...`);
+    for (const schedule of schedulesData) {
       await db.insert(schedules).values({
         id: schedule.id,
         employeeId: schedule.employeeId,
