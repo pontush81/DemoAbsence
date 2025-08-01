@@ -105,6 +105,21 @@ const DeviationForm = ({ deviationId, onCancel }: DeviationFormProps) => {
     queryFn: () => apiService.getTimeCodes(),
   });
   
+  // Form setup with default values FIRST
+  const deviationFormSchema = createDeviationFormSchema(t);
+  const form = useForm<DeviationFormValues>({
+    resolver: zodResolver(deviationFormSchema),
+    defaultValues: {
+      employeeId: user.currentUser?.employeeId || '',
+      date: format(new Date(), 'yyyy-MM-dd'),
+      startTime: '08:00',
+      endTime: '17:00',
+      timeCode: '',
+      comment: '',
+      status: 'pending',
+    },
+  });
+
   // Fetch deviation if editing
   const { data: deviation, isLoading: isLoadingDeviation } = useQuery({
     queryKey: ['/api/deviations', deviationId],
@@ -133,21 +148,8 @@ const DeviationForm = ({ deviationId, onCancel }: DeviationFormProps) => {
     enabled: !!user.currentUser?.employeeId && !!selectedDate,
   });
   
-  // Form setup with default values
-  const deviationFormSchema = createDeviationFormSchema(t);
+  // Calculate duration function with schedule data
   const calculateDuration = createCalculateDuration(t, scheduleForDate);
-  const form = useForm<DeviationFormValues>({
-    resolver: zodResolver(deviationFormSchema),
-    defaultValues: {
-      employeeId: user.currentUser?.employeeId || '',
-      date: format(new Date(), 'yyyy-MM-dd'),
-      startTime: '08:00',
-      endTime: '17:00',
-      timeCode: '',
-      comment: '',
-      status: 'pending',
-    },
-  });
 
   // Get workflow info for selected time code
   const selectedTimeCode = timeCodes?.find(tc => tc.code === form.watch('timeCode'));

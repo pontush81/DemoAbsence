@@ -411,14 +411,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Handle period filtering with date ranges
       if (period) {
         const today = new Date();
+        const year = today.getFullYear();
+        const month = today.getMonth(); // 0-indexed
+        
         if (period === 'current-month') {
-          const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-          filters.startDate = startOfMonth.toISOString().split('T')[0];
+          // Use string formatting to avoid timezone issues
+          const startDate = `${year}-${String(month + 1).padStart(2, '0')}-01`;
+          const lastDay = new Date(year, month + 1, 0).getDate();
+          const endDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+          
+          filters.startDate = startDate;
+          filters.endDate = endDate;
         } else if (period === 'last-month') {
-          const startOfLastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-          const endOfLastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
-          filters.startDate = startOfLastMonth.toISOString().split('T')[0];
-          filters.endDate = endOfLastMonth.toISOString().split('T')[0];
+          // Last month calculation
+          const lastMonthYear = month === 0 ? year - 1 : year;
+          const lastMonth = month === 0 ? 12 : month;
+          
+          const startDate = `${lastMonthYear}-${String(lastMonth).padStart(2, '0')}-01`;
+          const lastDay = new Date(lastMonthYear, lastMonth, 0).getDate();
+          const endDate = `${lastMonthYear}-${String(lastMonth).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+          
+          filters.startDate = startDate;
+          filters.endDate = endDate;
         }
       }
       

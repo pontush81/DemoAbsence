@@ -179,7 +179,7 @@ export const useStore = create<AppState>()(
       })),
     }),
     {
-      name: 'kontek-app-storage-v2', // v2: Fixed employee ID consistency
+      name: 'kontek-app-storage-v3', // v3: Fixed manager ID mismatch (mgr-001 → E005)
       partialize: (state) => ({
         user: {
           isAuthenticated: state.user.isAuthenticated,

@@ -26,9 +26,9 @@ export const productionUsers: ProductionUser[] = [
     canSwitchRoles: false
   },
   
-  // Chef - kan vara både medarbetare och chef (matchar mock data mgr-001)  
+  // Chef - kan vara både medarbetare och chef (matchar employee data E005)  
   {
-    id: "mgr-001", 
+    id: "E005", 
     name: "Mikael Svensson",
     email: "mikael.svensson@kontek.se",
     department: "Ledning",
