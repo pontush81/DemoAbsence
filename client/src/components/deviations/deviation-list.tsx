@@ -22,9 +22,9 @@ const DeviationList = ({ onSelect }: DeviationListProps) => {
   const { user } = useStore();
   const employeeId = user.currentUser?.employeeId;
   
-  // Filters
+  // Filters - default to all-time so demo data from 2023 shows up
   const [filters, setFilters] = useState({
-    period: 'current-month',
+    period: 'all-time',
     status: 'all',
     timeCode: 'all',
   });

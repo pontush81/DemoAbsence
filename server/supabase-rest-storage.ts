@@ -6,8 +6,8 @@ export class SupabaseRestStorage {
   
   // Helper method to check if Supabase client is available
   private isSupabaseAvailable(): boolean {
-    // Force JSON fallback mode for development
-    return false; // Changed from: return supabase !== null;
+    // Use real database if available, fallback to JSON for development
+    return supabase !== null;
   }
   
   // Helper method to get data with fallback to JSON

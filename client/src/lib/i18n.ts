@@ -307,6 +307,10 @@ const translations: Translations = {
     sv: 'Anpassad period',
     en: 'Custom Period',
   },
+  'deviations.allTime': {
+    sv: 'Alla tider',
+    en: 'All Time',
+  },
   'deviations.status': {
     sv: 'Status',
     en: 'Status',

@@ -43,6 +43,7 @@ const DeviationFilters = ({ filters, onFilterChange }: DeviationFiltersProps) =>
                 <SelectValue placeholder={t('deviations.period')} />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="all-time">{t('deviations.allTime')}</SelectItem>
                 <SelectItem value="current-month">{t('deviations.currentMonth')}</SelectItem>
                 <SelectItem value="last-month">{t('deviations.lastMonth')}</SelectItem>
                 <SelectItem value="custom">{t('deviations.customPeriod')}</SelectItem>
