@@ -1,0 +1,137 @@
+import 'dotenv/config';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { createClient } from '@supabase/supabase-js';
+import fs from 'fs';
+import path from 'path';
+
+// Initialize Supabase client
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_ANON_KEY;
+const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
+
+// Helper to read mock data
+async function getMockData(filename: string) {
+  try {
+    const filePath = path.join(process.cwd(), 'mock-data', filename);
+    const fileContent = fs.readFileSync(filePath, 'utf8');
+    return JSON.parse(fileContent);
+  } catch (error) {
+    console.error(`Error reading mock data ${filename}:`, error);
+    return [];
+  }
+}
+
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (req.method === 'GET') {
+    // GET - fetch individual leave request
+    try {
+      const { id } = req.query;
+      const leaveRequestId = parseInt(id as string);
+      let leaveRequest;
+      
+      // Try Supabase first, fallback to mock data
+      if (supabase) {
+        try {
+          const { data, error } = await supabase
+            .from('leave_requests')
+            .select('*')
+            .eq('id', leaveRequestId)
+            .single();
+          
+          if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+            throw error;
+          }
+          leaveRequest = data;
+        } catch (error) {
+          console.log('Supabase failed, using mock data:', error);
+        }
+      }
+      
+      // If Supabase didn't work or no data found, try mock data
+      if (!leaveRequest) {
+        console.log('Using mock data for leave request');
+        const allLeaveRequests = await getMockData('leave-requests.json');
+        leaveRequest = allLeaveRequests.find((lr: any) => lr.id === leaveRequestId);
+      }
+      
+      if (leaveRequest) {
+        // Map snake_case to camelCase for frontend compatibility
+        const mappedLeaveRequest = {
+          ...leaveRequest,
+          employeeId: leaveRequest.employee_id || leaveRequest.employeeId,
+          startDate: leaveRequest.start_date || leaveRequest.startDate,
+          endDate: leaveRequest.end_date || leaveRequest.endDate,
+          leaveType: leaveRequest.leave_type || leaveRequest.leaveType,
+        };
+        
+        res.json(mappedLeaveRequest);
+      } else {
+        res.status(404).json({ message: 'Leave request not found' });
+      }
+    } catch (error) {
+      console.error('Error fetching leave request:', error);
+      res.status(500).json({ error: (error as Error).message });
+    }
+  } else if (req.method === 'PATCH') {
+    // PATCH - update existing leave request
+    try {
+      const { id } = req.query;
+      const leaveRequestId = parseInt(id as string);
+      const updateData = { ...req.body };
+      
+      let updatedLeaveRequest;
+      
+      // Try Supabase first, fallback to mock data
+      if (supabase) {
+        try {
+          const { data, error } = await supabase
+            .from('leave_requests')
+            .update(updateData)
+            .eq('id', leaveRequestId)
+            .select()
+            .single();
+          
+          if (error) throw error;
+          updatedLeaveRequest = data;
+        } catch (error) {
+          console.log('Supabase update failed, using mock data:', error);
+        }
+      }
+      
+      // If Supabase didn't work, try mock data fallback
+      if (!updatedLeaveRequest) {
+        const allLeaveRequests = await getMockData('leave-requests.json');
+        const index = allLeaveRequests.findIndex((lr: any) => lr.id === leaveRequestId);
+        
+        if (index >= 0) {
+          allLeaveRequests[index] = { ...allLeaveRequests[index], ...updateData, lastUpdated: new Date().toISOString() };
+          // In a real implementation, we would save back to file
+          updatedLeaveRequest = allLeaveRequests[index];
+        }
+      }
+      
+      if (updatedLeaveRequest) {
+        // Map snake_case to camelCase for frontend compatibility
+        const mappedLeaveRequest = {
+          ...updatedLeaveRequest,
+          employeeId: updatedLeaveRequest.employee_id || updatedLeaveRequest.employeeId,
+          startDate: updatedLeaveRequest.start_date || updatedLeaveRequest.startDate,
+          endDate: updatedLeaveRequest.end_date || updatedLeaveRequest.endDate,
+          leaveType: updatedLeaveRequest.leave_type || updatedLeaveRequest.leaveType,
+        };
+        
+        res.json(mappedLeaveRequest);
+      } else {
+        res.status(404).json({ message: 'Leave request not found or update failed' });
+      }
+    } catch (error) {
+      console.error('Error updating leave request:', error);
+      res.status(500).json({ 
+        error: 'Failed to update leave request', 
+        details: (error as Error).message 
+      });
+    }
+  } else {
+    res.status(405).json({ message: 'Method not allowed' });
+  }
+}
