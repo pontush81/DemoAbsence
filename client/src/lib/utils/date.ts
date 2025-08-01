@@ -39,18 +39,33 @@ export function formatDateWithDay(date: Date | string, locale: string = 'sv-SE')
  * @param locale Locale to use
  * @returns Formatted time string (e.g., "08:00")
  */
-export function formatTime(timeString: string, locale: string = 'sv-SE'): string {
-  // Convert time string to Date object
-  const [hours, minutes] = timeString.split(':');
-  const date = new Date();
-  date.setHours(parseInt(hours, 10));
-  date.setMinutes(parseInt(minutes, 10));
+export function formatTime(timeString?: string | null, locale: string = 'sv-SE'): string {
+  // Handle undefined/null values
+  if (!timeString) {
+    return '--:--';
+  }
   
-  return date.toLocaleTimeString(locale, {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false
-  });
+  // Simple substring approach for HH:MM:SS format
+  if (timeString.includes(':')) {
+    return timeString.substring(0, 5); // Remove seconds if present (HH:MM:SS -> HH:MM)
+  }
+  
+  // Convert time string to Date object (fallback for other formats)
+  try {
+    const [hours, minutes] = timeString.split(':');
+    const date = new Date();
+    date.setHours(parseInt(hours, 10));
+    date.setMinutes(parseInt(minutes, 10));
+    
+    return date.toLocaleTimeString(locale, {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    });
+  } catch (error) {
+    console.warn('Invalid time format:', timeString);
+    return '--:--';
+  }
 }
 
 /**

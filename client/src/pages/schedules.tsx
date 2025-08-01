@@ -10,6 +10,7 @@ import { apiService } from '@/lib/apiService';
 import { useI18n } from '@/lib/i18n';
 import { useStore } from '@/lib/store';
 import { Employee, Schedule } from '@shared/schema';
+import { formatTime } from '@/lib/utils/date';
 import ScheduleImport from '@/components/paxml/schedule-import';
 
 export default function SchedulesPage() {
@@ -99,21 +100,33 @@ export default function SchedulesPage() {
     return employee ? `${employee.firstName} ${employee.lastName}` : employeeId;
   };
 
-  const formatTime = (time: string) => {
-    return time.substring(0, 5); // Remove seconds if present
-  };
-
   const calculateWorkHours = (schedule: Schedule) => {
-    const start = new Date(`2000-01-01T${schedule.startTime}`);
-    const end = new Date(`2000-01-01T${schedule.endTime}`);
-    const breakStart = new Date(`2000-01-01T${schedule.breakStart}`);
-    const breakEnd = new Date(`2000-01-01T${schedule.breakEnd}`);
-    
-    const totalMinutes = (end.getTime() - start.getTime()) / (1000 * 60);
-    const breakMinutes = (breakEnd.getTime() - breakStart.getTime()) / (1000 * 60);
-    const workMinutes = totalMinutes - breakMinutes;
-    
-    return (workMinutes / 60).toFixed(1);
+    try {
+      // Check if required times are available
+      if (!schedule.startTime || !schedule.endTime) {
+        return '0.0';
+      }
+      
+      const start = new Date(`2000-01-01T${schedule.startTime}`);
+      const end = new Date(`2000-01-01T${schedule.endTime}`);
+      
+      // Calculate total work time
+      const totalMinutes = (end.getTime() - start.getTime()) / (1000 * 60);
+      
+      // Subtract break time if available
+      let breakMinutes = 0;
+      if (schedule.breakStart && schedule.breakEnd) {
+        const breakStart = new Date(`2000-01-01T${schedule.breakStart}`);
+        const breakEnd = new Date(`2000-01-01T${schedule.breakEnd}`);
+        breakMinutes = (breakEnd.getTime() - breakStart.getTime()) / (1000 * 60);
+      }
+      
+      const workMinutes = Math.max(0, totalMinutes - breakMinutes);
+      return (workMinutes / 60).toFixed(1);
+    } catch (error) {
+      console.warn('Error calculating work hours:', error);
+      return '0.0';
+    }
   };
 
   const groupedSchedules = schedules.reduce((acc, schedule) => {
