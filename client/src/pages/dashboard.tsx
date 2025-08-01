@@ -106,7 +106,7 @@ export default function Dashboard() {
             isLoadingTimeBalance ? (
               <Skeleton className="h-6 w-24" />
             ) : timeBalance ? (
-              formatDuration(timeBalance.timeBalance)
+              formatDuration(timeBalance.timeBalance ?? 0)
             ) : (
               "0"
             )

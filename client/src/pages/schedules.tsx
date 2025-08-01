@@ -299,7 +299,7 @@ export default function SchedulesPage() {
                               {formatTime(schedule.endTime)}
                             </td>
                             <td className="border border-gray-300 px-4 py-2">
-                              {formatTime(schedule.breakStart)} - {formatTime(schedule.breakEnd)}
+                              {schedule.breakStart && schedule.breakEnd ? `${formatTime(schedule.breakStart)} - ${formatTime(schedule.breakEnd)}` : "-"}
                             </td>
                             <td className="border border-gray-300 px-4 py-2 font-medium">
                               {calculateWorkHours(schedule)}h

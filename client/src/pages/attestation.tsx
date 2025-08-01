@@ -254,6 +254,7 @@ function PeriodApprovals({ onViewPeriod, onSendReminder }: {
       const mockDeviations: Deviation[] = [
         {
           id: 1,
+          periodId: period.id,
           employeeId: period.employeeId,
           date: `2023-${period.month + 1}-15`,
           startTime: "08:00",
@@ -262,6 +263,7 @@ function PeriodApprovals({ onViewPeriod, onSendReminder }: {
           status: "pending",
           comment: "Worked late to finish project",
           lastUpdated: new Date(),
+          submitted: new Date(new Date().setDate(new Date().getDate() - 2)),
           approvedBy: null,
           approvedAt: null,
           rejectedBy: null,
@@ -270,6 +272,7 @@ function PeriodApprovals({ onViewPeriod, onSendReminder }: {
         },
         {
           id: 2,
+          periodId: period.id,
           employeeId: period.employeeId,
           date: `2023-${period.month + 1}-22`,
           startTime: "07:30",
@@ -278,6 +281,7 @@ function PeriodApprovals({ onViewPeriod, onSendReminder }: {
           status: "pending",
           comment: "Client meeting ran late",
           lastUpdated: new Date(),
+          submitted: new Date(new Date().setDate(new Date().getDate() - 1)),
           approvedBy: null,
           approvedAt: null,
           rejectedBy: null,

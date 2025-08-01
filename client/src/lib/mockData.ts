@@ -213,7 +213,7 @@ export const mockSchedules: Schedule[] = [
 function getDateString(daysAhead: number): string {
   const date = new Date();
   date.setDate(date.getDate() + daysAhead);
-  return date.split('T')[0];
+  return date.toISOString().split('T')[0];
 }
 
 // Mock Time Codes
