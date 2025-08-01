@@ -28,12 +28,12 @@ export default function Settings() {
           onValueChange={handleTabChange}
           className="w-full"
         >
-          <CardContent className="pt-6">
-            <TabsList className="mb-8 grid grid-cols-4 gap-4">
+          <CardContent className="pt-4 md:pt-6 px-4 md:px-6">
+            <TabsList className="mb-8 grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 h-auto">
               <TabsTrigger 
                 value="personal"
                 className={`
-                  px-4 py-2 text-sm font-medium 
+                  px-2 md:px-4 py-2 text-xs md:text-sm font-medium 
                   ${activeTab === 'personal' 
                     ? 'bg-primary text-white' 
                     : 'bg-background hover:bg-muted'}
@@ -44,7 +44,7 @@ export default function Settings() {
               <TabsTrigger 
                 value="bank"
                 className={`
-                  px-4 py-2 text-sm font-medium 
+                  px-2 md:px-4 py-2 text-xs md:text-sm font-medium 
                   ${activeTab === 'bank' 
                     ? 'bg-primary text-white' 
                     : 'bg-background hover:bg-muted'}
@@ -55,7 +55,7 @@ export default function Settings() {
               <TabsTrigger 
                 value="language"
                 className={`
-                  px-4 py-2 text-sm font-medium 
+                  px-2 md:px-4 py-2 text-xs md:text-sm font-medium 
                   ${activeTab === 'language' 
                     ? 'bg-primary text-white' 
                     : 'bg-background hover:bg-muted'}
@@ -66,7 +66,7 @@ export default function Settings() {
               <TabsTrigger 
                 value="role"
                 className={`
-                  px-4 py-2 text-sm font-medium 
+                  px-2 md:px-4 py-2 text-xs md:text-sm font-medium 
                   ${activeTab === 'role' 
                     ? 'bg-primary text-white' 
                     : 'bg-background hover:bg-muted'}

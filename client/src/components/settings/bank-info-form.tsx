@@ -169,19 +169,21 @@ const BankInfoForm = () => {
             )}
           />
           
-          <FormField
-            control={form.control}
-            name="bankIBAN"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t('settings.bankIBAN')}</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="md:col-span-2">
+            <FormField
+              control={form.control}
+              name="bankIBAN"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('settings.bankIBAN')}</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="SE45 5000 0000 0583 9825 7466" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
         </div>
         
         <Button 
