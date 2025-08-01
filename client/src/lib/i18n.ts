@@ -1211,6 +1211,22 @@ const translations: Translations = {
     sv: 'Omfattning krävs',
     en: 'Scope is required',
   },
+  'validation.startDateRequired': {
+    sv: 'Startdatum krävs',
+    en: 'Start date is required',
+  },
+  'validation.endDateRequired': {
+    sv: 'Slutdatum krävs',
+    en: 'End date is required',
+  },
+  'validation.leaveTypeRequired': {
+    sv: 'Ledighetstyp krävs',
+    en: 'Leave type is required',
+  },
+  'validation.endDateAfterStartDate': {
+    sv: 'Slutdatum måste vara på eller efter startdatum',
+    en: 'End date must be on or after start date',
+  },
   'validation.personnummerRequired': {
     sv: 'Personnummer krävs',
     en: 'Personal number required',
@@ -1250,6 +1266,14 @@ const translations: Translations = {
   'validation.countryCodeRequired': {
     sv: 'Landskod krävs',
     en: 'Country code required',
+  },
+  'validation.validClearingNumberRequired': {
+    sv: 'Giltigt clearingnummer krävs',
+    en: 'Valid clearing number required',
+  },
+  'validation.validAccountNumberRequired': {
+    sv: 'Giltigt kontonummer krävs',
+    en: 'Valid account number required',
   },
   'validation.invalidTimePeriod': {
     sv: 'Ogiltig tidsperiod',

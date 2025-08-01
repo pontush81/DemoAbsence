@@ -49,13 +49,13 @@ interface DeviationFormProps {
 }
 
 // Helper function to calculate duration between two times
-const calculateDuration = (startTime: string, endTime: string): string => {
+const createCalculateDuration = (t: (key: string) => string) => (startTime: string, endTime: string): string => {
   try {
     const start = new Date(`2000-01-01T${startTime}:00`);
     const end = new Date(`2000-01-01T${endTime}:00`);
     
     if (end <= start) {
-      return "Ogiltig tidsperiod";
+      return t('validation.invalidTimePeriod');
     }
     
     const diffMs = end.getTime() - start.getTime();
@@ -70,7 +70,7 @@ const calculateDuration = (startTime: string, endTime: string): string => {
       return `${diffHours} tim ${diffMinutes} min`;
     }
   } catch {
-    return "Ogiltig tid";
+    return t('validation.invalidTime');
   }
 };
 
@@ -95,6 +95,8 @@ const DeviationForm = ({ deviationId, onCancel }: DeviationFormProps) => {
   });
   
   // Form setup with default values
+  const deviationFormSchema = createDeviationFormSchema(t);
+  const calculateDuration = createCalculateDuration(t);
   const form = useForm<DeviationFormValues>({
     resolver: zodResolver(deviationFormSchema),
     defaultValues: {

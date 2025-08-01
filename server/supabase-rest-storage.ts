@@ -51,7 +51,7 @@ export class SupabaseRestStorage {
   }
 
   async getEmployee(employeeId: string) {
-    const employees = await this.getDataWithFallback('employees', 'employees.json', { employeeId });
+    const employees = await this.getDataWithFallback('employees', 'employees.json', { employee_id: employeeId });
     return Array.isArray(employees) ? employees[0] : employees;
   }
 
@@ -150,6 +150,238 @@ export class SupabaseRestStorage {
   // Time codes
   async getTimeCodes() {
     return await this.getDataWithFallback('time_codes', 'timecodes.json');
+  }
+
+  // === WRITE OPERATIONS ===
+
+  // Create deviation
+  async createDeviation(data: any) {
+    if (!this.isSupabaseAvailable()) {
+      throw new Error('Supabase not available for create operations');
+    }
+
+    try {
+      const { data: created, error } = await supabase!
+        .from('deviations')
+        .insert({
+          employee_id: data.employeeId,
+          date: data.date,
+          start_time: data.startTime,
+          end_time: data.endTime,
+          time_code: data.timeCode,
+          comment: data.comment,
+          status: data.status || 'pending',
+          manager_comment: data.managerComment,
+          submitted: data.submitted || new Date().toISOString(),
+          approved_by: data.approvedBy,
+          approved_at: data.approvedAt,
+          rejected_by: data.rejectedBy,
+          rejected_at: data.rejectedAt
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return created;
+    } catch (error) {
+      console.error('REST create deviation error:', error);
+      throw error;
+    }
+  }
+
+  // Update deviation
+  async updateDeviation(id: number, updates: any) {
+    if (!this.isSupabaseAvailable()) {
+      throw new Error('Supabase not available for update operations');
+    }
+
+    try {
+      const updateData: any = {};
+      
+      // Map camelCase to snake_case for database
+      if (updates.employeeId) updateData.employee_id = updates.employeeId;
+      if (updates.startTime) updateData.start_time = updates.startTime;
+      if (updates.endTime) updateData.end_time = updates.endTime;
+      if (updates.timeCode) updateData.time_code = updates.timeCode;
+      if (updates.managerComment) updateData.manager_comment = updates.managerComment;
+      if (updates.approvedBy) updateData.approved_by = updates.approvedBy;
+      if (updates.approvedAt) updateData.approved_at = updates.approvedAt;
+      if (updates.rejectedBy) updateData.rejected_by = updates.rejectedBy;
+      if (updates.rejectedAt) updateData.rejected_at = updates.rejectedAt;
+      
+      // Direct mapping for these fields
+      ['date', 'comment', 'status', 'submitted'].forEach(field => {
+        if (updates[field] !== undefined) updateData[field] = updates[field];
+      });
+
+      const { data: updated, error } = await supabase!
+        .from('deviations')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return updated;
+    } catch (error) {
+      console.error('REST update deviation error:', error);
+      throw error;
+    }
+  }
+
+  // Delete deviation
+  async deleteDeviation(id: number) {
+    if (!this.isSupabaseAvailable()) {
+      throw new Error('Supabase not available for delete operations');
+    }
+
+    try {
+      const { error } = await supabase!
+        .from('deviations')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('REST delete deviation error:', error);
+      throw error;
+    }
+  }
+
+  // === LEAVE REQUEST OPERATIONS ===
+
+  // Create leave request
+  async createLeaveRequest(data: any) {
+    if (!this.isSupabaseAvailable()) {
+      throw new Error('Supabase not available for create operations');
+    }
+
+    try {
+      const { data: created, error } = await supabase!
+        .from('leave_requests')
+        .insert({
+          employee_id: data.employeeId,
+          start_date: data.startDate,
+          end_date: data.endDate,
+          leave_type: data.leaveType,
+          reason: data.reason,
+          status: data.status || 'pending',
+          submitted: data.submitted || new Date().toISOString(),
+          last_updated: data.lastUpdated || new Date().toISOString()
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return created;
+    } catch (error) {
+      console.error('REST create leave request error:', error);
+      throw error;
+    }
+  }
+
+  // Update leave request
+  async updateLeaveRequest(id: number, updates: any) {
+    if (!this.isSupabaseAvailable()) {
+      throw new Error('Supabase not available for update operations');
+    }
+
+    try {
+      const updateData: any = {};
+      
+      // Map camelCase to snake_case for database
+      if (updates.employeeId) updateData.employee_id = updates.employeeId;
+      if (updates.startDate) updateData.start_date = updates.startDate;
+      if (updates.endDate) updateData.end_date = updates.endDate;
+      if (updates.leaveType) updateData.leave_type = updates.leaveType;
+      if (updates.lastUpdated) updateData.last_updated = updates.lastUpdated;
+      
+      // Direct mapping for these fields
+      ['reason', 'status', 'submitted'].forEach(field => {
+        if (updates[field] !== undefined) updateData[field] = updates[field];
+      });
+
+      const { data: updated, error } = await supabase!
+        .from('leave_requests')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return updated;
+    } catch (error) {
+      console.error('REST update leave request error:', error);
+      throw error;
+    }
+  }
+
+  // Delete leave request
+  async deleteLeaveRequest(id: number) {
+    if (!this.isSupabaseAvailable()) {
+      throw new Error('Supabase not available for delete operations');
+    }
+
+    try {
+      const { error } = await supabase!
+        .from('leave_requests')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('REST delete leave request error:', error);
+      throw error;
+    }
+  }
+
+  // === EMPLOYEE OPERATIONS ===
+
+  // Update employee
+  async updateEmployee(employeeId: string, updates: any) {
+    if (!this.isSupabaseAvailable()) {
+      throw new Error('Supabase not available for update operations');
+    }
+
+    try {
+      const updateData: any = {};
+      
+      // Map camelCase to snake_case for database
+      if (updates.firstName) updateData.first_name = updates.firstName;
+      if (updates.lastName) updateData.last_name = updates.lastName;
+      if (updates.streetAddress) updateData.street_address = updates.streetAddress;
+      if (updates.postalCode) updateData.postal_code = updates.postalCode;
+      if (updates.phoneNumber) updateData.phone_number = updates.phoneNumber;
+      if (updates.workEmail) updateData.work_email = updates.workEmail;
+      if (updates.preferredEmail) updateData.preferred_email = updates.preferredEmail;
+      if (updates.bankClearingNumber) updateData.bank_clearing_number = updates.bankClearingNumber;
+      if (updates.bankAccountNumber) updateData.bank_account_number = updates.bankAccountNumber;
+      if (updates.bankBic) updateData.bank_bic = updates.bankBic;
+      if (updates.bankCountryCode) updateData.bank_country_code = updates.bankCountryCode;
+      if (updates.bankIban) updateData.bank_iban = updates.bankIban;
+      if (updates.scheduleTemplate) updateData.schedule_template = updates.scheduleTemplate;
+      if (updates.careOfAddress) updateData.care_of_address = updates.careOfAddress;
+      
+      // Direct mapping for these fields
+      ['personnummer', 'city', 'country', 'email', 'status', 'role', 'department', 'position', 'manager'].forEach(field => {
+        if (updates[field] !== undefined) updateData[field] = updates[field];
+      });
+
+      const { data: updated, error } = await supabase!
+        .from('employees')
+        .update(updateData)
+        .eq('employee_id', employeeId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return updated;
+    } catch (error) {
+      console.error('REST update employee error:', error);
+      throw error;
+    }
   }
 }
 

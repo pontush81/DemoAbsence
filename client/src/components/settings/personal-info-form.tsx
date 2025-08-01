@@ -21,23 +21,23 @@ import { apiService } from "@/lib/apiService";
 import { apiRequest } from "@/lib/queryClient";
 import { queryClient } from "@/lib/queryClient";
 
-// Personal info form schema
-const personalInfoSchema = z.object({
-  personnummer: z.string().min(1, { message: "Personnummer required" }),
-  firstName: z.string().min(1, { message: "First name required" }),
-  lastName: z.string().min(1, { message: "Last name required" }),
+// Personal info form schema with translations
+const createPersonalInfoSchema = (t: (key: string) => string) => z.object({
+  personnummer: z.string().min(1, { message: t('validation.personnummerRequired') }),
+  firstName: z.string().min(1, { message: t('validation.firstNameRequired') }),
+  lastName: z.string().min(1, { message: t('validation.lastNameRequired') }),
   careOfAddress: z.string().optional(),
-  streetAddress: z.string().min(1, { message: "Street address required" }),
-  postalCode: z.string().min(5, { message: "Valid postal code required" }),
-  city: z.string().min(1, { message: "City required" }),
-  country: z.string().min(1, { message: "Country required" }),
+  streetAddress: z.string().min(1, { message: t('validation.streetAddressRequired') }),
+  postalCode: z.string().min(5, { message: t('validation.postalCodeRequired') }),
+  city: z.string().min(1, { message: t('validation.cityRequired') }),
+  country: z.string().min(1, { message: t('validation.countryRequired') }),
   phoneNumber: z.string().optional(),
-  email: z.string().email({ message: "Valid email required" }).optional(),
-  workEmail: z.string().email({ message: "Valid work email required" }).optional(),
+  email: z.string().email({ message: t('validation.validEmailRequired') }).optional(),
+  workEmail: z.string().email({ message: t('validation.validWorkEmailRequired') }).optional(),
   preferredEmail: z.enum(["personal", "work"]),
 });
 
-type PersonalInfoFormValues = z.infer<typeof personalInfoSchema>;
+type PersonalInfoFormValues = z.infer<ReturnType<typeof createPersonalInfoSchema>>;
 
 const PersonalInfoForm = () => {
   const { t } = useI18n();
@@ -55,6 +55,7 @@ const PersonalInfoForm = () => {
   });
   
   // Form setup
+  const personalInfoSchema = createPersonalInfoSchema(t);
   const form = useForm<PersonalInfoFormValues>({
     resolver: zodResolver(personalInfoSchema),
     defaultValues: {

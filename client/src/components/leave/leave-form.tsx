@@ -28,22 +28,22 @@ import { apiService } from "@/lib/apiService";
 import { useStore } from "@/lib/store";
 import { format } from "date-fns";
 
-// Extend the schema with custom validation
-const leaveFormSchema = insertLeaveRequestSchema.extend({
-  startDate: z.string().min(1, "Start date is required"),
-  endDate: z.string().min(1, "End date is required"),
-  leaveType: z.string().min(1, "Leave type is required"),
-  scope: z.string().min(1, "Scope is required"),
+// Create the schema with custom validation using translations
+const createLeaveFormSchema = (t: (key: string) => string) => insertLeaveRequestSchema.extend({
+  startDate: z.string().min(1, t('validation.startDateRequired')),
+  endDate: z.string().min(1, t('validation.endDateRequired')),
+  leaveType: z.string().min(1, t('validation.leaveTypeRequired')),
+  scope: z.string().min(1, t('validation.scopeRequired')),
 }).refine((data) => {
   const start = new Date(data.startDate);
   const end = new Date(data.endDate);
   return end >= start;
 }, {
-  message: "End date must be on or after start date",
+  message: t('validation.endDateAfterStartDate'),
   path: ["endDate"],
 });
 
-type LeaveFormValues = z.infer<typeof leaveFormSchema>;
+type LeaveFormValues = z.infer<ReturnType<typeof createLeaveFormSchema>>;
 
 interface LeaveFormProps {
   leaveRequestId?: number;
@@ -65,6 +65,7 @@ const LeaveForm = ({ leaveRequestId, onCancel }: LeaveFormProps) => {
   });
   
   // Form setup with default values
+  const leaveFormSchema = createLeaveFormSchema(t);
   const form = useForm<LeaveFormValues>({
     resolver: zodResolver(leaveFormSchema),
     defaultValues: {

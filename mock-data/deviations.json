@@ -140,5 +140,65 @@
     "comment": "Test avvikelse som ska sparas",
     "status": "pending",
     "lastUpdated": "2025-07-31T19:47:33.199Z"
+  },
+  {
+    "id": 10,
+    "employeeId": "E001",
+    "date": "2024-01-15",
+    "startTime": "08:00:00",
+    "endTime": "17:00:00",
+    "timeCode": "300",
+    "comment": "Test",
+    "status": "approved",
+    "lastUpdated": "2025-08-01T09:18:28.855Z",
+    "submitted": "2025-08-01T09:18:28.855Z"
+  },
+  {
+    "id": 11,
+    "employeeId": "E001",
+    "date": "2024-01-16",
+    "startTime": "08:00:00",
+    "endTime": "12:00:00",
+    "timeCode": "300",
+    "comment": "Sjukfrånvaro",
+    "status": "approved",
+    "lastUpdated": "2025-08-01T09:24:31.255Z",
+    "submitted": "2025-08-01T09:24:31.255Z"
+  },
+  {
+    "id": 12,
+    "employeeId": "E001",
+    "date": "2024-01-17",
+    "startTime": "13:00:00",
+    "endTime": "17:00:00",
+    "timeCode": "400",
+    "comment": "Vård av barn",
+    "status": "approved",
+    "lastUpdated": "2025-08-01T09:25:11.910Z",
+    "submitted": "2025-08-01T09:25:11.910Z"
+  },
+  {
+    "id": 13,
+    "employeeId": "E001",
+    "date": "2024-01-18",
+    "startTime": "09:00:00",
+    "endTime": "17:00:00",
+    "timeCode": "200",
+    "comment": "Test REST API create",
+    "status": "approved",
+    "lastUpdated": "2025-08-01T09:27:47.545Z",
+    "submitted": "2025-08-01T09:27:47.546Z"
+  },
+  {
+    "id": 14,
+    "employeeId": "E001",
+    "date": "2024-01-19",
+    "startTime": "14:00:00",
+    "endTime": "18:00:00",
+    "timeCode": "210",
+    "comment": "Lördagsövertid REST API",
+    "status": "approved",
+    "lastUpdated": "2025-08-01T09:31:47.119Z",
+    "submitted": "2025-08-01T09:31:47.119Z"
   }
 ]

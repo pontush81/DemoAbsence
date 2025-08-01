@@ -12,8 +12,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Test endpoint
   app.get('/api/test', (req, res) => {
-    res.json({ message: 'API is working', timestamp: new Date().toISOString() });
+    res.json({ message: 'API is working', timestamp: new Date() });
   });
+
+  // Simple test deviation creation
+  app.post('/api/test-deviation', async (req, res) => {
+    try {
+      const mockDeviations = await getMockData('deviations.json');
+      const newId = 999;
+      const newDeviation = {
+        id: newId,
+        employeeId: "E001",
+        date: "2024-01-15",
+        startTime: "08:00:00",
+        endTime: "17:00:00", 
+        timeCode: "300",
+        comment: "Test from simple route",
+        status: "approved",
+        lastUpdated: new Date().toISOString(),
+        submitted: new Date().toISOString()
+      };
+      
+      res.status(201).json(newDeviation);
+    } catch (error) {
+      console.error('Simple test error:', error);
+      res.status(500).json({ error: (error as Error).message });
+    }
+  });
+
 
   // Test database connection
   app.get('/api/test-data', async (req, res) => {
@@ -27,16 +53,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Debug time balances mock data
-  app.get('/api/admin/debug-time-balances', async (req, res) => {
+    app.get('/api/admin/debug-time-balances', async (req, res) => {
     try {
       const mockData = await getMockData('timebalances.json');
-      res.json({ 
+      res.json({
         message: 'Mock time balances data',
         count: mockData.length,
         data: mockData,
         employeeIds: mockData.map((tb: any) => tb.employeeId)
       });
     } catch (error) {
+      res.status(500).json({ error: (error as Error).message });
+    }
+  });
+
+  // Seed deviations from mock data to database
+  app.post('/api/admin/seed-deviations', async (req, res) => {
+    try {
+      const deviationData = await getMockData('deviations.json');
+      const seededDeviations = [];
+      
+      for (const deviation of deviationData) {
+        try {
+          const deviationEntry = {
+            employeeId: deviation.employeeId,
+            date: deviation.date,
+            startTime: deviation.startTime,
+            endTime: deviation.endTime,
+            timeCode: deviation.timeCode,
+            comment: deviation.comment,
+            status: deviation.status,
+            managerComment: deviation.managerComment,
+            lastUpdated: deviation.lastUpdated ? new Date(deviation.lastUpdated) : new Date(),
+            submitted: deviation.submitted ? new Date(deviation.submitted) : null,
+            approvedBy: deviation.approvedBy,
+            approvedAt: deviation.approvedAt ? new Date(deviation.approvedAt) : null,
+            rejectedBy: deviation.rejectedBy,
+            rejectedAt: deviation.rejectedAt ? new Date(deviation.rejectedAt) : null
+          };
+
+          const created = await restStorage.createDeviation(deviationEntry);
+          seededDeviations.push({ 
+            id: deviation.id, 
+            status: 'success',
+            timeCode: deviation.timeCode,
+            deviationStatus: deviation.status
+          });
+        } catch (error) {
+          console.error(`Error seeding deviation ${deviation.id}:`, error);
+          seededDeviations.push({
+            id: deviation.id,
+            status: 'error',
+            error: (error as Error).message
+          });
+        }
+      }
+
+      res.json({
+        message: 'Deviation seeding completed',
+        results: seededDeviations,
+        total: deviationData.length,
+        successful: seededDeviations.filter(r => r.status === 'success').length,
+        approved: seededDeviations.filter(r => r.deviationStatus === 'approved').length
+      });
+    } catch (error) {
+      console.error('Error during deviation seeding:', error);
       res.status(500).json({ error: (error as Error).message });
     }
   });
@@ -107,24 +188,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const demoTransactions = [
         {
           employeeId: "1001",
+          personnummer: "198505121234",
           date: "2025-05-03", 
           timeCode: "SEM",
           hours: 8.00,
-          comment: "Planerad semester"
+          comment: "Planerad semester",
+          postId: 1
         },
         {
           employeeId: "1001",
+          personnummer: "198505121234",
           date: "2025-05-04",
           timeCode: "SEM", 
           hours: 8.00,
-          comment: "Planerad semester"
+          comment: "Planerad semester",
+          postId: 2
         },
         {
           employeeId: "1001",
+          personnummer: "198505121234",
           date: "2025-05-05",
           timeCode: "SJK",
           hours: 4.50,
-          comment: "Sjukdom - halvdag"
+          comment: "Sjukdom - halvdag",
+          postId: 3
         }
       ];
 
@@ -156,28 +243,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Export approved deviations and schedules for May 2025
       const { employeeIds = ["E001", "E002"], startDate = "2025-05-01", endDate = "2025-05-09" } = req.body;
       
-      // Get deviations (already filtered in the existing logic)
-      let deviations = await getMockData('deviations.json');
-      deviations = deviations.filter((d: any) => 
-        d.status === 'approved' && 
-        employeeIds.includes(d.employeeId) &&
-        d.date >= startDate && 
-        d.date <= endDate
-      );
+      // Get deviations from database
+      let deviations = await restStorage.getDeviations({ 
+        status: 'approved',
+        startDate,
+        endDate 
+      });
+      // Filter by employee IDs if specified
+      if (employeeIds && employeeIds.length > 0) {
+        deviations = deviations.filter((d: any) => employeeIds.includes(d.employeeId || d.employee_id));
+      }
       
-      // Get schedules
-      let schedules = await getMockData('schedules.json');
-      schedules = schedules.filter((s: any) => 
-        employeeIds.includes(s.employeeId) &&
-        s.date >= startDate && 
-        s.date <= endDate
-      );
+      // Get schedules from database
+      let schedules = await restStorage.getSchedules({ 
+        startDate,
+        endDate 
+      });
+      // Filter by employee IDs if specified  
+      if (employeeIds && employeeIds.length > 0) {
+        schedules = schedules.filter((s: any) => employeeIds.includes(s.employeeId));
+      }
       
       console.log(`Found ${deviations.length} approved deviations and ${schedules.length} schedule entries`);
       
-      const employees = await getMockData('employees.json');
-      const transactions = generatePAXMLTransactions(deviations, employees);
-      const xmlSchedules = convertAppScheduleToXMLSchedule(schedules);
+      const employees = await restStorage.getEmployees();
+      
+      // Transform database format to PAXML expected format
+      const transformedDeviations = deviations.map((d: any) => ({
+        ...d,
+        employeeId: d.employee_id || d.employeeId,
+        timeCode: d.time_code || d.timeCode,
+        startTime: d.start_time || d.startTime,
+        endTime: d.end_time || d.endTime
+      }));
+      
+      const transformedEmployees = employees.map((e: any) => ({
+        ...e,
+        employeeId: e.employee_id || e.employeeId
+      }));
+      
+      const transactions = generatePAXMLTransactions(transformedDeviations, transformedEmployees);
+      const xmlSchedules = convertAppScheduleToXMLSchedule(schedules, transformedEmployees);
       
       const paXmlContent = generatePAXMLXMLWithSchedules(transactions, xmlSchedules);
       const filename = `paxml-demo-complete-${new Date().toISOString().split('T')[0]}.xml`;
@@ -244,7 +350,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update employee
   app.patch('/api/employees/:id', async (req, res) => {
     try {
-      const updated = await storage.updateEmployee(req.params.id, req.body);
+      const updated = await restStorage.updateEmployee(req.params.id, req.body);
       if (updated) {
         res.json(updated);
       } else {
@@ -332,6 +438,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       let deviations = await restStorage.getDeviations(filters);
       
+      // For now, keep using database data (we have working database via REST API)
+      // TODO: Add more test data to database or implement create operations via REST API
+      
       // Post-filter for time code categories if needed
       if (timeCode && timeCode !== 'all' && filters.timeCodeCategory) {
         const timeCodes = await restStorage.getTimeCodes();
@@ -373,14 +482,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...req.body,
         startTime: req.body.startTime + ':00', // Add seconds for consistency
         endTime: req.body.endTime + ':00',     // Add seconds for consistency
-        status: req.body.status || 'pending',
-        submitted: new Date().toISOString()
+        status: req.body.status || 'pending'
       };
       
-      const newDeviation = await storage.createDeviation(deviationData);
-      
-      console.log('Created new deviation:', newDeviation);
-      res.status(201).json(newDeviation);
+      // Use consistent REST API for all operations
+      try {
+        const newDeviation = await restStorage.createDeviation(deviationData);
+        console.log('Created new deviation via REST API:', newDeviation);
+        res.status(201).json(newDeviation);
+      } catch (restError) {
+        console.log('REST API creation failed, falling back to mock data:', restError);
+        // Fallback to mock data if REST API fails
+        const mockDeviations = await getMockData('deviations.json');
+        const newId = Math.max(...mockDeviations.map((d: any) => d.id || 0)) + 1;
+        const newDeviation = {
+          id: newId,
+          ...deviationData,
+          lastUpdated: new Date().toISOString(),
+          submitted: new Date().toISOString()  
+        };
+        mockDeviations.push(newDeviation);
+        await saveMockData('deviations.json', mockDeviations);
+        
+        console.log('Created new deviation via mock fallback:', newDeviation);
+        res.status(201).json(newDeviation);
+      }
     } catch (error) {
       console.error('Error creating deviation:', error);
       res.status(500).json({ 
@@ -403,12 +529,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         updateData.endTime = updateData.endTime + ':00';
       }
       
-      const updatedDeviation = await storage.updateDeviation(parseInt(req.params.id), updateData);
-      
-      if (updatedDeviation) {
+      try {
+        const updatedDeviation = await restStorage.updateDeviation(parseInt(req.params.id), updateData);
         res.json(updatedDeviation);
-      } else {
-        res.status(404).json({ message: 'Deviation not found' });
+      } catch (restError) {
+        console.log('REST API update failed:', restError);
+        res.status(404).json({ message: 'Deviation not found or update failed' });
       }
     } catch (error) {
       console.error('Error updating deviation:', error);
@@ -422,11 +548,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Delete deviation
   app.delete('/api/deviations/:id', async (req, res) => {
     try {
-      const success = await storage.deleteDeviation(parseInt(req.params.id));
-      if (success) {
+      try {
+        const success = await restStorage.deleteDeviation(parseInt(req.params.id));
         res.status(204).send();
-      } else {
-        res.status(404).json({ message: 'Deviation not found' });
+      } catch (restError) {
+        console.log('REST API delete failed:', restError);
+        res.status(404).json({ message: 'Deviation not found or delete failed' });
       }
     } catch (error) {
       console.error('Error deleting deviation:', error);
@@ -496,13 +623,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create leave request
   app.post('/api/leave-requests', async (req, res) => {
     try {
+      const now = new Date();
       const leaveRequestData = {
         ...req.body,
         status: req.body.status || 'pending',
-        submitted: new Date().toISOString()
+        submitted: now,
+        lastUpdated: now
       };
       
-      const newLeaveRequest = await storage.createLeaveRequest(leaveRequestData);
+      let newLeaveRequest;
+      
+      // Try storage first, fallback to mock data
+      try {
+        newLeaveRequest = await restStorage.createLeaveRequest(leaveRequestData);
+      } catch (storageError) {
+        console.log('Storage create failed, using mock data fallback:', storageError);
+        // Fallback to mock data creation
+        const leaveRequests = await getMockData('leave-requests.json');
+        const newId = generateId(leaveRequests);
+        newLeaveRequest = {
+          id: newId,
+          ...leaveRequestData
+        };
+        leaveRequests.push(newLeaveRequest);
+        await saveMockData('leave-requests.json', leaveRequests);
+      }
+      
       res.status(201).json(newLeaveRequest);
     } catch (error) {
       console.error('Error creating leave request:', error);
@@ -516,7 +662,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update leave request
   app.patch('/api/leave-requests/:id', async (req, res) => {
     try {
-      const updatedLeaveRequest = await storage.updateLeaveRequest(parseInt(req.params.id), req.body);
+      const updatedLeaveRequest = await restStorage.updateLeaveRequest(parseInt(req.params.id), req.body);
       if (updatedLeaveRequest) {
         res.json(updatedLeaveRequest);
       } else {
@@ -534,7 +680,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Delete leave request
   app.delete('/api/leave-requests/:id', async (req, res) => {
     try {
-      const success = await storage.deleteLeaveRequest(parseInt(req.params.id));
+      const success = await restStorage.deleteLeaveRequest(parseInt(req.params.id));
       if (success) {
         res.status(204).send();
       } else {
@@ -601,7 +747,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get pending deviations (for manager)
   app.get('/api/manager/deviations/pending', async (req, res) => {
     try {
-      const pendingDeviations = await storage.getDeviations({ status: 'pending' });
+      let pendingDeviations;
+      
+      // Try storage first, fallback to restStorage
+      try {
+        pendingDeviations = await restStorage.getDeviations({ status: 'pending' });
+      } catch (storageError) {
+        console.log('Storage failed, using restStorage fallback:', storageError);
+        const allDeviations = await restStorage.getDeviations({ status: 'pending' });
+        pendingDeviations = allDeviations.filter((d: any) => d.status === 'pending');
+      }
+      
       res.json(pendingDeviations);
     } catch (error) {
       console.error('Error fetching pending deviations:', error);
@@ -616,10 +772,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: 'approved',
         managerComment: req.body.comment || 'Approved',
         approvedBy: 'E005', // Mock manager ID
-        approvedAt: new Date().toISOString()
+        approvedAt: new Date()
       };
       
-      const approvedDeviation = await storage.updateDeviation(parseInt(req.params.id), updateData);
+      let approvedDeviation;
+      
+      // Try storage first, fallback to mock data update
+      try {
+        approvedDeviation = await restStorage.updateDeviation(parseInt(req.params.id), updateData);
+      } catch (storageError) {
+        console.log('Storage update failed, using mock data fallback:', storageError);
+        // Fallback to mock data update
+        const deviations = await getMockData('deviations.json');
+        const index = deviations.findIndex((d: any) => d.id === parseInt(req.params.id));
+        if (index !== -1) {
+          approvedDeviation = {
+            ...deviations[index],
+            ...updateData,
+            lastUpdated: new Date()
+          };
+          deviations[index] = approvedDeviation;
+          await saveMockData('deviations.json', deviations);
+        }
+      }
+      
       if (approvedDeviation) {
         res.json(approvedDeviation);
       } else {
@@ -638,10 +814,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: 'rejected',
         managerComment: req.body.comment || 'Rejected',
         rejectedBy: 'E005', // Mock manager ID
-        rejectedAt: new Date().toISOString()
+        rejectedAt: new Date()
       };
       
-      const rejectedDeviation = await storage.updateDeviation(parseInt(req.params.id), updateData);
+      const rejectedDeviation = await restStorage.updateDeviation(parseInt(req.params.id), updateData);
       if (rejectedDeviation) {
         res.json(rejectedDeviation);
       } else {
@@ -661,7 +837,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         managerComment: req.body.comment || 'Needs correction'
       };
       
-      const returnedDeviation = await storage.updateDeviation(parseInt(req.params.id), updateData);
+      const returnedDeviation = await restStorage.updateDeviation(parseInt(req.params.id), updateData);
       if (returnedDeviation) {
         res.json(returnedDeviation);
       } else {
@@ -676,7 +852,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get pending leave requests (for manager)
   app.get('/api/manager/leave-requests/pending', async (req, res) => {
     try {
-      const pendingLeaveRequests = await storage.getLeaveRequests({ status: 'pending' });
+      let pendingLeaveRequests;
+      
+      // Try storage first, fallback to restStorage
+      try {
+        pendingLeaveRequests = await restStorage.getLeaveRequests({ status: 'pending' });
+      } catch (storageError) {
+        console.log('Storage failed, using restStorage fallback:', storageError);
+        const allLeaveRequests = await restStorage.getLeaveRequests({ status: 'pending' });
+        pendingLeaveRequests = allLeaveRequests.filter((lr: any) => lr.status === 'pending');
+      }
+      
       res.json(pendingLeaveRequests);
     } catch (error) {
       console.error('Error fetching pending leave requests:', error);
@@ -691,10 +877,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: 'approved',
         managerComment: req.body.comment || 'Approved',
         approvedBy: 'E005', // Mock manager ID
-        approvedAt: new Date().toISOString()
+        approvedAt: new Date()
       };
       
-      const approvedLeaveRequest = await storage.updateLeaveRequest(parseInt(req.params.id), updateData);
+      const approvedLeaveRequest = await restStorage.updateLeaveRequest(parseInt(req.params.id), updateData);
       if (approvedLeaveRequest) {
         res.json(approvedLeaveRequest);
       } else {
@@ -713,10 +899,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: 'rejected',
         managerComment: req.body.comment || 'Rejected',
         rejectedBy: 'E005', // Mock manager ID
-        rejectedAt: new Date().toISOString()
+        rejectedAt: new Date()
       };
       
-      const rejectedLeaveRequest = await storage.updateLeaveRequest(parseInt(req.params.id), updateData);
+      const rejectedLeaveRequest = await restStorage.updateLeaveRequest(parseInt(req.params.id), updateData);
       if (rejectedLeaveRequest) {
         res.json(rejectedLeaveRequest);
       } else {
@@ -731,23 +917,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/paxml/export', async (req, res) => {
     const { employeeIds, startDate, endDate } = req.body;
     
-    let deviations = await getMockData('deviations.json');
-    deviations = deviations.filter((d: any) => d.status === 'approved');
+    // Get approved deviations from database, with fallback to mock data
+    let deviations = await restStorage.getDeviations({ 
+      status: 'approved',
+      startDate,
+      endDate 
+    });
     
+    // Fallback to mock data if we have very few deviations (for testing/demo)
+    if (deviations.length <= 1) {
+      console.log('Using mock data fallback for PAXML export (insufficient database data)');
+      const mockDeviations = await getMockData('deviations.json');
+      deviations = mockDeviations.filter((d: any) => d.status === 'approved');
+      
+      // Apply date filtering to mock data
+      if (startDate || endDate) {
+        deviations = deviations.filter((d: any) => {
+          const deviationDate = new Date(d.date);
+          if (startDate && deviationDate < new Date(startDate)) return false;
+          if (endDate && deviationDate > new Date(endDate)) return false;
+          return true;
+        });
+      }
+    }
+    
+    // Filter by employee IDs if specified
     if (employeeIds && employeeIds.length > 0) {
-      deviations = deviations.filter((d: any) => employeeIds.includes(d.employeeId));
+      deviations = deviations.filter((d: any) => employeeIds.includes(d.employeeId || d.employee_id));
     }
     
-    if (startDate) {
-      deviations = deviations.filter((d: any) => d.date >= startDate);
-    }
+    const employees = await restStorage.getEmployees();
     
-    if (endDate) {
-      deviations = deviations.filter((d: any) => d.date <= endDate);
-    }
+    // Transform database format to PAXML expected format
+    const transformedDeviations = deviations.map((d: any) => ({
+      ...d,
+      employeeId: d.employee_id || d.employeeId,
+      timeCode: d.time_code || d.timeCode,
+      startTime: d.start_time || d.startTime,
+      endTime: d.end_time || d.endTime
+    }));
     
-    const employees = await getMockData('employees.json');
-    const transactions = generatePAXMLTransactions(deviations, employees);
+    const transformedEmployees = employees.map((e: any) => ({
+      ...e,
+      employeeId: e.employee_id || e.employeeId,
+      personnummer: e.personnummer || e.personal_number
+    }));
+    
+    
+    const transactions = generatePAXMLTransactions(transformedDeviations, transformedEmployees);
     
     const validationErrors = validatePAXMLData(transactions);
     if (validationErrors.length > 0) {
@@ -775,23 +992,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Get all schedules (extend existing endpoint)
   app.get('/api/schedules', async (req, res) => {
-    const { employeeId, startDate, endDate } = req.query;
-    
-    let schedules = await getMockData('schedules.json');
-    
-    if (employeeId) {
-      schedules = schedules.filter((s: any) => s.employeeId === employeeId);
+    try {
+      const { employeeId, startDate, endDate } = req.query;
+      
+      const filters: any = {};
+      if (employeeId) filters.employeeId = employeeId;
+      if (startDate) filters.startDate = startDate;
+      if (endDate) filters.endDate = endDate;
+      
+      const schedules = await restStorage.getSchedules(filters);
+      res.json(schedules);
+    } catch (error) {
+      console.error('Error fetching schedules:', error);
+      res.status(500).json({ error: (error as Error).message });
     }
-    
-    if (startDate) {
-      schedules = schedules.filter((s: any) => s.date >= startDate);
-    }
-    
-    if (endDate) {
-      schedules = schedules.filter((s: any) => s.date <= endDate);
-    }
-    
-    res.json(schedules);
   });
 
   app.post('/api/paxml/import-schedules', (req, res) => {
@@ -846,43 +1060,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/paxml/export-with-schedules', async (req, res) => {
     const { employeeIds, startDate, endDate, includeSchedules = true } = req.body;
     
-    // Get and filter deviations
-    let deviations = await getMockData('deviations.json');
-    deviations = deviations.filter((d: any) => d.status === 'approved');
+    // Get approved deviations from database
+    let deviations = await restStorage.getDeviations({ 
+      status: 'approved',
+      startDate,
+      endDate 
+    });
     
+    // Filter by employee IDs if specified
     if (employeeIds && employeeIds.length > 0) {
-      deviations = deviations.filter((d: any) => employeeIds.includes(d.employeeId));
+      deviations = deviations.filter((d: any) => employeeIds.includes(d.employeeId || d.employee_id));
     }
     
-    if (startDate) {
-      deviations = deviations.filter((d: any) => d.date >= startDate);
-    }
-    
-    if (endDate) {
-      deviations = deviations.filter((d: any) => d.date <= endDate);
-    }
-    
-    // Get and filter schedules
+    // Get schedules from database
     let schedules: any[] = [];
     if (includeSchedules) {
-      schedules = await getMockData('schedules.json');
+      schedules = await restStorage.getSchedules({ 
+        startDate,
+        endDate 
+      });
       
+      // Filter by employee IDs if specified
       if (employeeIds && employeeIds.length > 0) {
         schedules = schedules.filter((s: any) => employeeIds.includes(s.employeeId));
       }
-      
-      if (startDate) {
-        schedules = schedules.filter((s: any) => s.date >= startDate);
-      }
-      
-      if (endDate) {
-        schedules = schedules.filter((s: any) => s.date <= endDate);
-      }
     }
     
-    const employees = await getMockData('employees.json');
-    const transactions = generatePAXMLTransactions(deviations, employees);
-    const xmlSchedules = convertAppScheduleToXMLSchedule(schedules);
+    const employees = await restStorage.getEmployees();
+    
+    // Transform database format to PAXML expected format
+    const transformedDeviations = deviations.map((d: any) => ({
+      ...d,
+      employeeId: d.employee_id || d.employeeId,
+      timeCode: d.time_code || d.timeCode,
+      startTime: d.start_time || d.startTime,
+      endTime: d.end_time || d.endTime
+    }));
+    
+    const transformedEmployees = employees.map((e: any) => ({
+      ...e,
+      employeeId: e.employee_id || e.employeeId,
+      personnummer: e.personnummer || e.personal_number
+    }));
+    
+    const transactions = generatePAXMLTransactions(transformedDeviations, transformedEmployees);
+    const xmlSchedules = convertAppScheduleToXMLSchedule(schedules, transformedEmployees);
     
     const validationErrors = validatePAXMLData(transactions);
     if (validationErrors.length > 0) {

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paxml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.paxml.se/2.2/paxml.xsd">
+	<header>
+		<format>LÖNIN</format>
+		<version>2.2</version>
+	</header>
+	<tidtransaktioner>
+		<tidtrans postid="1" anstid="E001" persnr="198505121234">
+			<tidkod>SEM</tidkod>
+			<datum>2025-05-03</datum>
+			<timmar>9.00</timmar>
+			<info>Planerad semester - första dagen</info>
+		</tidtrans>
+		<tidtrans postid="2" anstid="E001" persnr="198505121234">
+			<tidkod>SEM</tidkod>
+			<datum>2025-05-04</datum>
+			<timmar>9.00</timmar>
+			<info>Planerad semester - andra dagen</info>
+		</tidtrans>
+		<tidtrans postid="3" anstid="E001" persnr="198505121234">
+			<tidkod>SJK</tidkod>
+			<datum>2025-05-05</datum>
+			<timmar>4.50</timmar>
+			<info>Sjukdom - halvdag (magsjuka)</info>
+		</tidtrans>
+		<tidtrans postid="4" anstid="E001" persnr="198505121234">
+			<tidkod>SJK</tidkod>
+			<datum>2024-01-15</datum>
+			<timmar>9.00</timmar>
+			<info>Test</info>
+		</tidtrans>
+		<tidtrans postid="5" anstid="E001" persnr="198505121234">
+			<tidkod>SJK</tidkod>
+			<datum>2024-01-16</datum>
+			<timmar>4.00</timmar>
+			<info>Sjukfrånvaro</info>
+		</tidtrans>
+		<tidtrans postid="6" anstid="E001" persnr="198505121234">
+			<tidkod>VAB</tidkod>
+			<datum>2024-01-17</datum>
+			<timmar>4.00</timmar>
+			<info>Vård av barn</info>
+		</tidtrans>
+		<tidtrans postid="7" anstid="E001" persnr="198505121234">
+			<tidkod>ÖT1</tidkod>
+			<datum>2024-01-18</datum>
+			<timmar>8.00</timmar>
+			<info>Test REST API create</info>
+		</tidtrans>
+		<tidtrans postid="8" anstid="E001" persnr="198505121234">
+			<tidkod>ÖT2</tidkod>
+			<datum>2024-01-19</datum>
+			<timmar>4.00</timmar>
+			<info>Lördagsövertid REST API</info>
+		</tidtrans>
+	</tidtransaktioner>
+</paxml>

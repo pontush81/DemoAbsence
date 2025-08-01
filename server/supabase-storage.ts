@@ -92,7 +92,7 @@ export class SupabaseStorage {
       .insert(deviations)
       .values({
         ...data,
-        lastUpdated: new Date().toISOString()
+        lastUpdated: data.lastUpdated || new Date()
       })
       .returning();
     return created;
@@ -103,7 +103,7 @@ export class SupabaseStorage {
       .update(deviations)
       .set({
         ...updates,
-        lastUpdated: new Date().toISOString()
+        lastUpdated: new Date()
       })
       .where(eq(deviations.id, id))
       .returning();
@@ -147,7 +147,7 @@ export class SupabaseStorage {
       .insert(leaveRequests)
       .values({
         ...data,
-        lastUpdated: new Date().toISOString()
+        lastUpdated: new Date()
       })
       .returning();
     return created;
@@ -158,7 +158,7 @@ export class SupabaseStorage {
       .update(leaveRequests)
       .set({
         ...updates,
-        lastUpdated: new Date().toISOString()
+        lastUpdated: new Date()
       })
       .where(eq(leaveRequests.id, id))
       .returning();

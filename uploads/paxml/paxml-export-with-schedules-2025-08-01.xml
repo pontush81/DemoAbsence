@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paxml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.paxml.se/2.2/paxml.xsd">
+	<header>
+		<format>LÖNIN</format>
+		<version>2.2</version>
+	</header>
+	<tidtransaktioner>
+		<tidtrans postid="1" anstid="E001" persnr="198505121234">
+			<tidkod>ÖT1</tidkod>
+			<datum>2023-04-14</datum>
+			<timmar>2.50</timmar>
+			<info>Akut projektleverans</info>
+		</tidtrans>
+	</tidtransaktioner>
+</paxml>

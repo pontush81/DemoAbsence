@@ -20,16 +20,16 @@ import { apiService } from "@/lib/apiService";
 import { apiRequest } from "@/lib/queryClient";
 import { queryClient } from "@/lib/queryClient";
 
-// Bank info form schema
-const bankInfoSchema = z.object({
-  bankClearingNumber: z.string().min(4, { message: "Valid clearing number required" }),
-  bankAccountNumber: z.string().min(6, { message: "Valid account number required" }),
+// Bank info form schema with translations
+const createBankInfoSchema = (t: (key: string) => string) => z.object({
+  bankClearingNumber: z.string().min(4, { message: t('validation.validClearingNumberRequired') }),
+  bankAccountNumber: z.string().min(6, { message: t('validation.validAccountNumberRequired') }),
   bankBIC: z.string().optional(),
-  bankCountryCode: z.string().min(2, { message: "Country code required" }),
+  bankCountryCode: z.string().min(2, { message: t('validation.countryCodeRequired') }),
   bankIBAN: z.string().optional(),
 });
 
-type BankInfoFormValues = z.infer<typeof bankInfoSchema>;
+type BankInfoFormValues = z.infer<ReturnType<typeof createBankInfoSchema>>;
 
 const BankInfoForm = () => {
   const { t } = useI18n();
@@ -46,7 +46,8 @@ const BankInfoForm = () => {
     enabled: !!employeeId,
   });
   
-  // Form setup
+  // Form setup  
+  const bankInfoSchema = createBankInfoSchema(t);
   const form = useForm<BankInfoFormValues>({
     resolver: zodResolver(bankInfoSchema),
     defaultValues: {
