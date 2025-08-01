@@ -38,6 +38,18 @@ const DeviationList = ({ onSelect }: DeviationListProps) => {
       : Promise.resolve([]),
     enabled: !!employeeId,
   });
+
+  // Fetch time codes for mapping
+  const { data: timeCodes = [] } = useQuery({
+    queryKey: ['/api/timecodes'],
+    queryFn: () => apiService.getTimeCodes(),
+  });
+
+  // Helper function to get time code name
+  const getTimeCodeName = (timeCodeStr: string) => {
+    const timeCode = timeCodes.find(tc => tc.code === timeCodeStr);
+    return timeCode ? `${timeCode.code} - ${timeCode.name}` : timeCodeStr;
+  };
   
   const handleFilterChange = (newFilters: typeof filters) => {
     setFilters(newFilters);
@@ -149,7 +161,7 @@ const DeviationList = ({ onSelect }: DeviationListProps) => {
                   onClick={() => handleRowClick(deviation)}
                 >
                   <TableCell className="whitespace-nowrap">{deviation.date}</TableCell>
-                  <TableCell className="whitespace-nowrap">{deviation.timeCode}</TableCell>
+                  <TableCell className="whitespace-nowrap">{getTimeCodeName(deviation.timeCode)}</TableCell>
                   <TableCell className="whitespace-nowrap">
                     {formatTime(deviation.startTime)} - {formatTime(deviation.endTime)}
                   </TableCell>

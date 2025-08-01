@@ -27,6 +27,12 @@ const DeviationDetails = ({ deviationId, onBack }: DeviationDetailsProps) => {
     queryKey: ['/api/deviations', deviationId],
     queryFn: () => apiService.getDeviation(deviationId),
   });
+
+  // Fetch time codes for mapping
+  const { data: timeCodes = [] } = useQuery({
+    queryKey: ['/api/timecodes'],
+    queryFn: () => apiService.getTimeCodes(),
+  });
   
   // Delete mutation
   const deleteMutation = useMutation({
@@ -265,7 +271,12 @@ const DeviationDetails = ({ deviationId, onBack }: DeviationDetailsProps) => {
             </div>
             <div className="mb-4">
               <p className="text-sm text-muted-foreground">{t('deviations.timeCode')}</p>
-              <p className="font-medium">{deviation.timeCode}</p>
+              <p className="font-medium">
+                {(() => {
+                  const timeCode = timeCodes.find(tc => tc.code === deviation.timeCode);
+                  return timeCode ? `${timeCode.code} - ${timeCode.name}` : deviation.timeCode;
+                })()}
+              </p>
             </div>
             <div className="mb-4">
               <p className="text-sm text-muted-foreground">{t('deviations.comment')}</p>
