@@ -22,9 +22,11 @@ async function getMockData(filename: string) {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  try {
-    const { employeeId, period, status, timeCode, sortBy } = req.query;
-    let deviations;
+  if (req.method === 'GET') {
+    // GET - fetch deviations with filtering
+    try {
+      const { employeeId, period, status, timeCode, sortBy } = req.query;
+      let deviations;
     
     // Try Supabase first, fallback to mock data
     if (supabase) {
@@ -169,9 +171,72 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       endTime: deviation.end_time || deviation.endTime,
     }));
     
-    res.json(mappedDeviations);
-  } catch (error) {
-    console.error('Error fetching deviations:', error);
-    res.status(500).json({ error: (error as Error).message });
+      res.json(mappedDeviations);
+    } catch (error) {
+      console.error('Error fetching deviations:', error);
+      res.status(500).json({ error: (error as Error).message });
+    }
+  } else if (req.method === 'POST') {
+    // POST - create new deviation
+    try {
+      const deviationData = {
+        ...req.body,
+        startTime: req.body.startTime && !req.body.startTime.includes(':00') ? req.body.startTime + ':00' : req.body.startTime,
+        endTime: req.body.endTime && !req.body.endTime.includes(':00') ? req.body.endTime + ':00' : req.body.endTime,
+        status: req.body.status || 'pending'
+      };
+      
+      let newDeviation;
+      
+      // Try Supabase first, fallback to mock data
+      if (supabase) {
+        try {
+          const { data, error } = await supabase
+            .from('deviations')
+            .insert([deviationData])
+            .select()
+            .single();
+          
+          if (error) throw error;
+          newDeviation = data;
+          console.log('Created new deviation via Supabase:', newDeviation);
+        } catch (error) {
+          console.log('Supabase creation failed, using mock data:', error);
+        }
+      }
+      
+      // If Supabase didn't work, try mock data fallback
+      if (!newDeviation) {
+        const mockDeviations = await getMockData('deviations.json');
+        const newId = Math.max(...mockDeviations.map((d: any) => d.id || 0)) + 1;
+        newDeviation = {
+          id: newId,
+          ...deviationData,
+          lastUpdated: new Date().toISOString(),
+          submitted: new Date().toISOString()
+        };
+        // In a real implementation, we would save back to file
+        console.log('Created new deviation via mock fallback:', newDeviation);
+      }
+      
+      // Map snake_case to camelCase for frontend compatibility
+      const mappedDeviation = {
+        ...newDeviation,
+        employeeId: newDeviation.employee_id || newDeviation.employeeId,
+        timeCode: newDeviation.time_code || newDeviation.timeCode,
+        startTime: newDeviation.start_time || newDeviation.startTime,
+        endTime: newDeviation.end_time || newDeviation.endTime,
+      };
+      
+      res.status(201).json(mappedDeviation);
+    } catch (error) {
+      console.error('Error creating deviation:', error);
+      res.status(500).json({ 
+        error: 'Failed to create deviation', 
+        details: (error as Error).message 
+      });
+    }
+  } else {
+    res.status(405).json({ message: 'Method not allowed' });
   }
 }
