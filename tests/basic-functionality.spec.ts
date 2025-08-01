@@ -31,21 +31,43 @@ test.describe('Basic App Functionality', () => {
   test('should have working navigation', async ({ page }) => {
     await page.goto('/');
     await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(2000); // Wait for navigation to load
     
-    // Look for navigation elements - could be sidebar, nav, or menu items
-    const navigationElements = page.locator('nav, [role="navigation"], aside, .sidebar');
-    const navCount = await navigationElements.count();
+    const viewport = page.viewportSize();
+    const isMobile = viewport ? viewport.width < 768 : false;
     
-    if (navCount > 0) {
-      await expect(navigationElements.first()).toBeVisible();
+    if (isMobile) {
+      // Test mobile navigation
+      const menuButton = page.locator('#menu-toggle');
+      if (await menuButton.count() > 0) {
+        await expect(menuButton).toBeVisible();
+        await menuButton.click();
+        await page.waitForTimeout(500);
+        
+        const mobileSidebar = page.locator('#mobile-sidebar');
+        const deviationsLink = mobileSidebar.locator('a[href="/deviations"]');
+        
+        if (await deviationsLink.count() > 0) {
+          await deviationsLink.click();
+          await page.waitForLoadState('domcontentloaded');
+          expect(page.url()).toContain('/deviations');
+        }
+      }
+    } else {
+      // Test desktop navigation
+      const desktopSidebar = page.locator('aside.hidden.md\\:flex');
+      const sidebarCount = await desktopSidebar.count();
       
-      // Try to find and click a deviations link
-      const deviationsLink = page.locator('a[href*="deviation"], [data-testid*="deviation"], text="Avvikelse", text="Deviation"').first();
-      
-      if (await deviationsLink.count() > 0) {
-        await deviationsLink.click();
-        await page.waitForLoadState('domcontentloaded');
-        expect(page.url()).toMatch(/deviation/);
+      if (sidebarCount > 0) {
+        await expect(desktopSidebar).toBeVisible();
+        
+        const deviationsLink = desktopSidebar.locator('a[href="/deviations"]');
+        
+        if (await deviationsLink.count() > 0) {
+          await deviationsLink.click();
+          await page.waitForLoadState('domcontentloaded');
+          expect(page.url()).toContain('/deviations');
+        }
       }
     }
   });

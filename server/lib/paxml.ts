@@ -31,7 +31,7 @@ export const TIME_CODE_MAPPING: Record<string, string> = {
   '422': 'HLG', // Helgdag
   '423': 'SKI', // Skiftarbete
   '424': 'FLX', // Flextid
-  '425': 'SCH'  // Schema
+  '425': 'SCH', // Schema
   
   '501': 'FR1', // Egen frånvaroorsak 1
   '502': 'FR2', // Egen frånvaroorsak 2

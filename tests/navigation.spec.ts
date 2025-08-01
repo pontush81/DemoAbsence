@@ -6,14 +6,30 @@ test.describe('Navigation Tests', () => {
     await page.setViewportSize({ width: 1024, height: 768 });
     await page.goto('/');
     await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(2000); // Wait for navigation to fully load
     
     // Desktop sidebar should be visible
     const desktopSidebar = page.locator('aside.hidden.md\\:flex');
     await expect(desktopSidebar).toBeVisible();
     
-    // Check for navigation links
-    const deviationsLink = page.locator('a[href="/deviations"]').first();
+    // Check for navigation links in desktop sidebar specifically
+    const deviationsLink = desktopSidebar.locator('a[href="/deviations"]');
     await expect(deviationsLink).toBeVisible();
+    
+    // Verify all main navigation items are present and visible
+    const navigationItems = [
+      { href: '/', text: 'Översikt' },
+      { href: '/deviations', text: 'Avvikelser' },
+      { href: '/leave', text: 'Ledighet' },
+      { href: '/payslips', text: 'Lönespecifikationer' },
+      { href: '/schedules', text: 'Scheman' },
+      { href: '/settings', text: 'Inställningar' }
+    ];
+    
+    for (const item of navigationItems) {
+      const link = desktopSidebar.locator(`a[href="${item.href}"]`);
+      await expect(link).toBeVisible();
+    }
   });
 
   test('should show mobile header on small screens', async ({ page }) => {
@@ -65,39 +81,45 @@ test.describe('Navigation Tests', () => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
     await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(1000); // Wait for mobile UI to load
     
-    // Look for menu button/hamburger menu
-    const menuButton = page.locator('[aria-label*="menu"], [data-testid*="menu"], .menu-button, button[aria-expanded]');
+    // Mobile menu button should be visible
+    const menuButton = page.locator('#menu-toggle');
+    await expect(menuButton).toBeVisible();
     
-    if (await menuButton.count() > 0) {
-      await menuButton.first().click();
-      
-      // Mobile sidebar should become visible
-      const mobileSidebar = page.locator('#mobile-sidebar');
-      await expect(mobileSidebar).not.toHaveClass(/-translate-x-full/);
-      
-      // Try to click deviations link
-      const deviationsLink = page.locator('#mobile-sidebar a[href="/deviations"]');
-      if (await deviationsLink.count() > 0) {
-        await deviationsLink.click();
-        expect(page.url()).toContain('/deviations');
-      }
-    }
+    // Click menu button to open sidebar  
+    await menuButton.click();
+    await page.waitForTimeout(500); // Wait for animation
+    
+    // Mobile sidebar should become visible (not have -translate-x-full)
+    const mobileSidebar = page.locator('#mobile-sidebar');
+    await expect(mobileSidebar).toHaveClass(/translate-x-0/);
+    
+    // Check that navigation links are visible in mobile sidebar
+    const deviationsLink = mobileSidebar.locator('a[href="/deviations"]');
+    await expect(deviationsLink).toBeVisible();
+    
+    // Test navigation functionality
+    await deviationsLink.click();
+    await page.waitForLoadState('domcontentloaded');
+    expect(page.url()).toContain('/deviations');
   });
 
   test('should have all main navigation items', async ({ page }) => {
     await page.setViewportSize({ width: 1024, height: 768 });
     await page.goto('/');
     await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(2000);
     
-    // Check for main navigation items
-    const expectedRoutes = ['/deviations', '/leave', '/payslips', '/settings'];
+    // Get desktop sidebar and check all navigation items
+    const desktopSidebar = page.locator('aside.hidden.md\\:flex');
+    await expect(desktopSidebar).toBeVisible();
+    
+    const expectedRoutes = ['/', '/deviations', '/leave', '/payslips', '/schedules', '/settings'];
     
     for (const route of expectedRoutes) {
-      const link = page.locator(`a[href="${route}"]`).first();
-      if (await link.count() > 0) {
-        await expect(link).toBeVisible();
-      }
+      const link = desktopSidebar.locator(`a[href="${route}"]`);
+      await expect(link).toBeVisible();
     }
   });
 
@@ -107,19 +129,22 @@ test.describe('Navigation Tests', () => {
     // Start at home
     await page.goto('/');
     await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(1000);
     
     // Go to deviations
     await page.goto('/deviations');
     await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(1000);
     
     // Navigation should still be visible
     const desktopSidebar = page.locator('aside.hidden.md\\:flex');
     await expect(desktopSidebar).toBeVisible();
     
-    // Deviations link should be active/highlighted
-    const activeLink = page.locator('a[href="/deviations"].text-primary, a[href="/deviations"][class*="active"], a[href="/deviations"][class*="border-primary"]');
-    if (await activeLink.count() > 0) {
-      await expect(activeLink.first()).toBeVisible();
-    }
+    // Check that deviations link exists and is functional
+    const deviationsLink = desktopSidebar.locator('a[href="/deviations"]');
+    await expect(deviationsLink).toBeVisible();
+    
+    // Verify we're on the correct page
+    expect(page.url()).toContain('/deviations');
   });
 }); 
