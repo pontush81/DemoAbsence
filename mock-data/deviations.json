@@ -200,5 +200,29 @@
     "status": "approved",
     "lastUpdated": "2025-08-01T09:31:47.119Z",
     "submitted": "2025-08-01T09:31:47.119Z"
+  },
+  {
+    "id": 15,
+    "employeeId": "emp-001",
+    "date": "2025-01-15",
+    "startTime": "08:00:00",
+    "endTime": "17:00:00",
+    "timeCode": "101",
+    "comment": "Semester i efterhand - tog ledigt för att fixa med banken, glömde ansöka i tid",
+    "status": "pending",
+    "lastUpdated": "2025-01-16T08:30:00.000Z",
+    "submitted": "2025-01-16T08:30:00.000Z"
+  },
+  {
+    "id": 16,
+    "employeeId": "emp-001",
+    "date": "2025-02-01",
+    "startTime": "08:00:00",
+    "endTime": "17:00:00",
+    "timeCode": "100",
+    "comment": "Planerad semester - ansökan för påskledighet",
+    "status": "pending",
+    "lastUpdated": "2025-01-16T10:00:00.000Z",
+    "submitted": "2025-01-16T10:00:00.000Z"
   }
 ]

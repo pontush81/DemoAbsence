@@ -225,6 +225,7 @@ export const mockTimeCodes: TimeCode[] = [
     nameEN: 'Overtime 1 (Mon-Fri)',
     category: 'overtime',
     requiresApproval: true,
+    approvalType: 'attestation',
   },
   {
     id: 2,
@@ -234,6 +235,7 @@ export const mockTimeCodes: TimeCode[] = [
     nameEN: 'Overtime 2 (Saturday)',
     category: 'overtime',
     requiresApproval: true,
+    approvalType: 'attestation',
   },
   {
     id: 3,
@@ -243,6 +245,7 @@ export const mockTimeCodes: TimeCode[] = [
     nameEN: 'Overtime 3 (Sunday, Holiday)',
     category: 'overtime',
     requiresApproval: true,
+    approvalType: 'attestation',
   },
   {
     id: 4,
@@ -252,6 +255,7 @@ export const mockTimeCodes: TimeCode[] = [
     nameEN: 'Sick Leave',
     category: 'sick',
     requiresApproval: true,
+    approvalType: 'attestation',
   },
   {
     id: 5,
@@ -261,6 +265,7 @@ export const mockTimeCodes: TimeCode[] = [
     nameEN: 'Care of Child',
     category: 'vab',
     requiresApproval: true,
+    approvalType: 'attestation',
   },
   {
     id: 6,
@@ -270,6 +275,7 @@ export const mockTimeCodes: TimeCode[] = [
     nameEN: 'Late Arrival',
     category: 'other',
     requiresApproval: true,
+    approvalType: 'attestation',
   },
   {
     id: 7,
@@ -279,6 +285,47 @@ export const mockTimeCodes: TimeCode[] = [
     nameEN: 'Early Departure',
     category: 'other',
     requiresApproval: true,
+    approvalType: 'attestation',
+  },
+  {
+    id: 8,
+    code: '100',
+    name: 'Planerad semester',
+    nameSV: 'Planerad semester',
+    nameEN: 'Planned Vacation',
+    category: 'vacation_planned',
+    requiresApproval: true,
+    approvalType: 'pre_approval',
+  },
+  {
+    id: 9,
+    code: '101', 
+    name: 'Semester (efterhand)',
+    nameSV: 'Semester (efterhand)',
+    nameEN: 'Retroactive Vacation',
+    category: 'vacation_retroactive',
+    requiresApproval: true,
+    approvalType: 'post_approval',
+  },
+  {
+    id: 10,
+    code: '110',
+    name: 'Föräldraledighet',
+    nameSV: 'Föräldraledighet', 
+    nameEN: 'Parental Leave',
+    category: 'parental_leave',
+    requiresApproval: true,
+    approvalType: 'pre_approval',
+  },
+  {
+    id: 11,
+    code: '120',
+    name: 'Kompledighet',
+    nameSV: 'Kompledighet',
+    nameEN: 'Comp Time',
+    category: 'comp_time',
+    requiresApproval: true,
+    approvalType: 'flexible',
   },
 ];
 

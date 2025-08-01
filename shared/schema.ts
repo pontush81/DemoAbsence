@@ -94,8 +94,9 @@ export const timeCodes = pgTable("time_codes", {
   name: text("name").notNull(),
   nameSV: text("name_sv").notNull(),
   nameEN: text("name_en").notNull(),
-  category: text("category").notNull(), // "overtime", "sick", "vab", etc.
+  category: text("category").notNull(), // "overtime", "sick", "vab", "vacation_planned", "vacation_retroactive", etc.
   requiresApproval: boolean("requires_approval").default(true),
+  approvalType: text("approval_type"), // "pre_approval", "post_approval", "attestation", "flexible"
 });
 
 // TimeCode relations

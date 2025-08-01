@@ -6,7 +6,8 @@
     "nameSV": "Övertid 1 (mån-fre)",
     "nameEN": "Overtime 1 (Mon-Fri)",
     "category": "overtime",
-    "requiresApproval": true
+    "requiresApproval": true,
+    "approvalType": "attestation"
   },
   {
     "id": 2,
@@ -15,7 +16,8 @@
     "nameSV": "Övertid 2 (lördag)",
     "nameEN": "Overtime 2 (Saturday)",
     "category": "overtime",
-    "requiresApproval": true
+    "requiresApproval": true,
+    "approvalType": "attestation"
   },
   {
     "id": 3,
@@ -24,7 +26,8 @@
     "nameSV": "Övertid 3 (söndag, helgdag)",
     "nameEN": "Overtime 3 (Sunday, Holiday)",
     "category": "overtime",
-    "requiresApproval": true
+    "requiresApproval": true,
+    "approvalType": "attestation"
   },
   {
     "id": 4,
@@ -33,7 +36,8 @@
     "nameSV": "Sjukdom",
     "nameEN": "Sick Leave",
     "category": "sick",
-    "requiresApproval": true
+    "requiresApproval": true,
+    "approvalType": "attestation"
   },
   {
     "id": 5,
@@ -42,7 +46,8 @@
     "nameSV": "Vård av barn (VAB)",
     "nameEN": "Care of Child",
     "category": "vab",
-    "requiresApproval": true
+    "requiresApproval": true,
+    "approvalType": "attestation"
   },
   {
     "id": 6,
@@ -51,7 +56,8 @@
     "nameSV": "Sen ankomst",
     "nameEN": "Late Arrival",
     "category": "other",
-    "requiresApproval": true
+    "requiresApproval": true,
+    "approvalType": "attestation"
   },
   {
     "id": 7,
@@ -60,6 +66,47 @@
     "nameSV": "Tidig avgång",
     "nameEN": "Early Departure",
     "category": "other",
-    "requiresApproval": true
+    "requiresApproval": true,
+    "approvalType": "attestation"
+  },
+  {
+    "id": 8,
+    "code": "100",
+    "name": "Planerad semester",
+    "nameSV": "Planerad semester",
+    "nameEN": "Planned Vacation",
+    "category": "vacation_planned",
+    "requiresApproval": true,
+    "approvalType": "pre_approval"
+  },
+  {
+    "id": 9,
+    "code": "101", 
+    "name": "Semester (efterhand)",
+    "nameSV": "Semester (efterhand)",
+    "nameEN": "Retroactive Vacation",
+    "category": "vacation_retroactive",
+    "requiresApproval": true,
+    "approvalType": "post_approval"
+  },
+  {
+    "id": 10,
+    "code": "110",
+    "name": "Föräldraledighet",
+    "nameSV": "Föräldraledighet", 
+    "nameEN": "Parental Leave",
+    "category": "parental_leave",
+    "requiresApproval": true,
+    "approvalType": "pre_approval"
+  },
+  {
+    "id": 11,
+    "code": "120",
+    "name": "Kompledighet",
+    "nameSV": "Kompledighet",
+    "nameEN": "Comp Time",
+    "category": "comp_time",
+    "requiresApproval": true,
+    "approvalType": "flexible"
   }
 ]

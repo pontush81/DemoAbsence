@@ -52,6 +52,7 @@ export interface TimeCode {
   nameEN: string;
   category: string;
   requiresApproval: boolean;
+  approvalType?: string; // "pre_approval", "post_approval", "attestation", "flexible"
 }
 
 export interface LeaveRequest {

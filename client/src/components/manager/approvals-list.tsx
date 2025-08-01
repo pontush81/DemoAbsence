@@ -12,6 +12,8 @@ import { queryClient } from "@/lib/queryClient";
 import { apiRequest } from "@/lib/queryClient";
 import { formatTime } from "@/lib/utils/date";
 import DeviationDetails from "@/components/deviations/deviation-details";
+import { getWorkflowInfo, getManagerActionText, getStatusText } from "@/lib/approvalWorkflows";
+import type { TimeCode } from "@shared/schema";
 
 type ApprovalType = 'deviations' | 'leaveRequests';
 
@@ -38,6 +40,17 @@ const ApprovalsList = ({ type }: ApprovalsListProps) => {
       }
     },
   });
+
+  // Fetch time codes to determine workflow types
+  const { data: timeCodes = [] } = useQuery({
+    queryKey: ['/api/timecodes'],
+    queryFn: () => apiService.getTimeCodes(),
+  });
+
+  // Helper function to get time code for a deviation
+  const getTimeCodeForDeviation = (timeCodeStr: string): TimeCode | undefined => {
+    return timeCodes.find(tc => tc.code === timeCodeStr);
+  };
   
   // Approve all mutation
   const approveAllMutation = useMutation({
@@ -187,63 +200,87 @@ const ApprovalsList = ({ type }: ApprovalsListProps) => {
                   <TableHead>{t('manager.employee')}</TableHead>
                   <TableHead>{t('deviations.date')}</TableHead>
                   <TableHead>{t('deviations.timeCode')}</TableHead>
+                  <TableHead>Typ</TableHead>
                   <TableHead>{t('deviations.time')}</TableHead>
                   <TableHead>{t('deviations.comment')}</TableHead>
                   <TableHead className="text-right">{t('deviations.actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {(pendingItems as any[]).map((deviation: any) => (
-                  <TableRow 
-                    key={deviation.id} 
-                    className="hover:bg-background-dark transition-colors cursor-pointer"
-                    onClick={() => handleSelectItem(deviation.id)}
-                  >
-                    <TableCell>
-                      <div className="flex items-center">
-                        <Avatar className="h-8 w-8 bg-primary bg-opacity-10">
-                          <AvatarFallback className="text-primary">
-                            {deviation.employeeId ? deviation.employeeId.substring(0, 2).toUpperCase() : '??'}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium">{deviation.employeeId}</div>
-                          <div className="text-sm text-muted-foreground">ID: {deviation.employeeId}</div>
+                {(pendingItems as any[]).map((deviation: any) => {
+                  const timeCode = getTimeCodeForDeviation(deviation.timeCode);
+                  const workflow = timeCode ? getWorkflowInfo(timeCode) : null;
+                  const actionText = workflow ? getManagerActionText(workflow.type) : { approveText: 'Godkänn', rejectText: 'Avslå' };
+                  
+                  return (
+                    <TableRow 
+                      key={deviation.id} 
+                      className="hover:bg-background-dark transition-colors cursor-pointer"
+                      onClick={() => handleSelectItem(deviation.id)}
+                    >
+                      <TableCell>
+                        <div className="flex items-center">
+                          <Avatar className="h-8 w-8 bg-primary bg-opacity-10">
+                            <AvatarFallback className="text-primary">
+                              {deviation.employeeId ? deviation.employeeId.substring(0, 2).toUpperCase() : '??'}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="ml-4">
+                            <div className="text-sm font-medium">{deviation.employeeId}</div>
+                            <div className="text-sm text-muted-foreground">ID: {deviation.employeeId}</div>
+                          </div>
                         </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="whitespace-nowrap">{deviation.date}</TableCell>
-                    <TableCell className="whitespace-nowrap">{deviation.timeCode}</TableCell>
-                    <TableCell className="whitespace-nowrap">
-                      {formatTime(deviation.startTime)} - {formatTime(deviation.endTime)}
-                    </TableCell>
-                    <TableCell className="max-w-xs truncate-text">
-                      {deviation.comment || '-'}
-                    </TableCell>
-                    <TableCell className="text-right whitespace-nowrap">
-                      <Button 
-                        variant="link" 
-                        className="text-[#4CAF50] hover:text-green-600 mr-3"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleSelectItem(deviation.id);
-                        }}
-                      >
-                        {t('action.approve')}
-                      </Button>
-                      <Button 
-                        variant="link" 
-                        className="text-destructive hover:text-red-600"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleSelectItem(deviation.id);
-                        }}
-                      >
-                        {t('action.reject')}
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap">{deviation.date}</TableCell>
+                      <TableCell className="whitespace-nowrap">
+                        <div>
+                          <div className="font-medium">{deviation.timeCode}</div>
+                          <div className="text-xs text-muted-foreground">{timeCode?.name}</div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap">
+                        {workflow && (
+                          <div className="flex items-center gap-2">
+                            <span className="material-icons text-sm text-muted-foreground">
+                              {workflow.icon}
+                            </span>
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${workflow.color}`}>
+                              {workflow.title}
+                            </span>
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap">
+                        {formatTime(deviation.startTime)} - {formatTime(deviation.endTime)}
+                      </TableCell>
+                      <TableCell className="max-w-xs truncate-text">
+                        {deviation.comment || '-'}
+                      </TableCell>
+                      <TableCell className="text-right whitespace-nowrap">
+                        <Button 
+                          variant="link" 
+                          className="text-[#4CAF50] hover:text-green-600 mr-3"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSelectItem(deviation.id);
+                          }}
+                        >
+                          {actionText.approveText}
+                        </Button>
+                        <Button 
+                          variant="link" 
+                          className="text-destructive hover:text-red-600"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSelectItem(deviation.id);
+                          }}
+                        >
+                          {actionText.rejectText}
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </div>

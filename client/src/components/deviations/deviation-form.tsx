@@ -86,6 +86,10 @@ const DeviationForm = ({ deviationId, onCancel }: DeviationFormProps) => {
     queryKey: ['/api/timecodes'],
     queryFn: () => apiService.getTimeCodes(),
   });
+
+  // Get workflow info for selected time code
+  const selectedTimeCode = timeCodes?.find(tc => tc.code === form.watch('timeCode'));
+  const workflowInfo = selectedTimeCode ? getWorkflowInfo(selectedTimeCode) : null;
   
   // Fetch deviation if editing
   const { data: deviation, isLoading: isLoadingDeviation } = useQuery({
@@ -303,17 +307,53 @@ const DeviationForm = ({ deviationId, onCancel }: DeviationFormProps) => {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {timeCodes?.map((code) => (
-                        <SelectItem key={code.code} value={code.code}>
-                          {code.code} - {code.name}
-                        </SelectItem>
-                      ))}
+                      {timeCodes?.map((code) => {
+                        const workflow = getWorkflowInfo(code);
+                        return (
+                          <SelectItem key={code.code} value={code.code}>
+                            <div className="flex items-center gap-2">
+                              <span className="material-icons text-sm">
+                                {workflow.icon}
+                              </span>
+                              <div>
+                                <div className="font-medium">{code.code} - {code.name}</div>
+                                <div className="text-xs text-muted-foreground">{workflow.title}</div>
+                              </div>
+                            </div>
+                          </SelectItem>
+                        );
+                      })}
                     </SelectContent>
                   </Select>
                   <FormMessage />
                 </FormItem>
               )}
             />
+            
+            {/* Workflow Information */}
+            {workflowInfo && (
+              <div className={`p-4 rounded-lg border ${workflowInfo.color.replace('text-', 'border-').replace('bg-', 'border-').replace('-100', '-300')} ${workflowInfo.color.replace('-800', '-50')}`}>
+                <div className="flex items-start gap-3">
+                  <span className="material-icons text-lg">
+                    {workflowInfo.icon}
+                  </span>
+                  <div>
+                    <h4 className="font-medium text-sm">{workflowInfo.title}</h4>
+                    <p className="text-xs text-muted-foreground mt-1">{workflowInfo.description}</p>
+                    {workflowInfo.type === 'post_approval' && (
+                      <p className="text-xs text-orange-600 mt-2 font-medium">
+                        💡 Detta kan registreras i efterhand men måste godkännas innan månadsstäng
+                      </p>
+                    )}
+                    {workflowInfo.type === 'pre_approval' && (
+                      <p className="text-xs text-blue-600 mt-2 font-medium">
+                        ⚠️ Detta kräver godkännande innan ledigheten tas
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
             
             <FormField
               control={form.control}
