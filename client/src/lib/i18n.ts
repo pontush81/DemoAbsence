@@ -689,6 +689,50 @@ const translations: Translations = {
     sv: 'Visa tidigare behandlade avvikelser och ledighetsansökningar',
     en: 'View previously processed deviations and leave requests',
   },
+  'manager.noDeviations': {
+    sv: 'Inga avvikelser att godkänna',
+    en: 'No deviations to approve',
+  },
+  'manager.noDeviationsDescription': {
+    sv: 'Det finns inga väntande avvikelser från dina medarbetare just nu',
+    en: 'There are currently no pending deviations from your employees',
+  },
+  'manager.noLeaveRequests': {
+    sv: 'Inga ledighetsansökningar att godkänna',
+    en: 'No leave requests to approve',
+  },
+  'manager.noLeaveRequestsDescription': {
+    sv: 'Det finns inga väntande ledighetsansökningar från dina medarbetare just nu',
+    en: 'There are currently no pending leave requests from your employees',
+  },
+  'manager.loadDeviationsError': {
+    sv: 'Fel vid hämtning av avvikelser',
+    en: 'Error loading deviations',
+  },
+  'manager.loadLeaveRequestsError': {
+    sv: 'Fel vid hämtning av ledighetsansökningar',
+    en: 'Error loading leave requests',
+  },
+  'manager.approveAll': {
+    sv: 'Godkänn alla',
+    en: 'Approve All',
+  },
+  'manager.approveAllSuccess': {
+    sv: 'Alla avvikelser godkända',
+    en: 'All deviations approved',
+  },
+  'manager.approveAllSuccessDescription': {
+    sv: 'Alla väntande avvikelser har godkänts',
+    en: 'All pending deviations have been approved',
+  },
+  'manager.approveAllError': {
+    sv: 'Kunde inte godkänna alla avvikelser',
+    en: 'Failed to approve all deviations',
+  },
+  'manager.confirmApproveAll': {
+    sv: 'Är du säker på att du vill godkänna alla väntande avvikelser?',
+    en: 'Are you sure you want to approve all pending deviations?',
+  },
   
   // Attestation
   'attestation.description': {
