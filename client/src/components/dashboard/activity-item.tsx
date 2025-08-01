@@ -130,7 +130,7 @@ const ActivityItem = ({ activity }: ActivityItemProps) => {
 
   const { icon, bgColor, textColor } = getIconInfo();
   const title = getTitle();
-  const timestamp = formatRelativeTime(activity.timestamp);
+  const timestamp = formatRelativeTime(activity.timestamp || new Date());
 
   return (
     <li className="p-4 hover:bg-background-dark transition-colors">

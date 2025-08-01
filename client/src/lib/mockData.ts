@@ -287,6 +287,7 @@ export const mockTimeCodes: TimeCode[] = [
 export const mockDeviations: Deviation[] = [
   {
     id: 1,
+    periodId: null,
     employeeId: 'E001',
     date: '2023-04-14',
     startTime: '17:00:00',
@@ -304,6 +305,7 @@ export const mockDeviations: Deviation[] = [
   },
   {
     id: 2,
+    periodId: null,
     employeeId: 'E001',
     date: '2023-04-11',
     startTime: '08:00:00',
@@ -321,6 +323,7 @@ export const mockDeviations: Deviation[] = [
   },
   {
     id: 3,
+    periodId: null,
     employeeId: 'E001',
     date: '2023-04-05',
     startTime: '08:00:00',
@@ -339,6 +342,7 @@ export const mockDeviations: Deviation[] = [
   // Pending deviations for manager approval
   {
     id: 4,
+    periodId: null,
     employeeId: 'E002',
     date: '2023-04-14',
     startTime: '17:00:00',
@@ -356,6 +360,7 @@ export const mockDeviations: Deviation[] = [
   },
   {
     id: 5,
+    periodId: null,
     employeeId: 'E003',
     date: '2023-04-12',
     startTime: '08:00:00',
@@ -373,6 +378,7 @@ export const mockDeviations: Deviation[] = [
   },
   {
     id: 6,
+    periodId: null,
     employeeId: 'E004',
     date: '2023-04-10',
     startTime: '08:00:00',
@@ -390,6 +396,7 @@ export const mockDeviations: Deviation[] = [
   },
   {
     id: 7,
+    periodId: null,
     employeeId: 'E001',
     date: '2023-04-01',
     startTime: '08:00:00',
@@ -427,6 +434,9 @@ export const mockLeaveRequests: LeaveRequest[] = [
     approvedAt: null,
     rejectedBy: null,
     rejectedAt: null,
+    pausedBy: null,
+    pausedAt: null,
+    pauseReason: null,
   },
   {
     id: 2,
@@ -446,6 +456,9 @@ export const mockLeaveRequests: LeaveRequest[] = [
     approvedAt: new Date(new Date().setDate(new Date().getDate() - 9)),
     rejectedBy: null,
     rejectedAt: null,
+    pausedBy: null,
+    pausedAt: null,
+    pauseReason: null,
   },
   // Leave requests for manager approval
   {
@@ -466,6 +479,9 @@ export const mockLeaveRequests: LeaveRequest[] = [
     approvedAt: null,
     rejectedBy: null,
     rejectedAt: null,
+    pausedBy: null,
+    pausedAt: null,
+    pauseReason: null,
   },
   {
     id: 4,
@@ -485,6 +501,9 @@ export const mockLeaveRequests: LeaveRequest[] = [
     approvedAt: null,
     rejectedBy: null,
     rejectedAt: null,
+    pausedBy: null,
+    pausedAt: null,
+    pauseReason: null,
   },
 ];
 
@@ -667,6 +686,7 @@ export const mockActivityLogs: ActivityLog[] = [
     timestamp: new Date(),
     referenceId: '1',
     referenceType: 'deviation',
+    performedBy: null,
   },
   {
     id: 2,
@@ -677,6 +697,7 @@ export const mockActivityLogs: ActivityLog[] = [
     timestamp: new Date(new Date().setDate(new Date().getDate() - 1)),
     referenceId: '1',
     referenceType: 'leave',
+    performedBy: null,
   },
   {
     id: 3,
@@ -687,6 +708,7 @@ export const mockActivityLogs: ActivityLog[] = [
     timestamp: new Date(new Date().setDate(new Date().getDate() - 2)),
     referenceId: '2',
     referenceType: 'deviation',
+    performedBy: null,
   },
   {
     id: 4,
@@ -697,6 +719,7 @@ export const mockActivityLogs: ActivityLog[] = [
     timestamp: new Date(new Date().setDate(new Date().getDate() - 5)),
     referenceId: '1',
     referenceType: 'payslip',
+    performedBy: null,
   },
   {
     id: 5,
@@ -707,6 +730,7 @@ export const mockActivityLogs: ActivityLog[] = [
     timestamp: new Date(new Date().setDate(new Date().getDate() - 9)),
     referenceId: '2',
     referenceType: 'leave',
+    performedBy: null,
   },
 ];
 

@@ -254,7 +254,7 @@ function PeriodApprovals({ onViewPeriod, onSendReminder }: {
       const mockDeviations: Deviation[] = [
         {
           id: 1,
-          periodId: period.id,
+          periodId: null,
           employeeId: period.employeeId,
           date: `2023-${period.month + 1}-15`,
           startTime: "08:00",
@@ -272,7 +272,7 @@ function PeriodApprovals({ onViewPeriod, onSendReminder }: {
         },
         {
           id: 2,
-          periodId: period.id,
+          periodId: null,
           employeeId: period.employeeId,
           date: `2023-${period.month + 1}-22`,
           startTime: "07:30",

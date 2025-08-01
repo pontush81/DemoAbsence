@@ -18,6 +18,7 @@ export const getRoleSpecificActivities = (role: UserRole): ActivityLog[] => {
           timestamp: new Date(now.getTime() - 2 * 60 * 60 * 1000), // 2h sedan
           referenceId: '1',
           referenceType: 'deviation',
+          performedBy: null,
         },
         {
           id: 2,
@@ -28,6 +29,7 @@ export const getRoleSpecificActivities = (role: UserRole): ActivityLog[] => {
           timestamp: new Date(now.getTime() - 24 * 60 * 60 * 1000), // 1 dag sedan
           referenceId: '1',
           referenceType: 'leave',
+          performedBy: null,
         },
         {
           id: 3,
@@ -38,6 +40,7 @@ export const getRoleSpecificActivities = (role: UserRole): ActivityLog[] => {
           timestamp: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000), // 2 dagar sedan
           referenceId: '2',
           referenceType: 'deviation',
+          performedBy: null,
         }
       ];
 
@@ -53,6 +56,7 @@ export const getRoleSpecificActivities = (role: UserRole): ActivityLog[] => {
           timestamp: new Date(now.getTime() - 30 * 60 * 1000), // 30 min sedan
           referenceId: '10',
           referenceType: 'deviation',
+          performedBy: null,
         },
         {
           id: 11,
@@ -63,6 +67,7 @@ export const getRoleSpecificActivities = (role: UserRole): ActivityLog[] => {
           timestamp: new Date(now.getTime() - 3 * 60 * 60 * 1000), // 3h sedan
           referenceId: '11',
           referenceType: 'leave',
+          performedBy: null,
         },
         {
           id: 12,
@@ -73,6 +78,7 @@ export const getRoleSpecificActivities = (role: UserRole): ActivityLog[] => {
           timestamp: new Date(now.getTime() - 6 * 60 * 60 * 1000), // 6h sedan
           referenceId: '12',
           referenceType: 'deviation',
+          performedBy: null,
         }
       ];
 
@@ -88,6 +94,7 @@ export const getRoleSpecificActivities = (role: UserRole): ActivityLog[] => {
           timestamp: new Date(now.getTime() - 60 * 60 * 1000), // 1h sedan
           referenceId: '20',
           referenceType: 'employee',
+          performedBy: null,
         },
         {
           id: 21,
@@ -98,6 +105,7 @@ export const getRoleSpecificActivities = (role: UserRole): ActivityLog[] => {
           timestamp: new Date(now.getTime() - 4 * 60 * 60 * 1000), // 4h sedan
           referenceId: '21',
           referenceType: 'policy',
+          performedBy: null,
         },
         {
           id: 22,
@@ -108,6 +116,7 @@ export const getRoleSpecificActivities = (role: UserRole): ActivityLog[] => {
           timestamp: new Date(now.getTime() - 8 * 60 * 60 * 1000), // 8h sedan
           referenceId: '22',
           referenceType: 'deviation',
+          performedBy: null,
         }
       ];
 
@@ -123,6 +132,7 @@ export const getRoleSpecificActivities = (role: UserRole): ActivityLog[] => {
           timestamp: new Date(now.getTime() - 90 * 60 * 1000), // 1.5h sedan
           referenceId: '30',
           referenceType: 'paxml',
+          performedBy: null,
         },
         {
           id: 31,
@@ -133,6 +143,7 @@ export const getRoleSpecificActivities = (role: UserRole): ActivityLog[] => {
           timestamp: new Date(now.getTime() - 5 * 60 * 60 * 1000), // 5h sedan
           referenceId: '31',
           referenceType: 'payslip',
+          performedBy: null,
         },
         {
           id: 32,
@@ -143,6 +154,7 @@ export const getRoleSpecificActivities = (role: UserRole): ActivityLog[] => {
           timestamp: new Date(now.getTime() - 24 * 60 * 60 * 1000), // 1 dag sedan
           referenceId: '32',
           referenceType: 'deviation',
+          performedBy: null,
         }
       ];
 

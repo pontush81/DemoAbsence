@@ -88,7 +88,7 @@ const LeaveForm = ({ leaveRequestId, onCancel }: LeaveFormProps) => {
         startDate: leaveRequest.startDate,
         endDate: leaveRequest.endDate,
         leaveType: leaveRequest.leaveType,
-        scope: leaveRequest.scope,
+        scope: leaveRequest.scope || 'full-day',
         customStartTime: leaveRequest.customStartTime,
         customEndTime: leaveRequest.customEndTime,
         comment: leaveRequest.comment || '',
@@ -345,6 +345,7 @@ const LeaveForm = ({ leaveRequestId, onCancel }: LeaveFormProps) => {
                       className="resize-none"
                       rows={3}
                       {...field}
+                      value={field.value || ''}
                       disabled={isLoading || isPending} 
                     />
                   </FormControl>

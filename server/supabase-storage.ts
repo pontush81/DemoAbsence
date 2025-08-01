@@ -51,13 +51,14 @@ export class SupabaseStorage {
       conditions.push(lte(deviations.date, filters.endDate));
     }
     
-    let query = db.select().from(deviations);
-    
     if (conditions.length > 0) {
-      query = query.where(and(...conditions));
+      return await db.select().from(deviations)
+        .where(and(...conditions))
+        .orderBy(desc(deviations.lastUpdated));
     }
     
-    return await query.orderBy(desc(deviations.lastUpdated));
+    return await db.select().from(deviations)
+      .orderBy(desc(deviations.lastUpdated));
   }
 
   async getDeviation(id: number) {
@@ -105,13 +106,14 @@ export class SupabaseStorage {
       conditions.push(eq(leaveRequests.status, filters.status));
     }
     
-    let query = db.select().from(leaveRequests);
-    
     if (conditions.length > 0) {
-      query = query.where(and(...conditions));
+      return await db.select().from(leaveRequests)
+        .where(and(...conditions))
+        .orderBy(desc(leaveRequests.lastUpdated));
     }
     
-    return await query.orderBy(desc(leaveRequests.lastUpdated));
+    return await db.select().from(leaveRequests)
+      .orderBy(desc(leaveRequests.lastUpdated));
   }
 
   async getLeaveRequest(id: number) {
@@ -172,13 +174,12 @@ export class SupabaseStorage {
       conditions.push(lte(schedules.date, filters.endDate));
     }
     
-    let query = db.select().from(schedules);
-    
     if (conditions.length > 0) {
-      query = query.where(and(...conditions));
+      return await db.select().from(schedules)
+        .where(and(...conditions));
     }
     
-    return await query;
+    return await db.select().from(schedules);
   }
 
   // Time balances

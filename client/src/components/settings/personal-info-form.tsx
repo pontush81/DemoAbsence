@@ -84,7 +84,7 @@ const PersonalInfoForm = () => {
         streetAddress: employee.streetAddress,
         postalCode: employee.postalCode,
         city: employee.city,
-        country: employee.country,
+        country: employee.country || 'Sverige',
         phoneNumber: employee.phoneNumber || "",
         email: employee.email || "",
         workEmail: employee.workEmail || "",

@@ -1,6 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { saveFile, getFile, listFiles, generateId } from "./storage";
+import { saveFile, getFile, listFiles, generateId, getMockData, saveMockData } from "./storage";
 import { storage } from "./supabase-storage";
 import { generatePAXMLTransactions, generatePAXMLXML, generatePAXMLXMLWithSchedules, validatePAXMLData, convertXMLScheduleToAppSchedule, convertAppScheduleToXMLSchedule } from './lib/paxml.js';
 
@@ -67,7 +67,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.send(paXmlContent);
     } catch (error) {
       console.error('Demo PAXML export error:', error);
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: (error as Error).message });
     }
   });
 
@@ -118,7 +118,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.send(paXmlContent);
     } catch (error) {
       console.error('Complete demo PAXML export error:', error);
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: (error as Error).message });
     }
   });
   

@@ -325,6 +325,7 @@ const DeviationForm = ({ deviationId, onCancel }: DeviationFormProps) => {
                       className="resize-none"
                       rows={3}
                       {...field}
+                      value={field.value ?? ''}
                       disabled={isLoading || isPending} 
                     />
                   </FormControl>

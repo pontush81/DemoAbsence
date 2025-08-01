@@ -25,13 +25,13 @@ const ApprovalsList = ({ type }: ApprovalsListProps) => {
   const [selectedItemId, setSelectedItemId] = useState<number | null>(null);
   
   // Fetch pending approvals
-  const { data: pendingItems, isLoading, error, refetch } = useQuery({
+  const { data: pendingItems = [], isLoading, error, refetch } = useQuery({
     queryKey: [`/api/manager/${type}/pending`],
-    queryFn: () => {
+    queryFn: async () => {
       if (type === 'deviations') {
-        return apiService.getPendingDeviations();
+        return await apiService.getPendingDeviations();
       } else {
-        return apiService.getPendingLeaveRequests();
+        return await apiService.getPendingLeaveRequests();
       }
     },
   });
@@ -190,7 +190,7 @@ const ApprovalsList = ({ type }: ApprovalsListProps) => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {pendingItems.map((deviation) => (
+                {(pendingItems as any[]).map((deviation: any) => (
                   <TableRow 
                     key={deviation.id} 
                     className="hover:bg-background-dark transition-colors cursor-pointer"
@@ -275,7 +275,7 @@ const ApprovalsList = ({ type }: ApprovalsListProps) => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {pendingItems.map((leave) => (
+              {(pendingItems as any[]).map((leave: any) => (
                 <TableRow 
                   key={leave.id} 
                   className="hover:bg-background-dark transition-colors cursor-pointer"
