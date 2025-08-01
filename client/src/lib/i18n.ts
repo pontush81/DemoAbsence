@@ -505,6 +505,30 @@ const translations: Translations = {
     sv: 'Kunde inte läsa in ledighetsansökningar',
     en: 'Failed to load leave requests',
   },
+  'leave.submitSuccess': {
+    sv: 'Ledighetsansökan skickad',
+    en: 'Leave request submitted',
+  },
+  'leave.submitSuccessDescription': {
+    sv: 'Din ledighetsansökan har skickats för godkännande.',
+    en: 'Your leave request has been submitted for approval.',
+  },
+  'leave.draftSaved': {
+    sv: 'Utkast sparat',
+    en: 'Draft saved',
+  },
+  'leave.draftSavedDescription': {
+    sv: 'Din ledighetsansökan har sparats som utkast.',
+    en: 'Your leave request has been saved as draft.',
+  },
+  'leave.submitError': {
+    sv: 'Fel vid inskickning',
+    en: 'Submission error',
+  },
+  'leave.updateSuccess': {
+    sv: 'Ledighetsansökan uppdaterad',
+    en: 'Leave request updated',
+  },
   
   // Pagination
   'pagination.showing': {
