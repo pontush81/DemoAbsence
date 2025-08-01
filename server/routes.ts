@@ -1,7 +1,8 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { saveFile, getFile, listFiles, generateId, getMockData, saveMockData } from "./storage";
-import { storage } from "./supabase-storage";
+import { storage } from "./supabase-storage"; 
+import { restStorage } from "./supabase-rest-storage";
 import { generatePAXMLTransactions, generatePAXMLXML, generatePAXMLXMLWithSchedules, validatePAXMLData, convertXMLScheduleToAppSchedule, convertAppScheduleToXMLSchedule } from './lib/paxml.js';
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -15,7 +16,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Test database connection
   app.get('/api/test-data', async (req, res) => {
     try {
-      const employees = await storage.getEmployees();
+      const employees = await restStorage.getEmployees();
       res.json({ success: true, count: employees.length, first: employees[0] || null });
     } catch (error) {
       console.error('Test data error:', error);
@@ -124,19 +125,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Current logged-in employee
   app.get('/api/employee/current', async (req, res) => {
-    const employees = await getMockData('employees.json');
-    // Return the first employee as the current user
-    if (employees && employees.length > 0) {
-      res.json(employees[0]);
-    } else {
-      res.status(404).json({ message: 'No employee found' });
+    try {
+      const employees = await restStorage.getEmployees();
+      // Return the first employee as the current user
+      if (employees && employees.length > 0) {
+        res.json(employees[0]);
+      } else {
+        res.status(404).json({ message: 'No employee found' });
+      }
+    } catch (error) {
+      console.error('Error fetching current employee:', error);
+      res.status(500).json({ error: (error as Error).message });
     }
   });
 
   // Get all employees
   app.get('/api/employees', async (req, res) => {
     try {
-      const employees = await storage.getEmployees();
+      const employees = await restStorage.getEmployees();
       res.json(employees);
     } catch (error) {
       console.error('Error fetching employees:', error);
@@ -147,7 +153,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get employee by ID
   app.get('/api/employees/:id', async (req, res) => {
     try {
-      const employee = await storage.getEmployee(req.params.id);
+      const employee = await restStorage.getEmployee(req.params.id);
       if (employee) {
         res.json(employee);
       } else {
@@ -185,7 +191,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         filters.date = date;
       }
       
-      const schedules = await storage.getSchedules(filters);
+      const schedules = await restStorage.getSchedules(filters);
       res.json(schedules);
     } catch (error) {
       console.error('Error fetching schedules:', error);
@@ -196,7 +202,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get time codes
   app.get('/api/timecodes', async (req, res) => {
     try {
-      const timeCodes = await storage.getTimeCodes();
+      const timeCodes = await restStorage.getTimeCodes();
       res.json(timeCodes);
     } catch (error) {
       console.error('Error fetching time codes:', error);
@@ -237,7 +243,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Handle time code filtering
       if (timeCode && timeCode !== 'all') {
         // Check if it's a direct code match or category
-        const timeCodes = await storage.getTimeCodes();
+        const timeCodes = await restStorage.getTimeCodes();
         const directMatch = timeCodes.find((t: any) => t.code === timeCode);
         
         if (directMatch) {
@@ -248,11 +254,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      let deviations = await storage.getDeviations(filters);
+      let deviations = await restStorage.getDeviations(filters);
       
       // Post-filter for time code categories if needed
       if (timeCode && timeCode !== 'all' && filters.timeCodeCategory) {
-        const timeCodes = await storage.getTimeCodes();
+        const timeCodes = await restStorage.getTimeCodes();
         const codesInCategory = timeCodes
           .filter((t: any) => t.category === timeCode)
           .map((t: any) => t.code);
@@ -272,7 +278,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get deviation by ID
   app.get('/api/deviations/:id', async (req, res) => {
     try {
-      const deviation = await storage.getDeviation(parseInt(req.params.id));
+      const deviation = await restStorage.getDeviation(parseInt(req.params.id));
       if (deviation) {
         res.json(deviation);
       } else {
@@ -364,7 +370,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (employeeId) filters.employeeId = employeeId;
       if (status && status !== 'all') filters.status = status;
       
-      let leaveRequests = await storage.getLeaveRequests(filters);
+      let leaveRequests = await restStorage.getLeaveRequests(filters);
       
       // Post-filter for complex filtering not supported by database layer
       if (period && period !== 'all') {
@@ -399,7 +405,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get leave request by ID
   app.get('/api/leave-requests/:id', async (req, res) => {
     try {
-      const leaveRequest = await storage.getLeaveRequest(parseInt(req.params.id));
+      const leaveRequest = await restStorage.getLeaveRequest(parseInt(req.params.id));
       if (leaveRequest) {
         res.json(leaveRequest);
       } else {
@@ -413,67 +419,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Create leave request
   app.post('/api/leave-requests', async (req, res) => {
-    const leaveRequests = await getMockData('leave-requests.json');
-    const newId = generateId(leaveRequests);
-    const newLeaveRequest = {
-      id: newId,
-      ...req.body,
-      lastUpdated: new Date().toISOString()
-    };
-    
-    leaveRequests.push(newLeaveRequest);
-    await saveMockData('leave-requests.json', leaveRequests);
-    res.status(201).json(newLeaveRequest);
+    try {
+      const leaveRequestData = {
+        ...req.body,
+        status: req.body.status || 'pending',
+        submitted: new Date().toISOString()
+      };
+      
+      const newLeaveRequest = await storage.createLeaveRequest(leaveRequestData);
+      res.status(201).json(newLeaveRequest);
+    } catch (error) {
+      console.error('Error creating leave request:', error);
+      res.status(500).json({ 
+        error: 'Failed to create leave request', 
+        details: (error as Error).message 
+      });
+    }
   });
 
   // Update leave request
   app.patch('/api/leave-requests/:id', async (req, res) => {
-    const leaveRequests = await getMockData('leave-requests.json');
-    const index = leaveRequests.findIndex((l: any) => l.id === parseInt(req.params.id));
-    if (index !== -1) {
-      const updatedLeaveRequest = {
-        ...leaveRequests[index],
-        ...req.body,
-        lastUpdated: new Date().toISOString()
-      };
-      
-      leaveRequests[index] = updatedLeaveRequest;
-      await saveMockData('leave-requests.json', leaveRequests);
-      res.json(updatedLeaveRequest);
-    } else {
-      res.status(404).json({ message: 'Leave request not found' });
+    try {
+      const updatedLeaveRequest = await storage.updateLeaveRequest(parseInt(req.params.id), req.body);
+      if (updatedLeaveRequest) {
+        res.json(updatedLeaveRequest);
+      } else {
+        res.status(404).json({ message: 'Leave request not found' });
+      }
+    } catch (error) {
+      console.error('Error updating leave request:', error);
+      res.status(500).json({ 
+        error: 'Failed to update leave request', 
+        details: (error as Error).message 
+      });
     }
   });
 
   // Delete leave request
   app.delete('/api/leave-requests/:id', async (req, res) => {
-    const leaveRequests = await getMockData('leave-requests.json');
-    const index = leaveRequests.findIndex((l: any) => l.id === parseInt(req.params.id));
-    if (index !== -1) {
-      leaveRequests.splice(index, 1);
-      await saveMockData('leave-requests.json', leaveRequests);
-      res.status(204).send();
-    } else {
-      res.status(404).json({ message: 'Leave request not found' });
+    try {
+      const success = await storage.deleteLeaveRequest(parseInt(req.params.id));
+      if (success) {
+        res.status(204).send();
+      } else {
+        res.status(404).json({ message: 'Leave request not found' });
+      }
+    } catch (error) {
+      console.error('Error deleting leave request:', error);
+      res.status(500).json({ 
+        error: 'Failed to delete leave request', 
+        details: (error as Error).message 
+      });
     }
   });
 
   // Get time balance for employee
   app.get('/api/time-balances/:employeeId', async (req, res) => {
-    const timeBalances = await getMockData('timebalances.json');
-    const timeBalance = timeBalances.find((t: any) => t.employeeId === req.params.employeeId);
-    if (timeBalance) {
-      res.json(timeBalance);
-    } else {
-      res.status(404).json({ message: 'Time balance not found' });
+    try {
+      const timeBalance = await restStorage.getTimeBalance(req.params.employeeId);
+      if (timeBalance) {
+        res.json(timeBalance);
+      } else {
+        res.status(404).json({ message: 'Time balance not found' });
+      }
+    } catch (error) {
+      console.error('Error fetching time balance:', error);
+      res.status(500).json({ error: (error as Error).message });
     }
   });
 
   // Get payslips for employee
   app.get('/api/payslips/:employeeId', async (req, res) => {
-    const payslips = await getMockData('payslips.json');
-    const employeePayslips = payslips.filter((p: any) => p.employeeId === req.params.employeeId);
-    res.json(employeePayslips);
+    try {
+      const employeePayslips = await restStorage.getPayslips(req.params.employeeId);
+      res.json(employeePayslips);
+    } catch (error) {
+      console.error('Error fetching payslips:', error);
+      res.status(500).json({ error: (error as Error).message });
+    }
   });
 
   // Get payslip file
@@ -487,123 +510,131 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Get pending deviations (for manager)
   app.get('/api/manager/deviations/pending', async (req, res) => {
-    const deviations = await getMockData('deviations.json');
-    const pendingDeviations = deviations.filter((d: any) => d.status === 'pending');
-    res.json(pendingDeviations);
+    try {
+      const pendingDeviations = await storage.getDeviations({ status: 'pending' });
+      res.json(pendingDeviations);
+    } catch (error) {
+      console.error('Error fetching pending deviations:', error);
+      res.status(500).json({ error: (error as Error).message });
+    }
   });
 
   // Approve deviation
   app.post('/api/manager/deviations/:id/approve', async (req, res) => {
-    const deviations = await getMockData('deviations.json');
-    const index = deviations.findIndex((d: any) => d.id === parseInt(req.params.id));
-    if (index !== -1) {
-      const approvedDeviation = {
-        ...deviations[index],
+    try {
+      const updateData = {
         status: 'approved',
         managerComment: req.body.comment || 'Approved',
         approvedBy: 'E005', // Mock manager ID
-        approvedAt: new Date().toISOString(),
-        lastUpdated: new Date().toISOString()
+        approvedAt: new Date().toISOString()
       };
       
-      deviations[index] = approvedDeviation;
-      await saveMockData('deviations.json', deviations);
-      res.json(approvedDeviation);
-    } else {
-      res.status(404).json({ message: 'Deviation not found' });
+      const approvedDeviation = await storage.updateDeviation(parseInt(req.params.id), updateData);
+      if (approvedDeviation) {
+        res.json(approvedDeviation);
+      } else {
+        res.status(404).json({ message: 'Deviation not found' });
+      }
+    } catch (error) {
+      console.error('Error approving deviation:', error);
+      res.status(500).json({ error: (error as Error).message });
     }
   });
 
   // Reject deviation
   app.post('/api/manager/deviations/:id/reject', async (req, res) => {
-    const deviations = await getMockData('deviations.json');
-    const index = deviations.findIndex((d: any) => d.id === parseInt(req.params.id));
-    if (index !== -1) {
-      const rejectedDeviation = {
-        ...deviations[index],
+    try {
+      const updateData = {
         status: 'rejected',
         managerComment: req.body.comment || 'Rejected',
         rejectedBy: 'E005', // Mock manager ID
-        rejectedAt: new Date().toISOString(),
-        lastUpdated: new Date().toISOString()
+        rejectedAt: new Date().toISOString()
       };
       
-      deviations[index] = rejectedDeviation;
-      await saveMockData('deviations.json', deviations);
-      res.json(rejectedDeviation);
-    } else {
-      res.status(404).json({ message: 'Deviation not found' });
+      const rejectedDeviation = await storage.updateDeviation(parseInt(req.params.id), updateData);
+      if (rejectedDeviation) {
+        res.json(rejectedDeviation);
+      } else {
+        res.status(404).json({ message: 'Deviation not found' });
+      }
+    } catch (error) {
+      console.error('Error rejecting deviation:', error);
+      res.status(500).json({ error: (error as Error).message });
     }
   });
 
   // Return deviation for correction
   app.post('/api/manager/deviations/:id/return', async (req, res) => {
-    const deviations = await getMockData('deviations.json');
-    const index = deviations.findIndex((d: any) => d.id === parseInt(req.params.id));
-    if (index !== -1) {
-      const returnedDeviation = {
-        ...deviations[index],
+    try {
+      const updateData = {
         status: 'returned',
-        managerComment: req.body.comment || 'Needs correction',
-        lastUpdated: new Date().toISOString()
+        managerComment: req.body.comment || 'Needs correction'
       };
       
-      deviations[index] = returnedDeviation;
-      await saveMockData('deviations.json', deviations);
-      res.json(returnedDeviation);
-    } else {
-      res.status(404).json({ message: 'Deviation not found' });
+      const returnedDeviation = await storage.updateDeviation(parseInt(req.params.id), updateData);
+      if (returnedDeviation) {
+        res.json(returnedDeviation);
+      } else {
+        res.status(404).json({ message: 'Deviation not found' });
+      }
+    } catch (error) {
+      console.error('Error returning deviation:', error);
+      res.status(500).json({ error: (error as Error).message });
     }
   });
 
   // Get pending leave requests (for manager)
   app.get('/api/manager/leave-requests/pending', async (req, res) => {
-    const leaveRequests = await getMockData('leave-requests.json');
-    const pendingLeaveRequests = leaveRequests.filter((l: any) => l.status === 'pending');
-    res.json(pendingLeaveRequests);
+    try {
+      const pendingLeaveRequests = await storage.getLeaveRequests({ status: 'pending' });
+      res.json(pendingLeaveRequests);
+    } catch (error) {
+      console.error('Error fetching pending leave requests:', error);
+      res.status(500).json({ error: (error as Error).message });
+    }
   });
 
   // Approve leave request
   app.post('/api/manager/leave-requests/:id/approve', async (req, res) => {
-    const leaveRequests = await getMockData('leave-requests.json');
-    const index = leaveRequests.findIndex((l: any) => l.id === parseInt(req.params.id));
-    if (index !== -1) {
-      const approvedLeaveRequest = {
-        ...leaveRequests[index],
+    try {
+      const updateData = {
         status: 'approved',
         managerComment: req.body.comment || 'Approved',
         approvedBy: 'E005', // Mock manager ID
-        approvedAt: new Date().toISOString(),
-        lastUpdated: new Date().toISOString()
+        approvedAt: new Date().toISOString()
       };
       
-      leaveRequests[index] = approvedLeaveRequest;
-      await saveMockData('leave-requests.json', leaveRequests);
-      res.json(approvedLeaveRequest);
-    } else {
-      res.status(404).json({ message: 'Leave request not found' });
+      const approvedLeaveRequest = await storage.updateLeaveRequest(parseInt(req.params.id), updateData);
+      if (approvedLeaveRequest) {
+        res.json(approvedLeaveRequest);
+      } else {
+        res.status(404).json({ message: 'Leave request not found' });
+      }
+    } catch (error) {
+      console.error('Error approving leave request:', error);
+      res.status(500).json({ error: (error as Error).message });
     }
   });
 
   // Reject leave request
   app.post('/api/manager/leave-requests/:id/reject', async (req, res) => {
-    const leaveRequests = await getMockData('leave-requests.json');
-    const index = leaveRequests.findIndex((l: any) => l.id === parseInt(req.params.id));
-    if (index !== -1) {
-      const rejectedLeaveRequest = {
-        ...leaveRequests[index],
+    try {
+      const updateData = {
         status: 'rejected',
         managerComment: req.body.comment || 'Rejected',
         rejectedBy: 'E005', // Mock manager ID
-        rejectedAt: new Date().toISOString(),
-        lastUpdated: new Date().toISOString()
+        rejectedAt: new Date().toISOString()
       };
       
-      leaveRequests[index] = rejectedLeaveRequest;
-      await saveMockData('leave-requests.json', leaveRequests);
-      res.json(rejectedLeaveRequest);
-    } else {
-      res.status(404).json({ message: 'Leave request not found' });
+      const rejectedLeaveRequest = await storage.updateLeaveRequest(parseInt(req.params.id), updateData);
+      if (rejectedLeaveRequest) {
+        res.json(rejectedLeaveRequest);
+      } else {
+        res.status(404).json({ message: 'Leave request not found' });
+      }
+    } catch (error) {
+      console.error('Error rejecting leave request:', error);
+      res.status(500).json({ error: (error as Error).message });
     }
   });
 

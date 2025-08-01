@@ -6,7 +6,7 @@ import { employees, deviations, leaveRequests, timeCodes, schedules, timeBalance
 import { eq, and, gte, lte } from 'drizzle-orm';
 
 // Use database if available, fallback to JSON files
-const USE_DATABASE = true; // Using Supabase database - JSON files as fallback
+const USE_DATABASE = db !== null; // Use database only if connection is available
 
 // Helper to read mock data from files (fallback)
 export const getMockData = async (filename: string) => {
@@ -30,6 +30,10 @@ export const getMockData = async (filename: string) => {
 
 // Get data from database
 const getDatabaseData = async (filename: string) => {
+  if (!db) {
+    throw new Error('Database not available');
+  }
+  
   try {
     switch (filename) {
       case 'employees.json':

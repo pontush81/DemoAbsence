@@ -1,4 +1,5 @@
 import { db } from './db';
+import { getMockData } from './storage';
 import { 
   employees, deviations, leaveRequests, timeCodes, schedules, 
   timeBalances, payslips, activityLogs, periods, reminders
@@ -7,6 +8,26 @@ import { eq, and, gte, lte, desc } from 'drizzle-orm';
 
 // Supabase-based storage operations
 export class SupabaseStorage {
+  
+  // Helper method to check if database is available
+  private isDatabaseAvailable(): boolean {
+    return db !== null;
+  }
+  
+  // Helper method to get data with fallback
+  private async getDataWithFallback<T>(operation: () => Promise<T>, fallbackFile: string): Promise<T> {
+    if (!this.isDatabaseAvailable()) {
+      console.log(`Database not available, falling back to ${fallbackFile}`);
+      return await getMockData(fallbackFile) as T;
+    }
+    
+    try {
+      return await operation();
+    } catch (error) {
+      console.error(`Database error, falling back to ${fallbackFile}:`, error);
+      return await getMockData(fallbackFile) as T;
+    }
+  }
   
   // Employee operations
   async getEmployees() {
@@ -156,30 +177,56 @@ export class SupabaseStorage {
 
   // Schedules
   async getSchedules(filters: any = {}) {
-    const conditions = [];
-    
-    if (filters.employeeId) {
-      conditions.push(eq(schedules.employeeId, filters.employeeId));
-    }
-    
-    if (filters.date) {
-      conditions.push(eq(schedules.date, filters.date));
-    }
-    
-    if (filters.startDate) {
-      conditions.push(gte(schedules.date, filters.startDate));
-    }
-    
-    if (filters.endDate) {
-      conditions.push(lte(schedules.date, filters.endDate));
-    }
-    
-    if (conditions.length > 0) {
-      return await db.select().from(schedules)
-        .where(and(...conditions));
-    }
-    
-    return await db.select().from(schedules);
+    return await this.getDataWithFallback(
+      async () => {
+        const conditions = [];
+        
+        if (filters.employeeId) {
+          conditions.push(eq(schedules.employeeId, filters.employeeId));
+        }
+        
+        if (filters.date) {
+          conditions.push(eq(schedules.date, filters.date));
+        }
+        
+        if (filters.startDate) {
+          conditions.push(gte(schedules.date, filters.startDate));
+        }
+        
+        if (filters.endDate) {
+          conditions.push(lte(schedules.date, filters.endDate));
+        }
+        
+        if (conditions.length > 0) {
+          return await db!.select().from(schedules)
+            .where(and(...conditions));
+        }
+        
+        return await db!.select().from(schedules);
+      },
+      'schedules.json'
+    ).then((data: any) => {
+      // Apply client-side filtering for JSON fallback
+      let filteredData = data;
+      
+      if (filters.employeeId) {
+        filteredData = filteredData.filter((s: any) => s.employeeId === filters.employeeId);
+      }
+      
+      if (filters.date) {
+        filteredData = filteredData.filter((s: any) => s.date === filters.date);
+      }
+      
+      if (filters.startDate) {
+        filteredData = filteredData.filter((s: any) => s.date >= filters.startDate);
+      }
+      
+      if (filters.endDate) {
+        filteredData = filteredData.filter((s: any) => s.date <= filters.endDate);
+      }
+      
+      return filteredData;
+    });
   }
 
   // Time balances

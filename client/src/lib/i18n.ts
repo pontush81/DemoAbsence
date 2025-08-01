@@ -1185,6 +1185,114 @@ const translations: Translations = {
     sv: 'Logga ut',
     en: 'Logout',
   },
+
+  // Error messages and validation
+  'validation.dateRequired': {
+    sv: 'Datum krävs',
+    en: 'Date is required',
+  },
+  'validation.startTimeRequired': {
+    sv: 'Starttid krävs',
+    en: 'Start time is required',
+  },
+  'validation.endTimeRequired': {
+    sv: 'Sluttid krävs',
+    en: 'End time is required',
+  },
+  'validation.timeCodeRequired': {
+    sv: 'Tidkod krävs',
+    en: 'Time code is required',
+  },
+  'validation.endTimeAfterStartTime': {
+    sv: 'Sluttid måste vara efter starttid',
+    en: 'End time must be after start time',
+  },
+  'validation.scopeRequired': {
+    sv: 'Omfattning krävs',
+    en: 'Scope is required',
+  },
+  'validation.personnummerRequired': {
+    sv: 'Personnummer krävs',
+    en: 'Personal number required',
+  },
+  'validation.firstNameRequired': {
+    sv: 'Förnamn krävs',
+    en: 'First name required',
+  },
+  'validation.lastNameRequired': {
+    sv: 'Efternamn krävs',
+    en: 'Last name required',
+  },
+  'validation.streetAddressRequired': {
+    sv: 'Gatuadress krävs',
+    en: 'Street address required',
+  },
+  'validation.postalCodeRequired': {
+    sv: 'Giltigt postnummer krävs',
+    en: 'Valid postal code required',
+  },
+  'validation.cityRequired': {
+    sv: 'Stad krävs',
+    en: 'City required',
+  },
+  'validation.countryRequired': {
+    sv: 'Land krävs',
+    en: 'Country required',
+  },
+  'validation.validEmailRequired': {
+    sv: 'Giltig e-post krävs',
+    en: 'Valid email required',
+  },
+  'validation.validWorkEmailRequired': {
+    sv: 'Giltig arbets-e-post krävs',
+    en: 'Valid work email required',
+  },
+  'validation.countryCodeRequired': {
+    sv: 'Landskod krävs',
+    en: 'Country code required',
+  },
+  'validation.invalidTimePeriod': {
+    sv: 'Ogiltig tidsperiod',
+    en: 'Invalid time period',
+  },
+  'validation.invalidTime': {
+    sv: 'Ogiltig tid',
+    en: 'Invalid time',
+  },
+
+  // Toast messages
+  'toast.languageChangedSwedish': {
+    sv: 'Språket har ändrats till Svenska',
+    en: 'Language has been changed to Swedish',
+  },
+  'toast.languageChangedEnglish': {
+    sv: 'Språket har ändrats till Engelska',
+    en: 'Language has been changed to English',
+  },
+
+  // Schedule filters
+  'schedules.filterYourSchedules': {
+    sv: 'Filtrera dina scheman',
+    en: 'Filter your schedules',
+  },
+  'schedules.filterSchedules': {
+    sv: 'Filtrera scheman',
+    en: 'Filter schedules',
+  },
+
+  // Accessibility labels
+  'accessibility.swedishFlag': {
+    sv: 'Svensk flagga',
+    en: 'Swedish flag',
+  },
+  'accessibility.englishFlag': {
+    sv: 'Engelsk flagga',
+    en: 'English flag',
+  },
+  'accessibility.toggleSidebar': {
+    sv: 'Växla sidopanel',
+    en: 'Toggle Sidebar',
+  },
 };
 
 type I18nStore = {

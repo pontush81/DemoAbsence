@@ -3,31 +3,26 @@ import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import * as schema from '@shared/schema';
 
-// Supabase configuration
-if (!process.env.DATABASE_URL) {
-  throw new Error(
-    "DATABASE_URL must be set. Did you forget to provision a database?",
-  );
+// Supabase configuration - optional for development
+const hasDatabase = process.env.DATABASE_URL && process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!hasDatabase) {
+  console.warn('⚠️ Database credentials not found. Running in JSON fallback mode.');
+  console.warn('To use database features, set DATABASE_URL, SUPABASE_URL, and SUPABASE_SERVICE_ROLE_KEY in .env file');
 }
 
-if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-  throw new Error(
-    "SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set for Supabase integration",
-  );
-}
-
-// Create Supabase client (for auth, storage, etc.)
-export const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY,
+// Create Supabase client (for auth, storage, etc.) - only if credentials exist
+export const supabase = hasDatabase ? createClient(
+  process.env.SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!,
   {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
     },
   }
-);
+) : null;
 
-// Create Drizzle client with postgres driver
-const client = postgres(process.env.DATABASE_URL, { prepare: false });
-export const db = drizzle(client, { schema });
+// Create Drizzle client with postgres driver - only if DATABASE_URL exists
+const client = hasDatabase ? postgres(process.env.DATABASE_URL!, { prepare: false }) : null;
+export const db = hasDatabase && client ? drizzle(client, { schema }) : null;

@@ -164,7 +164,7 @@ export default function SchedulesPage() {
       <Card>
         <CardHeader>
           <CardTitle>
-            {isEmployee ? "Filtrera dina scheman" : "Filtrera scheman"}
+            {isEmployee ? t('schedules.filterYourSchedules') : t('schedules.filterSchedules')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">

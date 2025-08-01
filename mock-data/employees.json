@@ -133,5 +133,32 @@
     "position": "Avdelningschef",
     "manager": "",
     "scheduleTemplate": "manager"
+  },
+  {
+    "id": 6,
+    "employeeId": "hr-001",
+    "personnummer": "19880614-2468",
+    "firstName": "Lisa",
+    "lastName": "Nilsson",
+    "careOfAddress": "",
+    "streetAddress": "Regeringsgatan 30",
+    "postalCode": "11153",
+    "city": "Stockholm",
+    "country": "Sverige",
+    "phoneNumber": "070-678 90 12",
+    "email": "lisa.nilsson@gmail.com",
+    "workEmail": "lisa.nilsson@kontek.se",
+    "preferredEmail": "work",
+    "status": "active",
+    "role": "hr",
+    "bankClearingNumber": "1357",
+    "bankAccountNumber": "246801357",
+    "bankBIC": "",
+    "bankCountryCode": "SE",
+    "bankIBAN": "",
+    "department": "HR",
+    "position": "HR-specialist",
+    "manager": "E005",
+    "scheduleTemplate": "standard"
   }
 ]

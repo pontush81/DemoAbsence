@@ -3,8 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useI18n } from "@/lib/i18n";
-import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 const LanguageSelector = () => {
   const { t, language, setLanguage } = useI18n();
@@ -20,8 +20,8 @@ const LanguageSelector = () => {
     toast({
       title: t('settings.languageUpdated'),
       description: selectedLanguage === 'sv' 
-        ? 'Språket har ändrats till Svenska' 
-        : 'Language has been changed to English',
+        ? t('toast.languageChangedSwedish')
+        : t('toast.languageChangedEnglish'),
     });
   };
   
@@ -44,7 +44,7 @@ const LanguageSelector = () => {
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="sv" id="sv" />
               <Label htmlFor="sv" className="flex items-center">
-                <span role="img" aria-label="Swedish flag" className="mr-2">
+                <span role="img" aria-label={t('accessibility.swedishFlag')} className="mr-2">
                   🇸🇪
                 </span>
                 {t('settings.swedish')}
@@ -53,7 +53,7 @@ const LanguageSelector = () => {
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="en" id="en" />
               <Label htmlFor="en" className="flex items-center">
-                <span role="img" aria-label="English flag" className="mr-2">
+                <span role="img" aria-label={t('accessibility.englishFlag')} className="mr-2">
                   🇬🇧
                 </span>
                 {t('settings.english')}

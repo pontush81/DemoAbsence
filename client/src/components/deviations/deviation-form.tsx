@@ -26,22 +26,22 @@ import { apiService } from "@/lib/apiService";
 import { useStore } from "@/lib/store";
 import { format } from "date-fns";
 
-// Extend the schema with custom validation
-const deviationFormSchema = insertDeviationSchema.extend({
-  date: z.string().min(1, "Date is required"),
-  startTime: z.string().min(1, "Start time is required"),
-  endTime: z.string().min(1, "End time is required"),
-  timeCode: z.string().min(1, "Time code is required"),
+// Create the schema with custom validation using translations
+const createDeviationFormSchema = (t: (key: string) => string) => insertDeviationSchema.extend({
+  date: z.string().min(1, t('validation.dateRequired')),
+  startTime: z.string().min(1, t('validation.startTimeRequired')),
+  endTime: z.string().min(1, t('validation.endTimeRequired')),
+  timeCode: z.string().min(1, t('validation.timeCodeRequired')),
 }).refine((data) => {
   const start = new Date(`${data.date}T${data.startTime}`);
   const end = new Date(`${data.date}T${data.endTime}`);
   return end > start;
 }, {
-  message: "Sluttid måste vara efter starttid",
+  message: t('validation.endTimeAfterStartTime'),
   path: ["endTime"],
 });
 
-type DeviationFormValues = z.infer<typeof deviationFormSchema>;
+type DeviationFormValues = z.infer<ReturnType<typeof createDeviationFormSchema>>;
 
 interface DeviationFormProps {
   deviationId?: number;
