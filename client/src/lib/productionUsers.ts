@@ -15,7 +15,7 @@ export interface ProductionUser {
 }
 
 export const productionUsers: ProductionUser[] = [
-  // Grundläggande medarbetare - bara en roll (matchar databas E001)
+  // 👤 MEDARBETARE - Anna Andersson
   {
     id: "E001",
     name: "Anna Andersson",
@@ -26,70 +26,37 @@ export const productionUsers: ProductionUser[] = [
     canSwitchRoles: false
   },
   
-  // Chef - kan vara både medarbetare och chef (matchar employee data E005)  
+  // 👨‍💼 CHEF - Mikael Svensson (bara manager-roll)
   {
     id: "E005", 
     name: "Mikael Svensson",
     email: "mikael.svensson@kontek.se",
     department: "Ledning",
-    assignedRoles: ["employee", "manager"],
+    assignedRoles: ["manager"],
     defaultRole: "manager", 
-    canSwitchRoles: true
+    canSwitchRoles: false
   },
   
-  // HR-specialist - också chef funktioner (matchar databas hr-001)
+  // 👩‍💼 HR - Lisa Nilsson (bara HR-roll)
   {
     id: "hr-001",
     name: "Lisa Nilsson", 
     email: "lisa.nilsson@kontek.se",
     department: "HR",
-    assignedRoles: ["employee", "hr", "manager"],
+    assignedRoles: ["hr"],
     defaultRole: "hr",
-    canSwitchRoles: true
+    canSwitchRoles: false
   },
   
-  // Löneadministratör - specialiserad roll
+  // 💰 LÖNEADMIN - Lars Johansson (bara payroll-roll)
   {
     id: "pay-001",
     name: "Lars Johansson",
     email: "lars.johansson@kontek.se", 
     department: "Ekonomi",
-    assignedRoles: ["employee", "payroll"],
+    assignedRoles: ["payroll"],
     defaultRole: "payroll",
-    canSwitchRoles: true
-  },
-  
-  // Utvecklingschef - matchar databas E006
-  {
-    id: "E006",
-    name: "Emma Pettersson",
-    email: "emma.pettersson@kontek.se",
-    department: "Utveckling",
-    assignedRoles: ["employee", "manager"],
-    defaultRole: "manager",
-    canSwitchRoles: true
-  },
-  
-  // Utvecklare under Emma
-  {
-    id: "E007", 
-    name: "Oliver Berg",
-    email: "oliver.berg@kontek.se",
-    department: "Utveckling",
-    assignedRoles: ["employee"],
-    defaultRole: "employee",
     canSwitchRoles: false
-  },
-  
-  // Systemadmin - alla roller för support
-  {
-    id: "admin-001",
-    name: "Tekla Support",
-    email: "support@kontek.se",
-    department: "IT", 
-    assignedRoles: ["employee", "manager", "hr", "payroll"],
-    defaultRole: "employee",
-    canSwitchRoles: true // För troubleshooting
   }
 ];
 

@@ -179,7 +179,7 @@ export const useStore = create<AppState>()(
       })),
     }),
     {
-      name: 'kontek-app-storage-v3', // v3: Fixed manager ID mismatch (mgr-001 → E005)
+      name: 'kontek-app-storage-v4', // v4: Simplified to one person per role
       partialize: (state) => ({
         user: {
           isAuthenticated: state.user.isAuthenticated,
