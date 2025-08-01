@@ -8,11 +8,13 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { apiService } from '@/lib/apiService';
 import { useI18n } from '@/lib/i18n';
+import { useStore } from '@/lib/store';
 import { Employee, Schedule } from '@shared/schema';
 import ScheduleImport from '@/components/paxml/schedule-import';
 
 export default function SchedulesPage() {
   const { t } = useI18n();
+  const { user } = useStore();
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>('');
@@ -21,6 +23,12 @@ export default function SchedulesPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showImport, setShowImport] = useState(false);
+
+  // Rollbaserade behörigheter
+  const currentRole = user.currentRole;
+  const currentUser = user.currentUser;
+  const canViewAllSchedules = ['manager', 'hr', 'payroll'].includes(currentRole);
+  const isEmployee = currentRole === 'employee';
 
   useEffect(() => {
     loadEmployees();
@@ -31,10 +39,32 @@ export default function SchedulesPage() {
     loadSchedules();
   }, [selectedEmployeeId, startDate, endDate]);
 
+  // Ladda om anställda när rollen ändras
+  useEffect(() => {
+    loadEmployees();
+  }, [currentRole, currentUser]);
+
   const loadEmployees = async () => {
     try {
       const employeesData = await apiService.getEmployees();
-      setEmployees(employeesData);
+      
+      // Filtrera anställda baserat på roll
+      let filteredEmployees = employeesData;
+      
+      if (isEmployee && currentUser) {
+        // Medarbetare kan bara se sitt eget schema
+        filteredEmployees = employeesData.filter(emp => emp.employeeId === currentUser.employeeId);
+        // Sätt automatiskt den aktuella användaren som vald
+        setSelectedEmployeeId(currentUser.employeeId);
+      } else if (!canViewAllSchedules) {
+        // Fallback: om rollen inte är definierad, visa bara egen
+        if (currentUser) {
+          filteredEmployees = employeesData.filter(emp => emp.employeeId === currentUser.employeeId);
+          setSelectedEmployeeId(currentUser.employeeId);
+        }
+      }
+      
+      setEmployees(filteredEmployees);
     } catch (err) {
       setError('Kunde inte ladda anställda');
     }
@@ -100,17 +130,24 @@ export default function SchedulesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Scheman</h1>
-          <p className="text-gray-600 mt-1">Hantera och visa anställdas arbetstidsscheman</p>
+          <p className="text-gray-600 mt-1">
+            {isEmployee 
+              ? "Visa dina arbetstidsscheman" 
+              : "Hantera och visa anställdas arbetstidsscheman"
+            }
+          </p>
         </div>
-        <Button
-          onClick={() => setShowImport(!showImport)}
-          variant={showImport ? "secondary" : "default"}
-        >
-          <span className="material-icons mr-2">
-            {showImport ? 'close' : 'upload'}
-          </span>
-          {showImport ? 'Stäng import' : 'Importera scheman'}
-        </Button>
+        {canViewAllSchedules && (
+          <Button
+            onClick={() => setShowImport(!showImport)}
+            variant={showImport ? "secondary" : "default"}
+          >
+            <span className="material-icons mr-2">
+              {showImport ? 'close' : 'upload'}
+            </span>
+            {showImport ? 'Stäng import' : 'Importera scheman'}
+          </Button>
+        )}
       </div>
 
       {showImport && (
@@ -126,26 +163,30 @@ export default function SchedulesPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Filtrera scheman</CardTitle>
+          <CardTitle>
+            {isEmployee ? "Filtrera dina scheman" : "Filtrera scheman"}
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <Label htmlFor="employee-filter">Anställd (valfritt)</Label>
-              <select
-                id="employee-filter"
-                value={selectedEmployeeId}
-                onChange={(e) => setSelectedEmployeeId(e.target.value)}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-              >
-                <option value="">Alla anställda</option>
-                {employees.map((employee) => (
-                  <option key={employee.employeeId} value={employee.employeeId}>
-                    {employee.firstName} {employee.lastName} ({employee.employeeId})
-                  </option>
-                ))}
-              </select>
-            </div>
+          <div className={`grid grid-cols-1 ${canViewAllSchedules ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-4`}>
+            {canViewAllSchedules && (
+              <div>
+                <Label htmlFor="employee-filter">Anställd (valfritt)</Label>
+                <select
+                  id="employee-filter"
+                  value={selectedEmployeeId}
+                  onChange={(e) => setSelectedEmployeeId(e.target.value)}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                >
+                  <option value="">Alla anställda</option>
+                  {employees.map((employee) => (
+                    <option key={employee.employeeId} value={employee.employeeId}>
+                      {employee.firstName} {employee.lastName} ({employee.employeeId})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             <div>
               <Label htmlFor="start-date">Från datum</Label>

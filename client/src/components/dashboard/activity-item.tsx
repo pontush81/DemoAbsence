@@ -35,14 +35,45 @@ const ActivityItem = ({ activity }: ActivityItemProps) => {
           textColor: 'text-[#2196F3]'
         };
       case 'pending':
+      case 'pending_approval':
         return { 
-          icon: 'pending', 
+          icon: 'pending_actions', 
           bgColor: 'bg-[#FFC107] bg-opacity-10', 
           textColor: 'text-[#FFC107]'
         };
       case 'published':
         return { 
           icon: 'file_download', 
+          bgColor: 'bg-[#673AB7] bg-opacity-10', 
+          textColor: 'text-[#673AB7]'
+        };
+      case 'processed':
+        return { 
+          icon: 'task_alt', 
+          bgColor: 'bg-primary bg-opacity-10', 
+          textColor: 'text-primary'
+        };
+      case 'escalated':
+        return { 
+          icon: 'priority_high', 
+          bgColor: 'bg-[#F44336] bg-opacity-10', 
+          textColor: 'text-[#F44336]'
+        };
+      case 'exported':
+        return { 
+          icon: 'upload', 
+          bgColor: 'bg-[#FF9800] bg-opacity-10', 
+          textColor: 'text-[#FF9800]'
+        };
+      case 'onboarded':
+        return { 
+          icon: 'person_add', 
+          bgColor: 'bg-primary bg-opacity-10', 
+          textColor: 'text-primary'
+        };
+      case 'policy_updated':
+        return { 
+          icon: 'policy', 
           bgColor: 'bg-[#673AB7] bg-opacity-10', 
           textColor: 'text-[#673AB7]'
         };
@@ -64,6 +95,9 @@ const ActivityItem = ({ activity }: ActivityItemProps) => {
           case 'rejected': return 'Avvikelse avslagen';
           case 'returned': return 'Avvikelse korrigering krävs';
           case 'created': return 'Avvikelse registrerad';
+          case 'pending_approval': return 'Väntande godkännanden';
+          case 'processed': return 'Avvikelser behandlade';
+          case 'escalated': return 'Avvikelse eskalerad';
           default: return 'Avvikelse uppdaterad';
         }
       case 'leave':
@@ -71,10 +105,24 @@ const ActivityItem = ({ activity }: ActivityItemProps) => {
           case 'approved': return 'Ledighet godkänd';
           case 'rejected': return 'Ledighet avslagen';
           case 'created': return 'Ledighetsansökan skickad';
+          case 'policy_updated': return 'Policy uppdaterad';
           default: return 'Ledighetsansökan uppdaterad';
         }
       case 'payslip':
-        return 'Lönespecifikation tillgänglig';
+        switch (activity.action) {
+          case 'published': return 'Lönespecar publicerade';
+          default: return 'Lönespecifikation tillgänglig';
+        }
+      case 'payroll':
+        switch (activity.action) {
+          case 'exported': return 'PAXML-export slutförd';
+          default: return 'Lönebearbetning';
+        }
+      case 'employee':
+        switch (activity.action) {
+          case 'onboarded': return 'Ny medarbetare';
+          default: return 'Personalförändring';
+        }
       default:
         return 'Aktivitet';
     }

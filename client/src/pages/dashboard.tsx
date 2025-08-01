@@ -9,7 +9,7 @@ import { useI18n } from "@/lib/i18n";
 import { useStore } from "@/lib/store";
 import { apiService } from "@/lib/apiService";
 import { formatDateWithDay, formatTime, formatDuration } from "@/lib/utils/date";
-import { mockActivityLogs } from "@/lib/mockData";
+import { getRoleSpecificActivities, getRoleSpecificActivityTitle } from "@/lib/roleSpecificData";
 
 export default function Dashboard() {
   const { t } = useI18n();
@@ -17,6 +17,10 @@ export default function Dashboard() {
   const employeeId = user.currentUser?.employeeId;
   const currentUser = user.currentUser;
   const isManager = user.currentRole === 'manager';
+  
+  // Hämta rollspecifika aktiviteter
+  const roleSpecificActivities = getRoleSpecificActivities(user.currentRole);
+  const activityTitle = getRoleSpecificActivityTitle(user.currentRole);
   
   // Get current date and format it
   const currentDate = new Date();
@@ -180,11 +184,11 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* Recent Activity Section */}
-      <h2 className="text-xl font-bold mb-4">{t('dashboard.recentActivity')}</h2>
+      {/* Recent Activity Section - Role Specific */}
+      <h2 className="text-xl font-bold mb-4">{activityTitle}</h2>
       <Card className="bg-white rounded-lg shadow-sm overflow-hidden mb-8">
         <ul className="divide-y divide-gray-200">
-          {mockActivityLogs.slice(0, 3).map((activity) => (
+          {roleSpecificActivities.slice(0, 3).map((activity) => (
             <ActivityItem key={activity.id} activity={activity} />
           ))}
         </ul>

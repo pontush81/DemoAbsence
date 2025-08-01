@@ -52,6 +52,13 @@ const RoleDropdown = ({ variant = "compact", className = "" }: RoleDropdownProps
     }
   ];
 
+  // Filtrera roller baserat på vad användaren har tillgång till
+  // Fallback till alla roller om availableRoles inte finns (för bakåtkompatibilitet)
+  const userAvailableRoles = user.availableRoles || ['employee', 'manager', 'hr', 'payroll'];
+  const availableRoleData = roles.filter(role => 
+    userAvailableRoles.includes(role.value)
+  );
+
   const currentRoleData = roles.find(role => role.value === user.currentRole);
 
   const handleRoleChange = (role: UserRole) => {
@@ -78,9 +85,11 @@ const RoleDropdown = ({ variant = "compact", className = "" }: RoleDropdownProps
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel>Växla roll (Demo)</DropdownMenuLabel>
+        <DropdownMenuLabel>
+          Växla roll {user.isDemoMode ? '(Demo)' : '(Produktion)'}
+        </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {roles.map((role) => (
+        {availableRoleData.map((role) => (
           <DropdownMenuItem
             key={role.value}
             onClick={() => handleRoleChange(role.value)}
