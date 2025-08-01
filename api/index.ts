@@ -1,19 +1,43 @@
 import 'dotenv/config';
-import express, { type Request, Response, NextFunction } from "express";
-import { registerRoutes } from "../server/routes";
+import express from "express";
+import restStorage from "../server/supabase-rest-storage";
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Register API routes (no Vite middleware for Vercel)
-registerRoutes(app);
+// API Routes - simplified for Vercel
+app.get('/api/employees', async (req, res) => {
+  try {
+    const employees = await restStorage.getEmployees();
+    res.json(employees);
+  } catch (error) {
+    console.error('Error fetching employees:', error);
+    res.status(500).json({ error: 'Failed to fetch employees' });
+  }
+});
 
-// Error handling middleware
-app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-  const status = err.status || err.statusCode || 500;
-  const message = err.message || "Internal Server Error";
-  res.status(status).json({ message });
+app.get('/api/schedules/:employeeId', async (req, res) => {
+  try {
+    const { employeeId } = req.params;
+    const { date } = req.query;
+    const schedules = await restStorage.getSchedules({ employeeId, date: date as string });
+    res.json(schedules);
+  } catch (error) {
+    console.error('Error fetching schedules:', error);
+    res.status(500).json({ error: 'Failed to fetch schedules' });
+  }
+});
+
+app.get('/api/time-balances/:employeeId', async (req, res) => {  
+  try {
+    const { employeeId } = req.params;
+    const timeBalance = await restStorage.getTimeBalance(employeeId);
+    res.json(timeBalance);
+  } catch (error) {
+    console.error('Error fetching time balance:', error);
+    res.status(500).json({ error: 'Failed to fetch time balance' });
+  }
 });
 
 // Export the Express app for Vercel serverless function
