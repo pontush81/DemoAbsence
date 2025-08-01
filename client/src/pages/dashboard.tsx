@@ -48,6 +48,13 @@ export default function Dashboard() {
     queryFn: () => apiService.getPendingDeviations(employeeId),
     enabled: isManager && !!employeeId,
   });
+
+  // Fetch pending leave requests (for manager)
+  const { data: pendingLeaveRequests, isLoading: isLoadingPendingLeaveRequests } = useQuery({
+    queryKey: ['/api/manager/leave-requests/pending'],
+    queryFn: () => apiService.getPendingLeaveRequests(),
+    enabled: isManager,
+  });
   
   // Get today's schedule
   const todaySchedule = schedule && schedule.length > 0 ? schedule[0] : null;
@@ -155,10 +162,10 @@ export default function Dashboard() {
           }
         />
 
-        {/* Pending Approvals Card (only for managers) */}
+        {/* Pending Deviations Card (only for managers) */}
         {isManager && (
           <StatusCard
-            title={t('dashboard.pendingApprovals')}
+            title={t('dashboard.pendingDeviations')}
             value={
               isLoadingPendingDeviations ? (
                 <Skeleton className="h-6 w-24" />
@@ -170,6 +177,32 @@ export default function Dashboard() {
             }
             icon="pending_actions"
             className="bg-[#FFC107] bg-opacity-5"
+            footer={
+              <Link href="/manager">
+                <div className="text-sm text-primary flex items-center cursor-pointer">
+                  {t('dashboard.viewAll')}
+                  <span className="material-icons text-sm ml-1">arrow_forward</span>
+                </div>
+              </Link>
+            }
+          />
+        )}
+
+        {/* Pending Leave Requests Card (only for managers) */}
+        {isManager && (
+          <StatusCard
+            title={t('dashboard.pendingLeaveRequests')}
+            value={
+              isLoadingPendingLeaveRequests ? (
+                <Skeleton className="h-6 w-24" />
+              ) : pendingLeaveRequests ? (
+                `${pendingLeaveRequests.length} ${t('items')}`
+              ) : (
+                "0 " + t('items')
+              )
+            }
+            icon="event_available"
+            className="bg-[#4CAF50] bg-opacity-5"
             footer={
               <Link href="/manager">
                 <div className="text-sm text-primary flex items-center cursor-pointer">

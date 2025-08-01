@@ -48,17 +48,6 @@ const ApprovalsList = ({ type }: ApprovalsListProps) => {
     queryFn: () => apiService.getTimeCodes(),
   });
 
-  // Fetch employees to display names instead of just IDs
-  const { data: employees = [] } = useQuery({
-    queryKey: ['/api/employees'],
-    queryFn: () => apiService.getAllEmployees(),
-  });
-
-  const getEmployeeName = (employeeId: string) => {
-    const employee = employees.find(e => e.employeeId === employeeId);
-    return employee ? `${employee.firstName} ${employee.lastName}` : employeeId;
-  };
-
   // Helper function to get time code for a deviation
   const getTimeCodeForDeviation = (timeCodeStr: string): TimeCode | undefined => {
     return timeCodes.find(tc => tc.code === timeCodeStr);
@@ -234,14 +223,11 @@ const ApprovalsList = ({ type }: ApprovalsListProps) => {
                         <div className="flex items-center">
                           <Avatar className="h-8 w-8 bg-primary bg-opacity-10">
                             <AvatarFallback className="text-primary">
-                              {(() => {
-                                const employee = employees.find(e => e.employeeId === deviation.employeeId);
-                                return employee ? `${employee.firstName.charAt(0)}${employee.lastName.charAt(0)}` : deviation.employeeId?.substring(0, 2).toUpperCase() || '??';
-                              })()}
+                              {deviation.employeeId ? deviation.employeeId.substring(0, 2).toUpperCase() : '??'}
                             </AvatarFallback>
                           </Avatar>
                           <div className="ml-4">
-                            <div className="text-sm font-medium">{getEmployeeName(deviation.employeeId)}</div>
+                            <div className="text-sm font-medium">{deviation.employeeId}</div>
                             <div className="text-sm text-muted-foreground">ID: {deviation.employeeId}</div>
                           </div>
                         </div>
@@ -340,14 +326,11 @@ const ApprovalsList = ({ type }: ApprovalsListProps) => {
                     <div className="flex items-center">
                       <Avatar className="h-8 w-8 bg-primary bg-opacity-10">
                         <AvatarFallback className="text-primary">
-                          {(() => {
-                            const employee = employees.find(e => e.employeeId === leave.employeeId);
-                            return employee ? `${employee.firstName.charAt(0)}${employee.lastName.charAt(0)}` : leave.employeeId.substring(0, 2);
-                          })()}
+                          {leave.employeeId.substring(0, 2)}
                         </AvatarFallback>
                       </Avatar>
                       <div className="ml-4">
-                        <div className="text-sm font-medium">{getEmployeeName(leave.employeeId)}</div>
+                        <div className="text-sm font-medium">{leave.employeeId}</div>
                         <div className="text-sm text-muted-foreground">ID: {leave.employeeId}</div>
                       </div>
                     </div>

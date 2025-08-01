@@ -1,7 +1,6 @@
-import { useState } from "react";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
 
 export type DeviationFilters = {
@@ -18,14 +17,10 @@ interface DeviationFiltersProps {
 
 const DeviationFilters = ({ filters, onFilterChange }: DeviationFiltersProps) => {
   const { t } = useI18n();
-  const [localFilters, setLocalFilters] = useState<DeviationFilters>(filters);
   
   const handleFilterChange = (key: keyof DeviationFilters, value: string) => {
-    setLocalFilters((prev) => ({ ...prev, [key]: value }));
-  };
-  
-  const handleApplyFilters = () => {
-    onFilterChange(localFilters);
+    const newFilters = { ...filters, [key]: value };
+    onFilterChange(newFilters);
   };
   
   return (
@@ -37,7 +32,7 @@ const DeviationFilters = ({ filters, onFilterChange }: DeviationFiltersProps) =>
               {t('deviations.period')}
             </label>
             <Select
-              value={localFilters.period}
+              value={filters.period}
               onValueChange={(value) => handleFilterChange('period', value)}
             >
               <SelectTrigger id="filter-period">
@@ -57,7 +52,7 @@ const DeviationFilters = ({ filters, onFilterChange }: DeviationFiltersProps) =>
               {t('deviations.status')}
             </label>
             <Select
-              value={localFilters.status}
+              value={filters.status}
               onValueChange={(value) => handleFilterChange('status', value)}
             >
               <SelectTrigger id="filter-status">
@@ -79,7 +74,7 @@ const DeviationFilters = ({ filters, onFilterChange }: DeviationFiltersProps) =>
               {t('deviations.timeCode')}
             </label>
             <Select
-              value={localFilters.timeCode}
+              value={filters.timeCode}
               onValueChange={(value) => handleFilterChange('timeCode', value)}
             >
               <SelectTrigger id="filter-type">
@@ -99,7 +94,7 @@ const DeviationFilters = ({ filters, onFilterChange }: DeviationFiltersProps) =>
               {t('deviations.sortBy')}
             </label>
             <Select
-              value={localFilters.sortBy}
+              value={filters.sortBy}
               onValueChange={(value) => handleFilterChange('sortBy', value)}
             >
               <SelectTrigger id="filter-sortBy">
@@ -112,13 +107,7 @@ const DeviationFilters = ({ filters, onFilterChange }: DeviationFiltersProps) =>
               </SelectContent>
             </Select>
           </div>
-          
-          <Button 
-            onClick={handleApplyFilters}
-            className="bg-primary hover:bg-primary-dark text-white h-10"
-          >
-            {t('action.filter')}
-          </Button>
+
         </div>
       </CardContent>
     </Card>

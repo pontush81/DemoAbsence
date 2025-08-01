@@ -1,5 +1,5 @@
 import { supabase } from './db';
-import { getMockData } from './storage';
+import { getMockData, saveMockData } from './storage';
 
 // Supabase REST API-based storage operations
 export class SupabaseRestStorage {
@@ -218,7 +218,25 @@ export class SupabaseRestStorage {
   // Update deviation
   async updateDeviation(id: number, updates: any) {
     if (!this.isSupabaseAvailable()) {
-      throw new Error('Supabase not available for update operations');
+      // Fallback to mock data update when Supabase not available
+      const deviations = await getMockData('deviations.json');
+      const index = deviations.findIndex((d: any) => d.id === id);
+      
+      if (index === -1) {
+        throw new Error(`Deviation with id ${id} not found`);
+      }
+      
+      // Update the deviation in mock data
+      const updatedDeviation = {
+        ...deviations[index],
+        ...updates,
+        lastUpdated: new Date().toISOString()
+      };
+      
+      deviations[index] = updatedDeviation;
+      await saveMockData('deviations.json', deviations);
+      
+      return updatedDeviation;
     }
 
     try {
