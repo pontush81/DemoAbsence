@@ -134,13 +134,9 @@ const DeviationForm = ({ deviationId, onCancel }: DeviationFormProps) => {
     queryFn: async () => {
       if (!user.currentUser?.employeeId || !selectedDate) return null;
       try {
-        // Try to get the specific schedule for this date
-        const response = await fetch(`/api/schedules/${user.currentUser.employeeId}?date=${selectedDate}`);
-        if (response.ok) {
-          const schedules = await response.json();
-          return schedules.find((s: any) => s.date === selectedDate) || null;
-        }
-        return null;
+        // Use apiService to get proper snake_case→camelCase mapping
+        const schedule = await apiService.getEmployeeSchedule(user.currentUser.employeeId, selectedDate);
+        return schedule;
       } catch {
         return null;
       }
