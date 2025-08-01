@@ -109,9 +109,13 @@ const translations: Translations = {
     sv: 'Sparade dagar',
     en: 'Saved Days',
   },
-  'dashboard.pendingApprovals': {
+  'dashboard.pendingDeviations': {
     sv: 'Avvikelser att godkänna',
-    en: 'Pending Approvals',
+    en: 'Pending Deviations',
+  },
+  'dashboard.pendingLeaveRequests': {
+    sv: 'Ledighetsansökningar',
+    en: 'Leave Requests',
   },
   'dashboard.viewAll': {
     sv: 'Visa alla',
