@@ -86,10 +86,6 @@ const DeviationForm = ({ deviationId, onCancel }: DeviationFormProps) => {
     queryKey: ['/api/timecodes'],
     queryFn: () => apiService.getTimeCodes(),
   });
-
-  // Get workflow info for selected time code
-  const selectedTimeCode = timeCodes?.find(tc => tc.code === form.watch('timeCode'));
-  const workflowInfo = selectedTimeCode ? getWorkflowInfo(selectedTimeCode) : null;
   
   // Fetch deviation if editing
   const { data: deviation, isLoading: isLoadingDeviation } = useQuery({
@@ -113,6 +109,10 @@ const DeviationForm = ({ deviationId, onCancel }: DeviationFormProps) => {
       status: 'pending',
     },
   });
+
+  // Get workflow info for selected time code
+  const selectedTimeCode = timeCodes?.find(tc => tc.code === form.watch('timeCode'));
+  const workflowInfo = selectedTimeCode ? getWorkflowInfo(selectedTimeCode) : null;
   
   // Update form when deviation data loads
   useState(() => {
