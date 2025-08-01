@@ -20,6 +20,14 @@ const RoleSwitcher = () => {
     setLocation('/manager');
   };
   
+  const goToHRArea = () => {
+    setLocation('/manager'); // HR also uses manager page for now
+  };
+  
+  const goToPayrollArea = () => {
+    setLocation('/paxml-export'); // Payroll goes to PAXML export
+  };
+  
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -31,10 +39,18 @@ const RoleSwitcher = () => {
             </CardDescription>
           </div>
           <Badge 
-            variant={user.currentRole === 'manager' ? 'secondary' : 'default'}
-            className="text-md py-1.5 px-3"
+            variant="secondary"
+            className={`text-md py-1.5 px-3 ${
+              user.currentRole === 'manager' ? 'bg-blue-100 text-blue-800' :
+              user.currentRole === 'hr' ? 'bg-purple-100 text-purple-800' :
+              user.currentRole === 'payroll' ? 'bg-orange-100 text-orange-800' :
+              'bg-green-100 text-green-800'
+            }`}
           >
-            {user.currentRole === 'manager' ? 'Chef' : 'Anställd'}
+            {user.currentRole === 'manager' ? 'Chef' :
+             user.currentRole === 'hr' ? 'HR-specialist' :
+             user.currentRole === 'payroll' ? 'Löneadministratör' :
+             'Medarbetare'}
           </Badge>
         </div>
       </CardHeader>
@@ -49,18 +65,46 @@ const RoleSwitcher = () => {
                 <SelectValue placeholder={t('settings.selectRole') || 'Select role'} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="employee">{t('roles.employee') || 'Employee'}</SelectItem>
-                <SelectItem value="manager">{t('roles.manager') || 'Manager'}</SelectItem>
+                <SelectItem value="employee">
+                  <div className="flex items-center">
+                    <span className="material-icons text-sm mr-2">person</span>
+                    Medarbetare
+                  </div>
+                </SelectItem>
+                <SelectItem value="manager">
+                  <div className="flex items-center">
+                    <span className="material-icons text-sm mr-2">supervisor_account</span>
+                    Chef
+                  </div>
+                </SelectItem>
+                <SelectItem value="hr">
+                  <div className="flex items-center">
+                    <span className="material-icons text-sm mr-2">people</span>
+                    HR-specialist
+                  </div>
+                </SelectItem>
+                <SelectItem value="payroll">
+                  <div className="flex items-center">
+                    <span className="material-icons text-sm mr-2">account_balance_wallet</span>
+                    Löneadministratör
+                  </div>
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
           
           <div className="pt-2 flex items-center gap-2">
-            <div className={`w-3 h-3 rounded-full ${user.currentRole === 'manager' ? 'bg-blue-500' : 'bg-green-500'}`}></div>
+            <div className={`w-3 h-3 rounded-full ${
+              user.currentRole === 'manager' ? 'bg-blue-500' :
+              user.currentRole === 'hr' ? 'bg-purple-500' :
+              user.currentRole === 'payroll' ? 'bg-orange-500' :
+              'bg-green-500'
+            }`}></div>
             <span className="text-sm">
-              {user.currentRole === 'manager' 
-                ? (t('roles.managerActive') || 'Manager role active') 
-                : (t('roles.employeeActive') || 'Employee role active')}
+              {user.currentRole === 'manager' ? 'Chefsroll aktiv' :
+               user.currentRole === 'hr' ? 'HR-specialist roll aktiv' :
+               user.currentRole === 'payroll' ? 'Löneadministratör roll aktiv' :
+               'Medarbetarroll aktiv'}
             </span>
           </div>
           
@@ -68,8 +112,12 @@ const RoleSwitcher = () => {
             <h4 className="font-medium mb-2">{t('settings.roleInfo') || 'Role Information'}</h4>
             <p className="text-sm text-muted-foreground">
               {user.currentRole === 'manager'
-                ? (t('settings.managerInfo') || 'You can now approve deviations and leave requests in the Manager section.')
-                : (t('settings.employeeInfo') || 'You can submit deviations and leave requests for approval.')}
+                ? 'Du kan nu godkänna avvikelser och ledighetsansökningar i Chefsektionen.'
+                : user.currentRole === 'hr'
+                ? 'Du kan hantera personalärenden och se översikt över alla anställda.'
+                : user.currentRole === 'payroll'
+                ? 'Du kan hantera löner, exportera PAXML och se löneoversikt.'
+                : 'Du kan skicka in avvikelser och ledighetsansökningar för godkännande.'}
             </p>
           </div>
           
@@ -79,7 +127,25 @@ const RoleSwitcher = () => {
               onClick={goToManagerArea}
             >
               <span className="material-icons mr-2">supervisor_account</span>
-              {t('settings.goToManager') || 'Go to Manager Area'}
+              Gå till Chefsområde
+            </Button>
+          )}
+          {user.currentRole === 'hr' && (
+            <Button 
+              className="w-full mt-4 bg-purple-600 hover:bg-purple-700" 
+              onClick={goToHRArea}
+            >
+              <span className="material-icons mr-2">people</span>
+              Gå till HR-område
+            </Button>
+          )}
+          {user.currentRole === 'payroll' && (
+            <Button 
+              className="w-full mt-4 bg-orange-600 hover:bg-orange-700" 
+              onClick={goToPayrollArea}
+            >
+              <span className="material-icons mr-2">account_balance_wallet</span>
+              Gå till Löneområde
             </Button>
           )}
         </div>
