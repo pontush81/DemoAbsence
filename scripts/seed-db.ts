@@ -1,11 +1,15 @@
 import { db } from "../server/db";
-import { 
-  mockTimeCodes, 
-  mockDeviations, 
-  mockLeaveRequests,
-  mockTimeBalances,
-  mockPayslips
-} from "../client/src/lib/mockData";
+import fs from 'fs';
+import path from 'path';
+
+// Load mock data from JSON files
+const mockTimeCodes = JSON.parse(fs.readFileSync(path.join(__dirname, "../mock-data/timecodes.json"), "utf8"));
+const mockDeviations = JSON.parse(fs.readFileSync(path.join(__dirname, "../mock-data/deviations.json"), "utf8"));
+const mockLeaveRequests = JSON.parse(fs.readFileSync(path.join(__dirname, "../mock-data/leave-requests.json"), "utf8"));
+const mockTimeBalances = JSON.parse(fs.readFileSync(path.join(__dirname, "../mock-data/timebalances.json"), "utf8"));
+const mockPayslips = JSON.parse(fs.readFileSync(path.join(__dirname, "../mock-data/payslips.json"), "utf8"));
+const mockEmployees = JSON.parse(fs.readFileSync(path.join(__dirname, "../mock-data/employees.json"), "utf8"));
+const mockSchedules = JSON.parse(fs.readFileSync(path.join(__dirname, "../mock-data/schedules.json"), "utf8"));
 import { 
   employees, 
   schedules, 

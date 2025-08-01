@@ -180,6 +180,8 @@ class ApiService {
         ...dev,
         employeeId: dev.employee_id || dev.employeeId,
         timeCode: dev.time_code || dev.timeCode,
+        startTime: dev.start_time || dev.startTime,
+        endTime: dev.end_time || dev.endTime,
       }));
     } catch (error) {
       console.error('Error fetching all deviations:', error);
@@ -217,6 +219,8 @@ class ApiService {
         ...dev,
         employeeId: dev.employee_id || dev.employeeId,
         timeCode: dev.time_code || dev.timeCode,
+        startTime: dev.start_time || dev.startTime,
+        endTime: dev.end_time || dev.endTime,
       }));
     } catch (error) {
       console.error('Error fetching deviations:', error);
@@ -418,6 +422,8 @@ class ApiService {
         ...leave,
         employeeId: leave.employee_id || leave.employeeId,
         leaveType: leave.leave_type || leave.leaveType,
+        startDate: leave.start_date || leave.startDate,
+        endDate: leave.end_date || leave.endDate,
       }));
     } catch (error) {
       console.error('Error fetching leave requests:', error);
