@@ -15,7 +15,7 @@ export const getRoleSpecificActivities = (role: UserRole): ActivityLog[] => {
           type: 'deviation',
           action: 'approved',
           description: 'Din övertidsansökan för 12 april har godkänts av Mikael Svensson',
-          timestamp: new Date(now.getTime() - 2 * 60 * 60 * 1000).toISOString(), // 2h sedan
+          timestamp: new Date(now.getTime() - 2 * 60 * 60 * 1000), // 2h sedan
           referenceId: '1',
           referenceType: 'deviation',
         },
@@ -25,7 +25,7 @@ export const getRoleSpecificActivities = (role: UserRole): ActivityLog[] => {
           type: 'leave',
           action: 'created',
           description: 'Du ansökte om semester 10-15 juli',
-          timestamp: new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString(), // 1 dag sedan
+          timestamp: new Date(now.getTime() - 24 * 60 * 60 * 1000), // 1 dag sedan
           referenceId: '1',
           referenceType: 'leave',
         },
@@ -35,7 +35,7 @@ export const getRoleSpecificActivities = (role: UserRole): ActivityLog[] => {
           type: 'deviation',
           action: 'returned',
           description: 'Mikael har skickat tillbaka din avvikelserapport för 11 april med kommentar',
-          timestamp: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 dagar sedan
+          timestamp: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000), // 2 dagar sedan
           referenceId: '2',
           referenceType: 'deviation',
         }
@@ -50,7 +50,7 @@ export const getRoleSpecificActivities = (role: UserRole): ActivityLog[] => {
           type: 'deviation',
           action: 'pending_approval',
           description: '3 nya avvikelserapporter väntar på ditt godkännande',
-          timestamp: new Date(now.getTime() - 30 * 60 * 1000).toISOString(), // 30 min sedan
+          timestamp: new Date(now.getTime() - 30 * 60 * 1000), // 30 min sedan
           referenceId: '10',
           referenceType: 'deviation',
         },
@@ -60,7 +60,7 @@ export const getRoleSpecificActivities = (role: UserRole): ActivityLog[] => {
           type: 'leave',
           action: 'approved',
           description: 'Du godkände Anna Anderssons semesteransökan för 10-15 juli',
-          timestamp: new Date(now.getTime() - 3 * 60 * 60 * 1000).toISOString(), // 3h sedan
+          timestamp: new Date(now.getTime() - 3 * 60 * 60 * 1000), // 3h sedan
           referenceId: '11',
           referenceType: 'leave',
         },
@@ -70,7 +70,7 @@ export const getRoleSpecificActivities = (role: UserRole): ActivityLog[] => {
           type: 'deviation',
           action: 'returned',
           description: 'Du skickade tillbaka Johan Svenssons övertidsrapport för mer information',
-          timestamp: new Date(now.getTime() - 6 * 60 * 60 * 1000).toISOString(), // 6h sedan
+          timestamp: new Date(now.getTime() - 6 * 60 * 60 * 1000), // 6h sedan
           referenceId: '12',
           referenceType: 'deviation',
         }
@@ -85,7 +85,7 @@ export const getRoleSpecificActivities = (role: UserRole): ActivityLog[] => {
           type: 'employee',
           action: 'onboarded',
           description: 'Ny medarbetare Lisa Karlsson har registrerats i systemet',
-          timestamp: new Date(now.getTime() - 60 * 60 * 1000).toISOString(), // 1h sedan
+          timestamp: new Date(now.getTime() - 60 * 60 * 1000), // 1h sedan
           referenceId: '20',
           referenceType: 'employee',
         },
@@ -95,7 +95,7 @@ export const getRoleSpecificActivities = (role: UserRole): ActivityLog[] => {
           type: 'leave',
           action: 'policy_updated',
           description: 'Semesterpolicy har uppdaterats - nya regler för sparade semesterdagar',
-          timestamp: new Date(now.getTime() - 4 * 60 * 60 * 1000).toISOString(), // 4h sedan
+          timestamp: new Date(now.getTime() - 4 * 60 * 60 * 1000), // 4h sedan
           referenceId: '21',
           referenceType: 'policy',
         },
@@ -105,7 +105,7 @@ export const getRoleSpecificActivities = (role: UserRole): ActivityLog[] => {
           type: 'deviation',
           action: 'escalated',
           description: 'Avvikelserapport från Erik Eriksson kräver HR-granskning',
-          timestamp: new Date(now.getTime() - 8 * 60 * 60 * 1000).toISOString(), // 8h sedan
+          timestamp: new Date(now.getTime() - 8 * 60 * 60 * 1000), // 8h sedan
           referenceId: '22',
           referenceType: 'deviation',
         }
@@ -120,7 +120,7 @@ export const getRoleSpecificActivities = (role: UserRole): ActivityLog[] => {
           type: 'payroll',
           action: 'exported',
           description: 'PAXML-export för mars 2024 slutförd - 47 medarbetare inkluderade',
-          timestamp: new Date(now.getTime() - 90 * 60 * 1000).toISOString(), // 1.5h sedan
+          timestamp: new Date(now.getTime() - 90 * 60 * 1000), // 1.5h sedan
           referenceId: '30',
           referenceType: 'paxml',
         },
@@ -130,7 +130,7 @@ export const getRoleSpecificActivities = (role: UserRole): ActivityLog[] => {
           type: 'payslip',
           action: 'published',
           description: 'Lönespecifikationer för mars publicerade för alla medarbetare',
-          timestamp: new Date(now.getTime() - 5 * 60 * 60 * 1000).toISOString(), // 5h sedan
+          timestamp: new Date(now.getTime() - 5 * 60 * 60 * 1000), // 5h sedan
           referenceId: '31',
           referenceType: 'payslip',
         },
@@ -140,7 +140,7 @@ export const getRoleSpecificActivities = (role: UserRole): ActivityLog[] => {
           type: 'deviation',
           action: 'processed',
           description: '12 övertidsrapporter har behandlats och förts in i lönesystemet',
-          timestamp: new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString(), // 1 dag sedan
+          timestamp: new Date(now.getTime() - 24 * 60 * 60 * 1000), // 1 dag sedan
           referenceId: '32',
           referenceType: 'deviation',
         }

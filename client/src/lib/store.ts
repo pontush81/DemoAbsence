@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { Employee, Deviation, LeaveRequest, TimeBalance, Schedule } from '@shared/schema';
 import { persist } from 'zustand/middleware';
+import { demoPersonas } from './demoPersonas';
+import { simulateProductionLogin } from './productionUsers';
 
 export type UserRole = 'employee' | 'manager' | 'hr' | 'payroll';
 
@@ -91,9 +93,6 @@ export const useStore = create<AppState>()(
         user: { ...state.user, todaySchedule } 
       })),
       setDemoPersona: (personaId) => set((state) => {
-        // Importera demo personas
-        const { demoPersonas } = require('./demoPersonas');
-        const { simulateProductionLogin } = require('./productionUsers');
         
         const persona = demoPersonas.find((p: any) => p.id === personaId);
         if (!persona) {
