@@ -3,6 +3,8 @@ import { createServer, type Server } from "http";
 import { saveFile, getFile, listFiles, generateId, getMockData, saveMockData } from "./storage";
 import { storage } from "./supabase-storage"; 
 import { restStorage } from "./supabase-rest-storage";
+import { db } from "./db";
+import { timeBalances } from "@shared/schema";
 import { generatePAXMLTransactions, generatePAXMLXML, generatePAXMLXMLWithSchedules, validatePAXMLData, convertXMLScheduleToAppSchedule, convertAppScheduleToXMLSchedule } from './lib/paxml.js';
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -21,6 +23,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Test data error:', error);
       res.status(500).json({ error: (error as Error).message, stack: (error as Error).stack });
+    }
+  });
+
+  // Debug time balances mock data
+  app.get('/api/admin/debug-time-balances', async (req, res) => {
+    try {
+      const mockData = await getMockData('timebalances.json');
+      res.json({ 
+        message: 'Mock time balances data',
+        count: mockData.length,
+        data: mockData,
+        employeeIds: mockData.map((tb: any) => tb.employeeId)
+      });
+    } catch (error) {
+      res.status(500).json({ error: (error as Error).message });
+    }
+  });
+
+  // Seed time balances from mock data
+  app.post('/api/admin/seed-time-balances', async (req, res) => {
+    try {
+      const timeBalanceData = await getMockData('timebalances.json');
+      const seededBalances = [];
+      
+      for (const balance of timeBalanceData) {
+        try {
+          // Try to create or update time balance using storage
+          const timeBalanceEntry = {
+            employeeId: balance.employeeId,
+            timeBalance: balance.timeBalance,
+            vacationDays: balance.vacationDays, 
+            savedVacationDays: balance.savedVacationDays,
+            vacationUnit: balance.vacationUnit,
+            compensationTime: balance.compensationTime,
+            lastUpdated: new Date(balance.lastUpdated)
+          };
+          
+          // For now, let's use a direct database insert since we don't have createTimeBalance in storage
+          if (db) {
+            await db.insert(timeBalances).values(timeBalanceEntry)
+              .onConflictDoUpdate({
+                target: timeBalances.employeeId,
+                set: {
+                  timeBalance: timeBalanceEntry.timeBalance,
+                  vacationDays: timeBalanceEntry.vacationDays,
+                  savedVacationDays: timeBalanceEntry.savedVacationDays,
+                  vacationUnit: timeBalanceEntry.vacationUnit,
+                  compensationTime: timeBalanceEntry.compensationTime,
+                  lastUpdated: timeBalanceEntry.lastUpdated
+                }
+              });
+            seededBalances.push({ employeeId: balance.employeeId, status: 'success' });
+          } else {
+            seededBalances.push({ employeeId: balance.employeeId, status: 'no_db' });
+          }
+        } catch (error) {
+          console.error(`Error seeding time balance for ${balance.employeeId}:`, error);
+          seededBalances.push({ 
+            employeeId: balance.employeeId, 
+            status: 'error', 
+            error: (error as Error).message 
+          });
+        }
+      }
+      
+      res.json({ 
+        message: 'Time balance seeding completed', 
+        results: seededBalances,
+        total: timeBalanceData.length,
+        successful: seededBalances.filter(r => r.status === 'success').length
+      });
+    } catch (error) {
+      console.error('Error during time balance seeding:', error);
+      res.status(500).json({ error: (error as Error).message });
     }
   });
 
@@ -476,7 +552,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get time balance for employee
   app.get('/api/time-balances/:employeeId', async (req, res) => {
     try {
-      const timeBalance = await restStorage.getTimeBalance(req.params.employeeId);
+      let timeBalance;
+      
+      // Try restStorage first
+      try {
+        timeBalance = await restStorage.getTimeBalance(req.params.employeeId);
+      } catch (error) {
+        console.log('restStorage failed, trying direct mock fallback:', error);
+      }
+      
+      // If restStorage didn't work, try direct mock data fallback
+      if (!timeBalance) {
+        const mockTimeBalances = await getMockData('timebalances.json');
+        timeBalance = mockTimeBalances.find((tb: any) => tb.employeeId === req.params.employeeId);
+      }
+      
       if (timeBalance) {
         res.json(timeBalance);
       } else {
