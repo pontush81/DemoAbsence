@@ -55,6 +55,10 @@ const translations: Translations = {
     sv: 'PAXML Export',
     en: 'PAXML Export',
   },
+  'nav.managerFunctions': {
+    sv: 'Chefsfunktioner',
+    en: 'Manager Functions',
+  },
   
   // Dashboard
   'dashboard.greeting': {
