@@ -468,16 +468,22 @@ export default function Dashboard() {
               </p>
             </div>
 
-            {/* Status alerts - Consolidated warning with action */}
+            {/* Status alerts - Consolidated warning with role-appropriate action */}
             {hasPendingItems && (
               <Alert className="mb-4 border-orange-200 bg-orange-50">
                 <AlertDescription className="flex items-center justify-between">
                   <div>
                     ⚠️ <strong>{currentMonthDeviations.filter(d => d.status === 'pending').length + currentMonthLeaveRequests.filter(lr => lr.status === 'pending').length} väntande godkännanden</strong> blockerar tidrapport
                   </div>
-                  <Link href="/manager" className="text-orange-600 hover:text-orange-800 text-sm font-medium underline">
-                    Hantera nu →
-                  </Link>
+                  {isManager ? (
+                    <Link href="/manager" className="text-orange-600 hover:text-orange-800 text-sm font-medium underline">
+                      Hantera nu →
+                    </Link>
+                  ) : (
+                    <Link href="/new-deviation" className="text-orange-600 hover:text-orange-800 text-sm font-medium underline">
+                      Visa avvikelser →
+                    </Link>
+                  )}
                 </AlertDescription>
               </Alert>
             )}
