@@ -6,16 +6,19 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useQuery } from "@tanstack/react-query";
 import { apiService } from '@/lib/apiService';
 import { useI18n } from '@/lib/i18n';
 import { useStore } from '@/lib/store';
-import { Employee, Schedule } from '@shared/schema';
-import { formatTime } from '@/lib/utils/date';
+import { Employee, Schedule, TimeBalance } from '@shared/schema';
+import { formatTime, formatDuration } from '@/lib/utils/date';
 import ScheduleImport from '@/components/paxml/schedule-import';
 
 export default function SchedulesPage() {
   const { t } = useI18n();
   const { user } = useStore();
+  const employeeId = user.currentUser?.employeeId;
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>('');
@@ -24,6 +27,15 @@ export default function SchedulesPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showImport, setShowImport] = useState(false);
+
+  // Fetch time balance using same API as dashboard
+  const { data: timeBalance, isLoading: isLoadingTimeBalance } = useQuery({
+    queryKey: ['/api/time-balances', employeeId],
+    queryFn: () => employeeId
+      ? apiService.getTimeBalance(employeeId)
+      : Promise.resolve(null),
+    enabled: !!employeeId,
+  });
 
   // Quick filter functions for world-class UX - FIXAD datumlogik
   const setQuickFilter = (type: 'thisWeek' | 'nextWeek' | 'thisMonth' | 'nextMonth' | 'today') => {
@@ -274,38 +286,49 @@ export default function SchedulesPage() {
             </div>
             <Button 
               size="lg" 
-              className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 text-lg"
+              className="bg-accent hover:bg-accent-dark text-white px-8 py-3 text-lg"
               onClick={() => {
                 // Navigate to deviations page
                 window.location.href = '/deviations';
               }}
             >
               <span className="material-icons mr-2">add</span>
-              Anmäl avvikelse
+              {t('action.newDeviation')}
             </Button>
           </div>
         </CardContent>
       </Card>
 
-      {/* Balances Overview */}
+      {/* Balances Overview - Using real API data */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="border-blue-200">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
               <span className="material-icons text-blue-600">beach_access</span>
-              Semester
+              Semestersaldo
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <span className="text-2xl font-bold text-gray-900">13</span>
-                <span className="text-sm text-gray-500">dagar kvar</span>
+                {isLoadingTimeBalance ? (
+                  <Skeleton className="h-8 w-16" />
+                ) : (
+                  <span className="text-2xl font-bold text-gray-900">
+                    {timeBalance ? timeBalance.vacationDays : 0}
+                  </span>
+                )}
+                <span className="text-sm text-gray-500">dagar</span>
               </div>
-              <div className="text-xs text-gray-500">Använt: 12/25 dagar</div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div className="bg-blue-600 h-2 rounded-full" style={{ width: '48%' }}></div>
-              </div>
+              {isLoadingTimeBalance ? (
+                <Skeleton className="h-3 w-32" />
+              ) : timeBalance?.savedVacationDays ? (
+                <div className="text-xs text-gray-500">
+                  Sparade dagar: {Object.values(timeBalance.savedVacationDays).reduce((a, b) => a + (b as number), 0)}
+                </div>
+              ) : (
+                <div className="text-xs text-gray-500">Aktuellt saldo</div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -313,17 +336,26 @@ export default function SchedulesPage() {
         <Card className="border-orange-200">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
-              <span className="material-icons text-orange-600">schedule</span>
-              Flextid
+              <span className="material-icons text-orange-600">hourglass_top</span>
+              Tidssaldo
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <span className="text-2xl font-bold text-red-600">-2.5</span>
-                <span className="text-sm text-gray-500">timmar</span>
+                {isLoadingTimeBalance ? (
+                  <Skeleton className="h-8 w-16" />
+                ) : (
+                  <span className={`text-2xl font-bold ${
+                    timeBalance && timeBalance.timeBalance >= 0 ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    {timeBalance ? formatDuration(timeBalance.timeBalance ?? 0) : '0h'}
+                  </span>
+                )}
               </div>
-              <div className="text-xs text-gray-500">Negativ flexbalans</div>
+              <div className="text-xs text-gray-500">
+                {timeBalance && timeBalance.timeBalance >= 0 ? 'Positiv flexbalans' : 'Negativ flexbalans'}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -332,14 +364,19 @@ export default function SchedulesPage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
               <span className="material-icons text-purple-600">trending_up</span>
-              Övertid
+              Kompensationstid
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <span className="text-2xl font-bold text-purple-600">8.5</span>
-                <span className="text-sm text-gray-500">timmar</span>
+                {isLoadingTimeBalance ? (
+                  <Skeleton className="h-8 w-16" />
+                ) : (
+                  <span className="text-2xl font-bold text-purple-600">
+                    {timeBalance ? formatDuration(timeBalance.compensationTime ?? 0) : '0h'}
+                  </span>
+                )}
               </div>
               <div className="text-xs text-gray-500">Ej kompenserad övertid</div>
             </div>
