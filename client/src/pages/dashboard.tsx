@@ -239,27 +239,27 @@ export default function Dashboard() {
                 </p>
               </div>
             </div>
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-4">
               <Button 
                 onClick={handleQuickSick}
                 disabled={quickSickMutation.isPending}
                 size="lg" 
-                className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+                className="w-full sm:w-auto bg-orange-600 hover:bg-orange-700 text-white px-8 py-6 sm:py-3 text-xl sm:text-base font-bold shadow-lg hover:shadow-xl transition-all duration-200 min-h-[72px] sm:min-h-[48px] rounded-xl sm:rounded-lg"
               >
-                <span className="text-xl mr-2">🤒</span>
+                <span className="text-3xl sm:text-xl mr-4 sm:mr-2">🤒</span>
                 <span className="hidden sm:inline">Sjuk idag</span>
-                <span className="sm:hidden">Sjuk</span>
+                <span className="sm:hidden text-xl font-bold">Sjuk idag</span>
               </Button>
               
-              <Link href="/new-deviation">
+              <Link href="/new-deviation" className="w-full sm:w-auto">
                 <Button 
                   size="lg" 
                   variant="outline"
-                  className="bg-white border-2 border-accent text-accent hover:bg-accent hover:text-white px-6 py-3 text-base font-semibold transition-all duration-200"
+                  className="w-full bg-white border-2 border-accent text-accent hover:bg-accent hover:text-white px-8 py-6 sm:py-3 text-xl sm:text-base font-bold transition-all duration-200 min-h-[72px] sm:min-h-[48px] rounded-xl sm:rounded-lg"
                 >
-                  <span className="material-icons mr-2">add</span>
+                  <span className="material-icons mr-4 sm:mr-2 text-2xl sm:text-base">add</span>
                   <span className="hidden sm:inline">Annan avvikelse</span>
-                  <span className="sm:hidden">Annan</span>
+                  <span className="sm:hidden text-xl font-bold">Annan avvikelse</span>
                 </Button>
               </Link>
             </div>

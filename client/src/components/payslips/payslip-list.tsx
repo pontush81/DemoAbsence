@@ -81,7 +81,59 @@ const PayslipList = ({ payslips }: PayslipListProps) => {
         <CardDescription>{t('payslips.payslipsDescription')}</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="overflow-x-auto -mx-6 px-6"> {/* Add horizontal scroll with negative margin and padding */}
+        {/* Mobile Card Layout - Hidden on desktop */}
+        <div className="space-y-4 sm:hidden">
+          {sortedPayslips.map((payslip) => {
+            const paymentDate = payslip.payDate || `${payslip.year}-${payslip.month.toString().padStart(2, '0')}-25`;
+            const monthName = getMonthName(payslip.month - 1);
+            const viewStatus = payslip.status || (payslip.viewed ? 'viewed' : 'new');
+            const amount = payslip.netAmount || 36000;
+            
+            return (
+              <div key={payslip.id} className="border rounded-lg p-4 bg-gray-50">
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <h3 className="font-semibold text-lg">{monthName} {payslip.year}</h3>
+                    <p className="text-sm text-gray-600">{paymentDate}</p>
+                  </div>
+                  <Badge variant={viewStatus === 'new' ? 'default' : 'outline'}>
+                    {viewStatus === 'new' ? t('payslips.status.new') : t('payslips.status.viewed')}
+                  </Badge>
+                </div>
+                
+                <div className="flex justify-between items-center">
+                  <div className="text-xl font-bold text-green-700">
+                    {formatAmount(amount)} kr
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleDownload(payslip.id, payslip.fileName)}
+                      className="flex items-center gap-1"
+                    >
+                      <EyeIcon className="h-4 w-4" />
+                      Visa
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleDownload(payslip.id, payslip.fileName)}
+                      className="flex items-center gap-1"
+                    >
+                      <DownloadIcon className="h-4 w-4" />
+                      Ladda ned
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Desktop Table Layout - Hidden on mobile */}
+        <div className="hidden sm:block overflow-x-auto -mx-6 px-6">
           <Table>
             <TableHeader>
               <TableRow>
@@ -94,13 +146,10 @@ const PayslipList = ({ payslips }: PayslipListProps) => {
             </TableHeader>
             <TableBody>
               {sortedPayslips.map((payslip) => {
-                // Format payment date from yyyy-MM-dd to something more readable
-                // Fallback values for older payslips without new fields
                 const paymentDate = payslip.payDate || `${payslip.year}-${payslip.month.toString().padStart(2, '0')}-25`;
-                const monthName = getMonthName(payslip.month - 1); // Adjust because getMonthName is 0-based
+                const monthName = getMonthName(payslip.month - 1);
                 const viewStatus = payslip.status || (payslip.viewed ? 'viewed' : 'new');
-                // Default amount is 0 if not available
-                const amount = payslip.netAmount || 36000; // Default test amount
+                const amount = payslip.netAmount || 36000;
                 
                 return (
                   <TableRow key={payslip.id}>
