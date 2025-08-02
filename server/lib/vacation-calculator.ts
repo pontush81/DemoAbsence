@@ -86,11 +86,22 @@ export async function updateVacationBalance(
 
   try {
     if (supabase) {
-      // Update in Supabase
+      // First get current balance, then update
+      const { data: currentBalance, error: fetchError } = await supabase
+        .from('time_balances')
+        .select('vacation_days')
+        .eq('employee_id', employeeId)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      const newBalance = Math.max(0, currentBalance.vacation_days - daysToDeduct);
+
+      // Update in Supabase with new calculated balance
       const { error } = await supabase
         .from('time_balances')
         .update({
-          vacation_days: supabase.raw(`vacation_days - ${daysToDeduct}`),
+          vacation_days: newBalance,
           last_updated: new Date().toISOString()
         })
         .eq('employee_id', employeeId);
@@ -103,8 +114,8 @@ export async function updateVacationBalance(
     console.error('Failed to update vacation balance in Supabase:', error);
   }
 
-  // Fallback: Update mock data if Supabase failed or not available
-  if (!supabaseSuccess) {
+  // Fallback: Update mock data ONLY if Supabase is not available (not just failed)
+  if (!supabaseSuccess && !supabase) {
     try {
       console.log(`📁 Falling back to mock data update for ${employeeId}`);
       const { getMockData, saveMockData } = await import('../storage.js');

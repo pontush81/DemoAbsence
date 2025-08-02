@@ -729,6 +729,14 @@ const translations: Translations = {
     sv: 'Det finns inga väntande ledighetsansökningar från dina medarbetare just nu',
     en: 'There are currently no pending leave requests from your employees',
   },
+  'manager.noHistory': {
+    sv: 'Ingen historik ännu',
+    en: 'No history yet',
+  },
+  'manager.noHistoryDescription': {
+    sv: 'Det finns inga behandlade avvikelser eller ledighetsansökningar att visa',
+    en: 'There are no processed deviations or leave requests to show',
+  },
   'manager.loadDeviationsError': {
     sv: 'Fel vid hämtning av avvikelser',
     en: 'Error loading deviations',

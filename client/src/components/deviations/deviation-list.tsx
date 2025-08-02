@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Link, useLocation } from "wouter";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -120,7 +120,7 @@ const DeviationList = ({ onSelect }: DeviationListProps) => {
   // Render error state
   if (error) {
     return (
-      <div className="bg-white rounded-lg shadow-sm p-6 mt-6">
+      <div className="p-6 mt-6">
         <p className="text-destructive">{t('deviations.loadError')}: {(error as Error).message}</p>
         <Button 
           onClick={() => window.location.reload()} 
@@ -138,16 +138,13 @@ const DeviationList = ({ onSelect }: DeviationListProps) => {
     return (
       <div>
         <DeviationFilters filters={filters} onFilterChange={handleFilterChange} />
-        <div className="bg-white rounded-lg shadow-sm p-6 mt-6 text-center">
+        <div className="p-6 mt-6 text-center">
           <span className="material-icons text-4xl text-muted-foreground mb-2">event_busy</span>
           <h3 className="text-lg font-medium">{t('deviations.noDeviations')}</h3>
           <p className="text-muted-foreground">{t('deviations.noDeviationsDescription')}</p>
-                      <Link href="/new-deviation">
-            <Button className="mt-4 bg-accent hover:bg-accent-dark text-white">
-              <span className="material-icons mr-2">add</span>
-              {t('action.newDeviation')}
-            </Button>
-          </Link>
+          <p className="text-sm text-gray-500 mt-3">
+            👆 Använd knapparna ovan för att registrera en ny avvikelse
+          </p>
         </div>
       </div>
     );
@@ -157,7 +154,7 @@ const DeviationList = ({ onSelect }: DeviationListProps) => {
     <div>
       <DeviationFilters filters={filters} onFilterChange={handleFilterChange} />
       
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden mt-6">
+      <div className="overflow-hidden mt-6">
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>

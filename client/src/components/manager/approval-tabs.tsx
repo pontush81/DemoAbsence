@@ -60,11 +60,7 @@ const ApprovalTabs = () => {
       </TabsContent>
       
       <TabsContent value="history" className="pt-6">
-        <div className="bg-white rounded-lg shadow-sm p-6 text-center">
-          <span className="material-icons text-4xl text-muted-foreground mb-2">history</span>
-          <h3 className="text-lg font-medium">{t('manager.historyTitle')}</h3>
-          <p className="text-muted-foreground">{t('manager.historyDescription')}</p>
-        </div>
+        <ApprovalsList type="history" />
       </TabsContent>
     </Tabs>
   );
