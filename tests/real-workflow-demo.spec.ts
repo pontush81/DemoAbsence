@@ -5,7 +5,7 @@ import { test, expect } from '@playwright/test';
  * Fullständiga användarresor från början till slut - som riktiga användare
  */
 
-test.describe('🎥 VERKLIGA ANVÄNDARFLÖDEN - Kontek Lön Integration', () => {
+test.describe('🎥 VERKLIGA ANVÄNDARFLÖDEN - Kontek Tid Integration', () => {
   
   test('📋 SCENARIO 1: Komplett Avvikelseflöde (Anställd → Chef → PAXML)', async ({ page }) => {
     console.log('🎬 === SCENARIO 1: KOMPLETT AVVIKELSEFLÖDE ===');

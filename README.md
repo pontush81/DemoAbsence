@@ -1,4 +1,4 @@
-# Kontek Lön - Tidrapporteringssystem (Demo)
+# Kontek Tid - Tidrapporteringssystem (Demo)
 
 Ett fullstack tidrapporteringssystem som fungerar som **försystem** till Kontek Lön. Systemet låter anställda registrera arbetstid, avvikelser och ledighetsansökningar som sedan exporteras som PAXML-filer för import i Kontek Lön.
 

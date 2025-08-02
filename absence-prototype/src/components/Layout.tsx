@@ -48,7 +48,7 @@ export default function Layout({ children }: LayoutProps) {
       <AppBar position="static" sx={{ backgroundColor: '#1976d2' }}>
         <Toolbar>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Kontek Lön - Avvikelseapp
+            Kontek Tid - Avvikelseapp
           </Typography>
           
           <Box sx={{ display: { xs: 'none', md: 'flex' } }}>

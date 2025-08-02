@@ -5,7 +5,7 @@ import { test, expect } from '@playwright/test';
  * Optimerade för videoinspelning och visning
  */
 
-test.describe('🎥 LIVE DEMO: Avvikelsesystem för Kontek Lön', () => {
+test.describe('🎥 LIVE DEMO: Kontek Tid - Avvikelsesystem', () => {
   
   test('🚀 Komplett Demo: Från Anställd till PAXML Export', async ({ page }) => {
     console.log('🎬 === KONTEK AVVIKELSESYSTEM - LIVE DEMO ===');

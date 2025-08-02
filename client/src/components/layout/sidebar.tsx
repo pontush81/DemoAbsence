@@ -118,7 +118,7 @@ const Sidebar = () => {
           <div className="h-8 w-8 bg-primary rounded flex items-center justify-center mr-2">
             <span className="material-icons text-white text-sm">business</span>
           </div>
-          <span className="font-bold text-sidebar-foreground">Kontek Lön</span>
+          <span className="font-bold text-sidebar-foreground">Kontek Tid</span>
         </div>
         <div className="mt-3">
           <span className="text-xs font-medium text-muted-foreground">Demo-läge aktivt</span>

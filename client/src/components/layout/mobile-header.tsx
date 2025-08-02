@@ -18,7 +18,7 @@ const MobileHeader = () => {
           <div className="h-8 w-8 bg-primary rounded flex items-center justify-center mr-2">
             <span className="material-icons text-white text-sm">business</span>
           </div>
-          <span className="font-bold">Kontek Lön</span>
+          <span className="font-bold">Kontek Tid</span>
         </div>
         <div className="flex items-center">
           <UserSwitcher />
