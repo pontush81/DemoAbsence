@@ -26,6 +26,7 @@ import { apiService } from "@/lib/apiService";
 import { useStore } from "@/lib/store";
 import { format } from "date-fns";
 import { getWorkflowInfo } from "@/lib/approvalWorkflows";
+import { Card, CardContent } from "@/components/ui/card";
 
 // Create the schema with custom validation using translations
 const createDeviationFormSchema = (t: (key: string) => string) => insertDeviationSchema.extend({
@@ -98,6 +99,85 @@ const DeviationForm = ({ deviationId, onCancel }: DeviationFormProps) => {
   const [, setLocation] = useLocation();
   const { user } = useStore();
   const [status, setStatus] = useState<"draft" | "pending">("pending");
+  const [showQuickActions, setShowQuickActions] = useState(!deviationId); // Show for new deviations only
+
+  // Quick Actions - Pre-configured common deviations
+  const quickActions = [
+    {
+      icon: "🤒",
+      label: "Sjuk hela dagen",
+      timeCode: "300",
+      startTime: "08:00",
+      endTime: "17:00",
+      comment: ""
+    },
+    {
+      icon: "👶",
+      label: "VAB hela dagen", 
+      timeCode: "400",
+      startTime: "08:00",
+      endTime: "17:00",
+      comment: ""
+    },
+    {
+      icon: "🤒",
+      label: "Sjuk halvdag",
+      timeCode: "300", 
+      startTime: "08:00",
+      endTime: "12:00",
+      comment: ""
+    },
+    {
+      icon: "⏰",
+      label: "Övertid igår",
+      timeCode: "200",
+      startTime: "17:00",
+      endTime: "19:00", 
+      comment: ""
+    },
+    {
+      icon: "🚗",
+      label: "Kom sent idag",
+      timeCode: "500",
+      startTime: "09:00",
+      endTime: "17:00",
+      comment: "Trafikstörningar"
+    }
+  ];
+
+  // Handle quick action selection
+  const handleQuickAction = async (action: typeof quickActions[0]) => {
+    const today = format(new Date(), 'yyyy-MM-dd');
+    const yesterday = format(new Date(Date.now() - 24 * 60 * 60 * 1000), 'yyyy-MM-dd');
+    
+    // Set form values
+    form.setValue('date', action.label.includes('igår') ? yesterday : today);
+    form.setValue('startTime', action.startTime);
+    form.setValue('endTime', action.endTime);
+    form.setValue('timeCode', action.timeCode);
+    form.setValue('comment', action.comment);
+    
+    // Hide quick actions
+    setShowQuickActions(false);
+    
+    // Show success toast immediately 
+    toast({
+      title: `${action.icon} ${action.label} registrerad!`,
+      description: "Avvikelsen skickas för godkännande...",
+    });
+    
+    // Auto-submit after a short delay to let user see the filled form
+    setTimeout(() => {
+      setStatus("pending");
+      const formData = form.getValues();
+      const submitData = {
+        ...formData,
+        status: "pending",
+        submitted: new Date().toISOString(),
+      };
+      createMutation.mutate(submitData as any);
+    }, 800);
+  };
   
   // Fetch time codes
   const { data: timeCodes, isLoading: isLoadingTimeCodes } = useQuery({
@@ -258,7 +338,64 @@ const DeviationForm = ({ deviationId, onCancel }: DeviationFormProps) => {
         <p className="text-muted-foreground">{t('deviations.registerDescription')}</p>
       </div>
       
+      {/* Quick Actions - Mobile First UX */}
+      {showQuickActions && (
+        <Card className="mb-6">
+          <CardContent className="p-4">
+            <div className="mb-3">
+              <h2 className="text-lg font-semibold flex items-center">
+                <span className="material-icons text-accent mr-2">flash_on</span>
+                Snabbregistrering
+              </h2>
+              <p className="text-sm text-muted-foreground">Klicka för att registrera vanliga avvikelser direkt</p>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+              {quickActions.map((action, index) => (
+                <Button
+                  key={index}
+                  variant="outline"
+                  size="lg"
+                  onClick={() => handleQuickAction(action)}
+                  className="h-16 flex flex-col items-center justify-center space-y-1 text-sm font-medium hover:bg-accent/10 border-2 hover:border-accent"
+                  disabled={isLoading || isPending}
+                >
+                  <span className="text-2xl">{action.icon}</span>
+                  <span className="text-center leading-tight">{action.label}</span>
+                </Button>
+              ))}
+            </div>
+            
+            <div className="mt-4 flex justify-center">
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => setShowQuickActions(false)}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                Eller fyll i manuellt nedan ↓
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      
       <div className="bg-white rounded-lg shadow-sm p-6">
+        {/* Toggle Quick Actions link */}
+        {!showQuickActions && !deviationId && (
+          <div className="mb-4 text-center">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => setShowQuickActions(true)}
+              className="text-accent hover:text-accent-dark"
+            >
+              <span className="material-icons text-sm mr-1">flash_on</span>
+              Använd snabbregistrering istället
+            </Button>
+          </div>
+        )}
+        
         <Form {...form}>
           <form onSubmit={handleSubmit} className="space-y-6">
             <FormField
