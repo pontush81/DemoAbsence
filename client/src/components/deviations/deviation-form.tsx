@@ -131,22 +131,6 @@ const DeviationForm = ({ deviationId, onCancel }: DeviationFormProps) => {
       startTime: "08:00",
       endTime: "12:00", // 4 timmar (morgon)
       comment: ""
-    },
-    {
-      icon: "⏰",
-      label: "Övertid igår",
-      timeCode: "200",
-      startTime: "17:00",
-      endTime: "19:00", 
-      comment: ""
-    },
-    {
-      icon: "🚗",
-      label: "Kom sent idag",
-      timeCode: "500",
-      startTime: "09:00",
-      endTime: "16:00", // 7 timmar arbetstid (kom sent 1h + exklusive lunch)
-      comment: "Trafikstörningar"
     }
   ];
 
