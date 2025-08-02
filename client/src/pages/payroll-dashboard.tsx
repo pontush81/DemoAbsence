@@ -8,7 +8,47 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useI18n } from "@/lib/i18n";
 import { apiService } from "@/lib/apiService";
 import { useQuery } from "@tanstack/react-query";
-import type { Employee, Deviation, LeaveRequest, Schedule, TimeBalance } from "@/types";
+// Import types directly - no central types file exists yet
+interface Employee {
+  employeeId: string;
+  firstName: string;
+  lastName: string;
+  [key: string]: any;
+}
+
+interface Deviation {  
+  id: number;
+  employeeId: string;
+  date: string;
+  timeCode: string;
+  status: string;
+  [key: string]: any;
+}
+
+interface LeaveRequest {
+  id: number;
+  employeeId: string;
+  startDate: string;
+  endDate: string;
+  leaveType: string;
+  status: string;
+  [key: string]: any;
+}
+
+interface Schedule {
+  employeeId: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  [key: string]: any;
+}
+
+interface TimeBalance {
+  employeeId: string;
+  timeBalance: number;
+  vacationDays: number;
+  [key: string]: any;
+}
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { sv } from "date-fns/locale";
 import { Link } from "wouter";
@@ -40,13 +80,13 @@ export default function PayrollDashboard() {
   // Fetch deviations for current month
   const { data: allDeviations = [] } = useQuery({
     queryKey: ['deviations', selectedMonth],
-    queryFn: apiService.getAllDeviations
+    queryFn: () => apiService.getDeviations("ALL") // Use existing method
   });
 
   // Fetch leave requests for current month
   const { data: allLeaveRequests = [] } = useQuery({
     queryKey: ['leave-requests', selectedMonth],
-    queryFn: apiService.getAllLeaveRequests
+    queryFn: () => apiService.getLeaveRequests("ALL") // Use existing method
   });
 
   // Build payroll data when dependencies change
@@ -58,7 +98,7 @@ export default function PayrollDashboard() {
         try {
           // Get employee-specific data
           const [schedule, timeBalance] = await Promise.all([
-            apiService.getEmployeeSchedule(employee.employeeId).catch(() => []),
+            apiService.getEmployeeSchedule(employee.employeeId, selectedMonth + "-01").catch(() => []),
             apiService.getTimeBalance(employee.employeeId).catch(() => null)
           ]);
 
@@ -66,13 +106,13 @@ export default function PayrollDashboard() {
           const monthStart = startOfMonth(new Date(selectedMonth + '-01'));
           const monthEnd = endOfMonth(new Date(selectedMonth + '-01'));
 
-          const employeeDeviations = allDeviations.filter(d => 
+          const employeeDeviations = (allDeviations as Deviation[]).filter((d: Deviation) => 
             d.employeeId === employee.employeeId &&
             new Date(d.date) >= monthStart &&
             new Date(d.date) <= monthEnd
           );
 
-          const employeeLeaveRequests = allLeaveRequests.filter(lr => 
+          const employeeLeaveRequests = (allLeaveRequests as LeaveRequest[]).filter((lr: LeaveRequest) => 
             lr.employeeId === employee.employeeId &&
             new Date(lr.startDate) <= monthEnd &&
             new Date(lr.endDate) >= monthStart
