@@ -144,7 +144,7 @@ const DeviationForm = ({ deviationId, onCancel }: DeviationFormProps) => {
       label: "Kom sent idag",
       timeCode: "500",
       startTime: "09:00",
-      endTime: "17:00",
+      endTime: "16:00", // 7 timmar arbetstid (kom sent 1h + exklusive lunch)
       comment: "Trafikstörningar"
     }
   ];
@@ -225,7 +225,7 @@ const DeviationForm = ({ deviationId, onCancel }: DeviationFormProps) => {
       employeeId: user.currentUser?.employeeId || '',
       date: format(new Date(), 'yyyy-MM-dd'),
       startTime: '08:00',
-      endTime: '17:00',
+      endTime: '16:00', // 8 timmar arbetstid (exklusive lunch) - konsistent med Quick Actions
       timeCode: '',
       comment: '',
       status: 'pending',
@@ -474,7 +474,7 @@ const DeviationForm = ({ deviationId, onCancel }: DeviationFormProps) => {
                         <TimeInput 
                           {...field} 
                           disabled={isLoading || isPending}
-                          placeholder="17:00"
+                          placeholder="16:00"
                         />
                       </FormControl>
                       <FormMessage />
