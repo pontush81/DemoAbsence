@@ -1054,6 +1054,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       if (approvedLeaveRequest) {
+        // 🎯 NEW: Calculate and deduct vacation days for approved vacation requests
+        try {
+          const daysToDeduct = calculateVacationDeduction(
+            approvedLeaveRequest.leaveType || approvedLeaveRequest.leave_type,
+            new Date(approvedLeaveRequest.startDate || approvedLeaveRequest.start_date),
+            new Date(approvedLeaveRequest.endDate || approvedLeaveRequest.end_date),
+            approvedLeaveRequest.scope
+          );
+          
+          if (daysToDeduct > 0) {
+            console.log(`🏖️ Deducting ${daysToDeduct} vacation days for employee ${approvedLeaveRequest.employeeId || approvedLeaveRequest.employee_id}`);
+            await updateVacationBalance(
+              approvedLeaveRequest.employeeId || approvedLeaveRequest.employee_id,
+              daysToDeduct,
+              supabase
+            );
+          }
+        } catch (balanceError) {
+          console.error('Failed to update vacation balance:', balanceError);
+          // Continue with approval even if balance update fails
+        }
+        
         res.json(approvedLeaveRequest);
       } else {
         res.status(404).json({ message: 'Leave request not found' });
