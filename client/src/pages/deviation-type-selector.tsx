@@ -23,18 +23,18 @@ export default function DeviationTypeSelector() {
         <Link href="/deviations/new">
           <Button 
             size="lg" 
-            className="w-full bg-orange-600 hover:bg-orange-700 text-white py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 group"
+            className="w-full bg-orange-600 hover:bg-orange-700 text-white py-3 sm:py-6 text-base sm:text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 group"
           >
-            <div className="flex items-center justify-center space-x-3">
-              <div className="flex items-center justify-center w-10 h-10 bg-white/20 rounded-full group-hover:bg-white/30 transition-colors">
-                <span className="material-icons text-xl">schedule</span>
+            <div className="flex items-center justify-center space-x-2 sm:space-x-3">
+              <div className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-white/20 rounded-full group-hover:bg-white/30 transition-colors">
+                <span className="material-icons text-lg sm:text-xl">schedule</span>
               </div>
               <div className="text-left">
-                <div className="font-bold">
+                <div className="font-bold text-sm sm:text-base">
                   <span className="hidden sm:inline">Registrera oplanerad frånvaro</span>
                   <span className="sm:hidden">Oplanerad frånvaro</span>
                 </div>
-                <div className="text-sm text-orange-100 opacity-90">
+                <div className="text-xs sm:text-sm text-orange-100 opacity-90">
                   Sjuk • VAB • Övertid • Kom sent
                 </div>
               </div>
@@ -47,18 +47,18 @@ export default function DeviationTypeSelector() {
           <Button 
             size="lg" 
             variant="outline"
-            className="w-full border-2 border-blue-300 text-blue-700 hover:bg-blue-50 py-6 text-lg font-semibold shadow-md hover:shadow-lg transition-all duration-200 group"
+            className="w-full border-2 border-blue-300 text-blue-700 hover:bg-blue-50 py-3 sm:py-6 text-base sm:text-lg font-semibold shadow-md hover:shadow-lg transition-all duration-200 group"
           >
-            <div className="flex items-center justify-center space-x-3">
-              <div className="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-full group-hover:bg-blue-200 transition-colors">
-                <span className="material-icons text-xl text-blue-600">event_available</span>
+            <div className="flex items-center justify-center space-x-2 sm:space-x-3">
+              <div className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 rounded-full group-hover:bg-blue-200 transition-colors">
+                <span className="material-icons text-lg sm:text-xl text-blue-600">event_available</span>
               </div>
               <div className="text-left">
-                <div className="font-bold">
+                <div className="font-bold text-sm sm:text-base">
                   <span className="hidden sm:inline">Ansök om planerad ledighet</span>
                   <span className="sm:hidden">Planerad ledighet</span>
                 </div>
-                <div className="text-sm text-blue-600 opacity-80">
+                <div className="text-xs sm:text-sm text-blue-600 opacity-80">
                   Semester • Föräldraledighet • Tjänstledighet
                 </div>
               </div>

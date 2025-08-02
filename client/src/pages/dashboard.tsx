@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,10 +15,13 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { sv } from "date-fns/locale";
 import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 
 export default function Dashboard() {
   const { t } = useI18n();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [showDeviationDetails, setShowDeviationDetails] = useState(false);
   const [showLeaveDetails, setShowLeaveDetails] = useState(false);
   const { user } = useStore();
@@ -129,6 +132,60 @@ export default function Dashboard() {
       alert(`Tidrapport för ${format(monthStart, 'MMMM yyyy', { locale: sv })} har skickats in enligt schema!`);
     }
   };
+
+  // Quick Sick Registration Mutation
+  const quickSickMutation = useMutation({
+    mutationFn: (data: any) => {
+      return fetch('/api/deviations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      }).then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to create deviation');
+        }
+        return response.json();
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/deviations'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/deviations', employeeId] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Fel vid registrering",
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
+  });
+
+  // Handle quick sick registration
+  const handleQuickSick = () => {
+    const today = format(new Date(), 'yyyy-MM-dd');
+    
+    const sickData = {
+      employeeId: employeeId,
+      date: today,
+      timeCode: "300", // Sick leave code
+      startTime: "08:00",
+      endTime: "16:00", // 8 hours work time (excluding lunch)
+      comment: "",
+      status: "pending",
+      submitted: new Date().toISOString(),
+    };
+
+    // Show immediate feedback
+    toast({
+      title: "🤒 Sjukdom registrerad!",
+      description: `För ${format(new Date(), 'dd MMMM', { locale: sv })} - Skickas för godkännande...`,
+    });
+
+    // Submit to API
+    quickSickMutation.mutate(sickData);
+  };
   
   return (
     <section>
@@ -182,19 +239,35 @@ export default function Dashboard() {
                   Anmäl avvikelse
                 </h3>
                 <p className="text-gray-600">
-                  Registrera sjukdom, semester, övertid eller andra avvikelser från din ordinarie arbetstid
+                  <span className="font-medium text-orange-600">Sjuk?</span> Klicka bara på orange knappen! 
+                  <br className="hidden sm:inline" />För andra avvikelser, använd den vita knappen.
                 </p>
               </div>
             </div>
-            <Link href="/new-deviation">
+            <div className="flex flex-col sm:flex-row gap-3">
               <Button 
+                onClick={handleQuickSick}
+                disabled={quickSickMutation.isPending}
                 size="lg" 
-                className="bg-accent hover:bg-accent-dark text-white px-8 py-3 text-lg"
+                className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
               >
-                <span className="material-icons mr-2">add</span>
-                {t('action.newDeviation')}
+                <span className="text-xl mr-2">🤒</span>
+                <span className="hidden sm:inline">Sjuk idag</span>
+                <span className="sm:hidden">Sjuk</span>
               </Button>
-            </Link>
+              
+              <Link href="/new-deviation">
+                <Button 
+                  size="lg" 
+                  variant="outline"
+                  className="bg-white border-2 border-accent text-accent hover:bg-accent hover:text-white px-6 py-3 text-base font-semibold transition-all duration-200"
+                >
+                  <span className="material-icons mr-2">add</span>
+                  <span className="hidden sm:inline">Annan avvikelse</span>
+                  <span className="sm:hidden">Annan</span>
+                </Button>
+              </Link>
+            </div>
           </div>
         </CardContent>
       </Card>
