@@ -213,7 +213,7 @@ export default function SchedulesPage() {
   }, {} as Record<string, Schedule[]>);
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-6 space-y-8">
       {/* World-class UX header with enhanced information hierarchy */}
       <div className="flex flex-col md:flex-row md:items-start justify-between mb-8">
         <div className="mb-4 md:mb-0">
@@ -266,11 +266,11 @@ export default function SchedulesPage() {
           const isToday = nextShift.date === today;
           
           return (
-            <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
+            <Card className="bg-gradient-to-r from-blue-50 to-blue-50 border-blue-200 shadow-sm">
               <CardHeader>
-                <CardTitle className="text-green-900 flex items-center gap-2">
-                  {isToday ? '🚀 Dagens pass' : '🔜 Nästa pass'}
-                  <Badge variant="outline" className="bg-white text-green-700 border-green-300">
+                <CardTitle className="text-gray-900 flex items-center gap-2 text-lg font-semibold">
+                  {isToday ? '🚀 Dagens arbetspass' : '🔜 Nästa arbetspass'}
+                  <Badge variant="outline" className="bg-blue-600 text-white border-blue-600 text-xs font-medium">
                     {isToday ? 'IDAG' : 'KOMMANDE'}
                   </Badge>
                 </CardTitle>
@@ -326,11 +326,11 @@ export default function SchedulesPage() {
                 </div>
                 
                 {upcomingSchedules.length > 1 && (
-                  <div className="mt-4 pt-4 border-t border-green-200">
-                    <p className="text-sm text-green-700 font-medium mb-2">Kommande pass:</p>
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <p className="text-sm text-gray-700 font-medium mb-2">Kommande pass:</p>
                     <div className="flex flex-wrap gap-2">
                       {upcomingSchedules.slice(1).map((schedule, index) => (
-                        <Badge key={index} variant="outline" className="bg-white text-green-700 border-green-300">
+                        <Badge key={index} variant="outline" className="bg-white text-gray-600 border-gray-300">
                           {new Date(schedule.date).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' })} - {formatTime(schedule.startTime)}
                         </Badge>
                       ))}
@@ -355,19 +355,21 @@ export default function SchedulesPage() {
         </Card>
       )}
 
-      {/* Quick filters - World-class UX feature */}
-      <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
-        <CardHeader>
-          <CardTitle className="text-blue-900">⚡ Snabbfilter</CardTitle>
-          <p className="text-sm text-blue-700">Välj en tidsperiod för att snabbt visa relevanta scheman</p>
+      {/* Quick filters - Clean neutral design following UX best practices */}
+      <Card className="bg-white border-gray-200 shadow-sm">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-gray-900 text-base font-medium flex items-center gap-2">
+            ⚡ Snabbfilter
+          </CardTitle>
+          <p className="text-sm text-gray-600">Välj en tidsperiod för att snabbt visa relevanta scheman</p>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-0">
           <div className="flex flex-wrap gap-2">
             <Button 
               variant="outline" 
               size="sm" 
               onClick={() => setQuickFilter('today')}
-              className="bg-white hover:bg-blue-100 border-blue-300"
+              className="bg-white hover:bg-gray-50 border-gray-300 text-gray-700"
             >
               📅 Idag
             </Button>
@@ -375,7 +377,7 @@ export default function SchedulesPage() {
               variant="outline" 
               size="sm" 
               onClick={() => setQuickFilter('thisWeek')}
-              className="bg-white hover:bg-blue-100 border-blue-300"
+              className="bg-white hover:bg-gray-50 border-gray-300 text-gray-700"
             >
               📆 Denna vecka
             </Button>
@@ -383,7 +385,7 @@ export default function SchedulesPage() {
               variant="outline" 
               size="sm" 
               onClick={() => setQuickFilter('nextWeek')}
-              className="bg-white hover:bg-blue-100 border-blue-300"
+              className="bg-white hover:bg-gray-50 border-gray-300 text-gray-700"
             >
               📅 Nästa vecka
             </Button>
@@ -391,7 +393,7 @@ export default function SchedulesPage() {
               variant="outline" 
               size="sm" 
               onClick={() => setQuickFilter('thisMonth')}
-              className="bg-white hover:bg-blue-100 border-blue-300"
+              className="bg-white hover:bg-gray-50 border-gray-300 text-gray-700"
             >
               📊 Denna månad
             </Button>
@@ -399,7 +401,7 @@ export default function SchedulesPage() {
               variant="outline" 
               size="sm" 
               onClick={() => setQuickFilter('nextMonth')}
-              className="bg-white hover:bg-blue-100 border-blue-300"
+              className="bg-white hover:bg-gray-50 border-gray-300 text-gray-700"
             >
               📈 Nästa månad
             </Button>
@@ -407,12 +409,12 @@ export default function SchedulesPage() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>
+      <Card className="bg-white border-gray-200 shadow-sm">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-gray-900 text-base font-medium flex items-center gap-2">
             🔧 {isEmployee ? 'Anpassa ditt schema' : 'Anpassade filter'}
           </CardTitle>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-gray-600">
             Använd detaljerade filter för specifika datum och anställda
           </p>
         </CardHeader>
@@ -499,25 +501,27 @@ export default function SchedulesPage() {
         </Alert>
       )}
 
-      <div className="space-y-6">
+      <div className="space-y-8">
         {Object.keys(groupedSchedules).length === 0 ? (
-          <Card>
-            <CardContent className="text-center py-8">
+          <Card className="bg-white border-gray-200 shadow-sm">
+            <CardContent className="text-center py-12">
               <span className="material-icons text-gray-400 text-6xl mb-4">schedule</span>
-              <p className="text-gray-600">Inga scheman hittades</p>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-gray-600 text-lg font-medium">Inga scheman hittades</p>
+              <p className="text-sm text-gray-500 mt-2">
                 Prova att ändra filtren eller importera scheman från PAXML
               </p>
             </CardContent>
           </Card>
         ) : (
           Object.entries(groupedSchedules).map(([employeeId, employeeSchedules]) => (
-            <Card key={employeeId}>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <span className="material-icons">person</span>
+            <Card key={employeeId} className="bg-white border-gray-200 shadow-sm">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-3 text-lg font-semibold text-gray-900">
+                  <span className="material-icons text-gray-600">person</span>
                   {getEmployeeName(employeeId)}
-                  <Badge variant="secondary">{employeeSchedules.length} dagar</Badge>
+                  <Badge variant="secondary" className="bg-gray-100 text-gray-700">
+                    {employeeSchedules.length} dagar
+                  </Badge>
                 </CardTitle>
               </CardHeader>
               <CardContent>
