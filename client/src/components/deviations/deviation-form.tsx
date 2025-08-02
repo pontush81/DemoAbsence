@@ -101,14 +101,14 @@ const DeviationForm = ({ deviationId, onCancel }: DeviationFormProps) => {
   const [status, setStatus] = useState<"draft" | "pending">("pending");
   const [showQuickActions, setShowQuickActions] = useState(!deviationId); // Show for new deviations only
 
-  // Quick Actions - Pre-configured common deviations
+  // Quick Actions - Pre-configured common deviations (8h arbetstid för tjänstemän)
   const quickActions = [
     {
       icon: "🤒",
       label: "Sjuk hela dagen",
       timeCode: "300",
       startTime: "08:00",
-      endTime: "17:00",
+      endTime: "16:00", // 8 timmar arbetstid (exklusive lunch)
       comment: ""
     },
     {
@@ -116,7 +116,7 @@ const DeviationForm = ({ deviationId, onCancel }: DeviationFormProps) => {
       label: "VAB hela dagen", 
       timeCode: "400",
       startTime: "08:00",
-      endTime: "17:00",
+      endTime: "16:00", // 8 timmar arbetstid (exklusive lunch)
       comment: ""
     },
     {
@@ -124,7 +124,7 @@ const DeviationForm = ({ deviationId, onCancel }: DeviationFormProps) => {
       label: "Sjuk halvdag",
       timeCode: "300", 
       startTime: "08:00",
-      endTime: "12:00",
+      endTime: "12:00", // 4 timmar (morgon)
       comment: ""
     },
     {
