@@ -14,6 +14,7 @@ import Manager from "@/pages/manager";
 import Attestation from "@/pages/attestation";
 import PAXMLExportPage from "@/pages/paxml-export";
 import SchedulesPage from "@/pages/schedules";
+import PayrollDashboard from "@/pages/payroll-dashboard";
 import { useEffect } from "react";
 import { useStore } from "./lib/store";
 import { useDemoInitialization } from "./hooks/use-demo-initialization";
@@ -52,6 +53,7 @@ function Router() {
         <Route path="/attestation" component={Attestation} />
         <Route path="/paxml-export" component={PAXMLExportPage} />
         <Route path="/schedules" component={SchedulesPage} />
+        <Route path="/payroll-dashboard" component={PayrollDashboard} />
         <Route component={NotFound} />
       </Switch>
     </AppShell>

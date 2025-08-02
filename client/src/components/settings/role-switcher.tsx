@@ -25,7 +25,7 @@ const RoleSwitcher = () => {
   };
   
   const goToPayrollArea = () => {
-    setLocation('/paxml-export'); // Payroll goes to PAXML export
+    setLocation('/payroll-dashboard'); // Payroll goes to payroll dashboard
   };
   
   return (
