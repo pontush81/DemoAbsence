@@ -214,420 +214,220 @@ export default function SchedulesPage() {
 
   return (
     <div className="container mx-auto p-6 space-y-8">
-      {/* World-class UX header with enhanced information hierarchy */}
+      {/* Simplified header for salaried employees */}
       <div className="flex flex-col md:flex-row md:items-start justify-between mb-8">
         <div className="mb-4 md:mb-0">
-          <h1 className="text-3xl font-bold text-gray-900">Scheman</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Arbetstid & Avvikelser</h1>
           <p className="text-lg text-muted-foreground mt-1">
-            {isEmployee 
-              ? "Visa dina arbetstider och kommande pass" 
-              : "Hantera och visa personalscheman"
-            }
+            Hantera dina arbetstider och registrera avvikelser
           </p>
-          <div className="mt-2 text-sm text-gray-500">
-            📅 <strong>Tips:</strong> Använd snabbfilter nedan för att visa aktuella veckor
-          </div>
-          
-          {/* Status summary - showing what's currently loaded */}
-          <div className="mt-3 flex items-center gap-4 text-sm">
-            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-              📊 {schedules.length} scheman hittades
-            </span>
-            {schedules.length > 0 && (
-              <span className="text-gray-500">
-                🕒 Total arbetstid: {schedules.reduce((total, s) => total + 8, 0)}h
-              </span>
-            )}
-          </div>
         </div>
-        {canViewAllSchedules && (
-          <Button
-            onClick={() => setShowImport(!showImport)}
-            variant={showImport ? "secondary" : "default"}
-          >
-            <span className="material-icons mr-2">
-              {showImport ? 'close' : 'upload'}
-            </span>
-            {showImport ? 'Stäng import' : 'Importera scheman'}
-          </Button>
-        )}
       </div>
 
-      {/* Next shift highlight - World-class UX "what's next" focus */}
-      {schedules.length > 0 && (() => {
-        const today = new Date().toISOString().split('T')[0];
-        const upcomingSchedules = schedules
-          .filter(s => s.date >= today)
-          .sort((a, b) => a.date.localeCompare(b.date))
-          .slice(0, 3);
-        
-        if (upcomingSchedules.length > 0) {
-          const nextShift = upcomingSchedules[0];
-          const isToday = nextShift.date === today;
-          
-          return (
-            <Card className="bg-gradient-to-r from-blue-50 to-blue-50 border-blue-200 shadow-sm">
-              <CardHeader>
-                <CardTitle className="text-gray-900 flex items-center gap-2 text-lg font-semibold">
-                  {isToday ? '🚀 Dagens arbetspass' : '🔜 Nästa arbetspass'}
-                  <Badge variant="outline" className="bg-blue-600 text-white border-blue-600 text-xs font-medium">
-                    {isToday ? 'IDAG' : 'KOMMANDE'}
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                      <span className="text-green-600 text-xl">📅</span>
-                    </div>
-                    <div>
-                      <p className="font-semibold text-green-900">
-                        {new Date(nextShift.date).toLocaleDateString('sv-SE', { 
-                          weekday: 'long', 
-                          day: 'numeric', 
-                          month: 'long' 
-                        })}
-                      </p>
-                      <p className="text-sm text-green-700">
-                        {isToday ? 'Idag' : `Om ${Math.ceil((new Date(nextShift.date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} dagar`}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                      <span className="text-blue-600 text-xl">🕐</span>
-                    </div>
-                    <div>
-                      <p className="font-semibold text-gray-900">
-                        {formatTime(nextShift.startTime)} - {formatTime(nextShift.endTime)}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        {calculateWorkHours(nextShift)}h arbetstid
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                      <span className="text-purple-600 text-xl">☕</span>
-                    </div>
-                    <div>
-                      <p className="font-semibold text-gray-900">
-                        {nextShift.breakStart && nextShift.breakEnd 
-                          ? `${formatTime(nextShift.breakStart)} - ${formatTime(nextShift.breakEnd)}`
-                          : 'Ingen rast'
-                        }
-                      </p>
-                      <p className="text-sm text-gray-600">Rast</p>
-                    </div>
-                  </div>
-                </div>
-                
-                {upcomingSchedules.length > 1 && (
-                  <div className="mt-4 pt-4 border-t border-gray-200">
-                    <p className="text-sm text-gray-700 font-medium mb-2">Kommande pass:</p>
-                    <div className="flex flex-wrap gap-2">
-                      {upcomingSchedules.slice(1).map((schedule, index) => (
-                        <Badge key={index} variant="outline" className="bg-white text-gray-600 border-gray-300">
-                          {new Date(schedule.date).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' })} - {formatTime(schedule.startTime)}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          );
-        }
-        return null;
-      })()}
+      {/* Simplified view for salaried employees */}
+      {/* Basic Work Schedule Overview */}
+      <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+        <CardContent className="p-6">
+          <div className="flex items-center gap-4">
+            <div className="h-12 w-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white">
+              <span className="material-icons text-xl">schedule</span>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                Din ordinarie arbetstid
+              </h3>
+              <div className="flex items-center gap-4 text-sm text-gray-600">
+                <span className="flex items-center gap-1">
+                  🕐 08:00 - 17:00
+                </span>
+                <span className="flex items-center gap-1">
+                  📅 Måndag - Fredag
+                </span>
+                <span className="flex items-center gap-1">
+                  ⏱️ 8h per dag
+                </span>
+                <span className="flex items-center gap-1">
+                  ☕ 12:00 - 13:00 lunch
+                </span>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-      {showImport && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Importera scheman från PAXML</CardTitle>
+      {/* Main Action - Report Deviation */}
+      <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
+        <CardContent className="p-6">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="h-16 w-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center text-white">
+                <span className="material-icons text-2xl">add_alert</span>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-1">
+                  Anmäl avvikelse
+                </h3>
+                <p className="text-gray-600">
+                  Registrera sjukdom, semester, övertid eller andra avvikelser från din ordinarie arbetstid
+                </p>
+              </div>
+            </div>
+            <Button 
+              size="lg" 
+              className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 text-lg"
+              onClick={() => {
+                // Navigate to deviations page
+                window.location.href = '/deviations';
+              }}
+            >
+              <span className="material-icons mr-2">add</span>
+              Anmäl avvikelse
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Balances Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="border-blue-200">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+              <span className="material-icons text-blue-600">beach_access</span>
+              Semester
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <ScheduleImport />
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-2xl font-bold text-gray-900">13</span>
+                <span className="text-sm text-gray-500">dagar kvar</span>
+              </div>
+              <div className="text-xs text-gray-500">Använt: 12/25 dagar</div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="bg-blue-600 h-2 rounded-full" style={{ width: '48%' }}></div>
+              </div>
+            </div>
           </CardContent>
         </Card>
-      )}
 
-      {/* Quick filters - Clean neutral design following UX best practices */}
-      <Card className="bg-white border-gray-200 shadow-sm">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-gray-900 text-base font-medium flex items-center gap-2">
-            ⚡ Snabbfilter
-          </CardTitle>
-          <p className="text-sm text-gray-600">Välj en tidsperiod för att snabbt visa relevanta scheman</p>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <div className="flex flex-wrap gap-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => setQuickFilter('today')}
-              className="bg-white hover:bg-gray-50 border-gray-300 text-gray-700"
-            >
-              📅 Idag
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => setQuickFilter('thisWeek')}
-              className="bg-white hover:bg-gray-50 border-gray-300 text-gray-700"
-            >
-              📆 Denna vecka
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => setQuickFilter('nextWeek')}
-              className="bg-white hover:bg-gray-50 border-gray-300 text-gray-700"
-            >
-              📅 Nästa vecka
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => setQuickFilter('thisMonth')}
-              className="bg-white hover:bg-gray-50 border-gray-300 text-gray-700"
-            >
-              📊 Denna månad
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => setQuickFilter('nextMonth')}
-              className="bg-white hover:bg-gray-50 border-gray-300 text-gray-700"
-            >
-              📈 Nästa månad
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card className="bg-white border-gray-200 shadow-sm">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-gray-900 text-base font-medium flex items-center gap-2">
-            🔧 {isEmployee ? 'Anpassa ditt schema' : 'Anpassade filter'}
-          </CardTitle>
-          <p className="text-sm text-gray-600">
-            Använd detaljerade filter för specifika datum och anställda
-          </p>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className={`grid grid-cols-1 ${canViewAllSchedules ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-4`}>
-            {canViewAllSchedules && (
-              <div>
-                <Label htmlFor="employee-filter">Anställd (valfritt)</Label>
-                <select
-                  id="employee-filter"
-                  value={selectedEmployeeId}
-                  onChange={(e) => setSelectedEmployeeId(e.target.value)}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                >
-                  <option value="">Alla anställda</option>
-                  {employees.map((employee) => (
-                    <option key={employee.employeeId} value={employee.employeeId}>
-                      {employee.firstName} {employee.lastName} ({employee.employeeId})
-                    </option>
-                  ))}
-                </select>
+        <Card className="border-orange-200">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+              <span className="material-icons text-orange-600">schedule</span>
+              Flextid
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-2xl font-bold text-red-600">-2.5</span>
+                <span className="text-sm text-gray-500">timmar</span>
               </div>
-            )}
-
-            <div>
-              <Label htmlFor="start-date">Från datum</Label>
-              <Input
-                id="start-date"
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="mt-1"
-              />
+              <div className="text-xs text-gray-500">Negativ flexbalans</div>
             </div>
+          </CardContent>
+        </Card>
 
-            <div>
-              <Label htmlFor="end-date">Till datum</Label>
-              <Input
-                id="end-date"
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="mt-1"
-              />
+        <Card className="border-purple-200">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+              <span className="material-icons text-purple-600">trending_up</span>
+              Övertid
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-2xl font-bold text-purple-600">8.5</span>
+                <span className="text-sm text-gray-500">timmar</span>
+              </div>
+              <div className="text-xs text-gray-500">Ej kompenserad övertid</div>
             </div>
-          </div>
+          </CardContent>
+        </Card>
+      </div>
 
-          <div className="flex items-center gap-4">
-            <Button onClick={loadSchedules} disabled={isLoading}>
-              {isLoading ? (
-                <>
-                  <span className="material-icons mr-2 animate-spin">refresh</span>
-                  Laddar...
-                </>
-              ) : (
-                <>
-                  <span className="material-icons mr-2">search</span>
-                  Uppdatera
-                </>
-              )}
-            </Button>
+      {/* Upcoming Deviations/Leave */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <span className="material-icons text-gray-600">event</span>
+            Kommande avvikelser
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center text-white text-sm">
+                  <span className="material-icons text-sm">beach_access</span>
+                </div>
+                <div>
+                  <p className="font-medium text-gray-900">Semester</p>
+                  <p className="text-sm text-gray-600">5-9 augusti (5 dagar)</p>
+                </div>
+              </div>
+              <Badge variant="secondary" className="bg-green-100 text-green-800">
+                Godkänd
+              </Badge>
+            </div>
             
-            {(selectedEmployeeId || startDate || endDate) && (
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setSelectedEmployeeId('');
-                  setStartDate('');
-                  setEndDate('');
-                }}
-              >
-                <span className="material-icons mr-2">clear</span>
-                Rensa filter
+            <div className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm">
+                  <span className="material-icons text-sm">local_hospital</span>
+                </div>
+                <div>
+                  <p className="font-medium text-gray-900">Läkarbesök</p>
+                  <p className="text-sm text-gray-600">15 augusti 14:00-15:00</p>
+                </div>
+              </div>
+              <Badge variant="outline" className="border-orange-300 text-orange-700">
+                Väntar på godkännande
+              </Badge>
+            </div>
+
+            <div className="text-center py-4">
+              <Button variant="outline" className="text-blue-600 border-blue-300 hover:bg-blue-50">
+                <span className="material-icons mr-2">visibility</span>
+                Visa alla avvikelser
               </Button>
-            )}
+            </div>
           </div>
         </CardContent>
       </Card>
 
-      {error && (
-        <Alert variant="destructive">
-          <span className="material-icons">error</span>
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
+      {/* Quick Actions */}
+      <Card className="bg-gray-50">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <span className="material-icons text-gray-600">flash_on</span>
+            Snabbåtgärder
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <Button variant="outline" className="h-20 flex flex-col items-center justify-center gap-2">
+              <span className="material-icons">sick</span>
+              <span className="text-sm">Sjukanmälan</span>
+            </Button>
+            <Button variant="outline" className="h-20 flex flex-col items-center justify-center gap-2">
+              <span className="material-icons">beach_access</span>
+              <span className="text-sm">Semesteransökan</span>
+            </Button>
+            <Button variant="outline" className="h-20 flex flex-col items-center justify-center gap-2">
+              <span className="material-icons">schedule</span>
+              <span className="text-sm">Flextid</span>
+            </Button>
+            <Button variant="outline" className="h-20 flex flex-col items-center justify-center gap-2">
+              <span className="material-icons">trending_up</span>
+              <span className="text-sm">Övertid</span>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
-      <div className="space-y-8">
-        {Object.keys(groupedSchedules).length === 0 ? (
-          <Card className="bg-white border-gray-200 shadow-sm">
-            <CardContent className="text-center py-12">
-              <span className="material-icons text-gray-400 text-6xl mb-4">schedule</span>
-              <p className="text-gray-600 text-lg font-medium">Inga scheman hittades</p>
-              <p className="text-sm text-gray-500 mt-2">
-                Prova att ändra filtren eller importera scheman från PAXML
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
-          Object.entries(groupedSchedules).map(([employeeId, employeeSchedules]) => (
-            <Card key={employeeId} className="bg-white border-gray-200 shadow-sm">
-              <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-3 text-lg font-semibold text-gray-900">
-                  <span className="material-icons text-gray-600">person</span>
-                  {getEmployeeName(employeeId)}
-                  <Badge variant="secondary" className="bg-gray-100 text-gray-700">
-                    {employeeSchedules.length} dagar
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse border border-gray-300">
-                    <thead>
-                      <tr className="bg-gray-50">
-                        <th className="border border-gray-300 px-4 py-2 text-left">Datum</th>
-                        <th className="border border-gray-300 px-4 py-2 text-left">Starttid</th>
-                        <th className="border border-gray-300 px-4 py-2 text-left">Sluttid</th>
-                        <th className="border border-gray-300 px-4 py-2 text-left">Rast</th>
-                        <th className="border border-gray-300 px-4 py-2 text-left">Arbetstid</th>
-                        <th className="border border-gray-300 px-4 py-2 text-left">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {employeeSchedules
-                        .sort((a, b) => a.date.localeCompare(b.date))
-                        .map((schedule, index) => {
-                          const today = new Date().toISOString().split('T')[0];
-                          const scheduleDate = schedule.date;
-                          const isToday = scheduleDate === today;
-                          const isPast = scheduleDate < today;
-                          const isFuture = scheduleDate > today;
-                          
-                          return (
-                            <tr 
-                              key={index} 
-                              className={`
-                                transition-all duration-200 hover:bg-blue-50 hover:shadow-sm
-                                ${isToday ? 'bg-gradient-to-r from-blue-100 to-blue-50 border-blue-300 font-semibold' : ''}
-                                ${isPast ? 'opacity-75' : ''}
-                              `}
-                            >
-                              <td className="border border-gray-300 px-4 py-2">
-                                <div className="flex items-center gap-2">
-                                  {isToday && <span className="text-blue-600">📅</span>}
-                                  {isFuture && <span className="text-green-600">🔜</span>}
-                                  {isPast && <span className="text-gray-400">✅</span>}
-                                  <span className={isToday ? 'text-blue-800 font-bold' : ''}>
-                                    {new Date(schedule.date).toLocaleDateString('sv-SE', {
-                                      weekday: 'short',
-                                      day: 'numeric',
-                                      month: 'short'
-                                    })}
-                                  </span>
-                                  {isToday && (
-                                    <Badge variant="default" className="text-xs bg-blue-600">
-                                      IDAG
-                                    </Badge>
-                                  )}
-                                </div>
-                              </td>
-                              <td className="border border-gray-300 px-4 py-2">
-                                <span className="font-mono text-sm">
-                                  🕐 {formatTime(schedule.startTime)}
-                                </span>
-                              </td>
-                              <td className="border border-gray-300 px-4 py-2">
-                                <span className="font-mono text-sm">
-                                  🕕 {formatTime(schedule.endTime)}
-                                </span>
-                              </td>
-                              <td className="border border-gray-300 px-4 py-2">
-                                <span className="text-sm">
-                                  {schedule.breakStart && schedule.breakEnd 
-                                    ? `☕ ${formatTime(schedule.breakStart)} - ${formatTime(schedule.breakEnd)}` 
-                                    : "➖ Ingen rast"
-                                  }
-                                </span>
-                              </td>
-                              <td className="border border-gray-300 px-4 py-2">
-                                <div className="flex items-center gap-1">
-                                  <span className="text-blue-600">⏱️</span>
-                                  <span className="font-bold text-lg">
-                                    {calculateWorkHours(schedule)}h
-                                  </span>
-                                </div>
-                              </td>
-                              <td className="border border-gray-300 px-4 py-2">
-                                <Badge 
-                                  variant={['scheduled', 'active'].includes(schedule.status) ? 'default' : 'secondary'}
-                                  className={`
-                                    ${['scheduled', 'active'].includes(schedule.status)
-                                      ? 'bg-green-100 text-green-800 border-green-300' 
-                                      : 'bg-gray-100 text-gray-600 border-gray-300'
-                                    }
-                                  `}
-                                >
-                                  {['scheduled', 'active'].includes(schedule.status) ? '✅ Planerat' : 
-                                   schedule.status === 'cancelled' ? '❌ Inställt' :
-                                   schedule.status === 'completed' ? '✅ Slutfört' : 
-                                   '⏸️ ' + schedule.status}
-                                </Badge>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
-          ))
-        )}
-      </div>
+
     </div>
   );
 }
