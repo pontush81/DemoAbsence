@@ -274,28 +274,14 @@ export default function Dashboard() {
       {isEmployee && (
         <Card className="mt-8">
           <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h2 className="text-xl font-semibold flex items-center">
-                  <span className="material-icons mr-2">schedule_send</span>
-                  Månatlig tidrapportering
-                </h2>
-                <p className="text-muted-foreground mt-1">
-                  {format(monthStart, 'MMMM yyyy', { locale: sv })} - Bekräfta dina arbetstider
-                </p>
-              </div>
-              <div className="flex items-center space-x-2">
-                {hasMonthlyDeviations && (
-                  <Badge variant="secondary">
-                    {currentMonthDeviations.length} avvikelser, {currentMonthLeaveRequests.length} ledigheter
-                  </Badge>
-                )}
-                {hasPendingItems && (
-                  <Badge variant="destructive">
-                    Väntande godkännanden
-                  </Badge>
-                )}
-              </div>
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold flex items-center mb-2">
+                <span className="material-icons mr-2">schedule_send</span>
+                Månatlig tidrapportering
+              </h2>
+              <p className="text-muted-foreground">
+                {format(monthStart, 'MMMM yyyy', { locale: sv })} - Skicka in din tidrapport för månaden
+              </p>
             </div>
 
             {/* Status alerts */}
@@ -307,26 +293,27 @@ export default function Dashboard() {
               </Alert>
             )}
 
-            {/* Monthly summary */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              <div className="p-4 bg-muted rounded-lg">
-                <div className="text-sm text-muted-foreground">Avvikelser denna månad</div>
-                <div className="text-2xl font-bold">{currentMonthDeviations.length}</div>
-              </div>
-              <div className="p-4 bg-muted rounded-lg">
-                <div className="text-sm text-muted-foreground">Ledigheter denna månad</div>
-                <div className="text-2xl font-bold">{currentMonthLeaveRequests.length}</div>
-              </div>
-              <div className="p-4 bg-muted rounded-lg">
-                <div className="text-sm text-muted-foreground">Status</div>
-                <div className="text-2xl font-bold">
-                  {hasPendingItems ? (
-                    <span className="text-yellow-600">Väntande</span>
-                  ) : hasMonthlyDeviations ? (
-                    <span className="text-blue-600">Med avvikelser</span>
-                  ) : (
-                    <span className="text-green-600">Enligt schema</span>
-                  )}
+            {/* Status summary */}
+            <div className="mb-6 p-4 bg-muted rounded-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm text-muted-foreground mb-1">Månadens tidrapport</div>
+                  <div className="flex items-center space-x-4">
+                    {currentMonthDeviations.length > 0 && (
+                      <span className="text-sm">📝 {currentMonthDeviations.length} avvikelser</span>
+                    )}
+                    {currentMonthLeaveRequests.length > 0 && (
+                      <span className="text-sm">🏖️ {currentMonthLeaveRequests.length} ledigheter</span>
+                    )}
+                    {!hasMonthlyDeviations && (
+                      <span className="text-sm text-green-600">✅ Enligt ordinarie schema</span>
+                    )}
+                  </div>
+                </div>
+                <div className="text-right">
+                  <Badge variant={hasPendingItems ? "destructive" : hasMonthlyDeviations ? "secondary" : "default"}>
+                    {hasPendingItems ? "Väntande godkännanden" : hasMonthlyDeviations ? "Med avvikelser" : "Klar att skicka"}
+                  </Badge>
                 </div>
               </div>
             </div>
@@ -342,7 +329,6 @@ export default function Dashboard() {
               >
                 <span className="material-icons mr-2">check_circle</span>
                 Jag har inga avvikelser
-                <span className="ml-2 text-sm opacity-75">(Skicka enligt schema)</span>
               </Button>
               
               <Button
@@ -354,17 +340,14 @@ export default function Dashboard() {
               >
                 <span className="material-icons mr-2">edit</span>
                 Jag har avvikelser
-                <span className="ml-2 text-sm opacity-75">(Registrera avvikelser)</span>
               </Button>
             </div>
 
             {/* Helper text */}
-            <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-              <p className="text-sm text-blue-800">
+            <div className="mt-4 text-center">
+              <p className="text-sm text-muted-foreground">
                 <span className="material-icons text-sm mr-1">info</span>
-                <strong>Tips:</strong> Välj "Jag har inga avvikelser" om du arbetat enligt ditt schema utan övertid, 
-                sjukfrånvaro eller andra avvikelser. Välj "Jag har avvikelser" för att registrera övertid, 
-                sjukdagar, VAB eller andra förändringar från ditt ordinarie schema.
+                Välj första alternativet om du arbetat enligt schema. Andra alternativet för övertid, sjukfrånvaro eller VAB.
               </p>
             </div>
           </CardContent>
