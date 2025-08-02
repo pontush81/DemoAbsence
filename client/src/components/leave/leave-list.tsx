@@ -86,8 +86,8 @@ const LeaveList = ({ onSelect }: LeaveListProps) => {
                 <SelectValue placeholder={t('deviations.status')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="active">🗓️ Aktiv planering</SelectItem>
                 <SelectItem value="all">📋 Alla statusar</SelectItem>
+                <SelectItem value="active">⚡ Behöver uppmärksamhet (väntande + godkända)</SelectItem>
                 <SelectItem value="pending">⏳ Väntande</SelectItem>
                 <SelectItem value="approved">✅ Godkända</SelectItem>
                 <SelectItem value="rejected">❌ Avslagna</SelectItem>
