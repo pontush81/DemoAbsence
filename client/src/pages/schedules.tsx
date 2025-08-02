@@ -425,7 +425,11 @@ export default function SchedulesPage() {
             </div>
 
             <div className="text-center py-4">
-              <Button variant="outline" className="text-blue-600 border-blue-300 hover:bg-blue-50">
+              <Button 
+                variant="outline" 
+                className="text-blue-600 border-blue-300 hover:bg-blue-50"
+                onClick={() => window.location.href = '/deviations'}
+              >
                 <span className="material-icons mr-2">visibility</span>
                 Visa alla avvikelser
               </Button>
@@ -434,35 +438,7 @@ export default function SchedulesPage() {
         </CardContent>
       </Card>
 
-      {/* Quick Actions */}
-      <Card className="bg-gray-50">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <span className="material-icons text-gray-600">flash_on</span>
-            Snabbåtgärder
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Button variant="outline" className="h-20 flex flex-col items-center justify-center gap-2">
-              <span className="material-icons">sick</span>
-              <span className="text-sm">Sjukanmälan</span>
-            </Button>
-            <Button variant="outline" className="h-20 flex flex-col items-center justify-center gap-2">
-              <span className="material-icons">beach_access</span>
-              <span className="text-sm">Semesteransökan</span>
-            </Button>
-            <Button variant="outline" className="h-20 flex flex-col items-center justify-center gap-2">
-              <span className="material-icons">schedule</span>
-              <span className="text-sm">Flextid</span>
-            </Button>
-            <Button variant="outline" className="h-20 flex flex-col items-center justify-center gap-2">
-              <span className="material-icons">trending_up</span>
-              <span className="text-sm">Övertid</span>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+
 
 
     </div>
