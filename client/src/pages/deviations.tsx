@@ -43,22 +43,33 @@ export default function Deviations() {
     <section>
       {view === 'list' && (
         <>
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-            <div>
-              <h1 className="text-2xl font-bold">{t('deviations.title')}</h1>
-              <p className="text-muted-foreground">{t('deviations.description')}</p>
+          {/* Modern header with clear hierarchy and better UX */}
+          <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-8">
+            <div className="mb-4 md:mb-0">
+              <h1 className="text-3xl font-bold text-gray-900">{t('deviations.title')}</h1>
+              <p className="text-lg text-muted-foreground mt-1">{t('deviations.description')}</p>
+              <div className="mt-2 text-sm text-gray-500">
+                💡 <strong>Tips:</strong> Default-vyn visar avvikelser som behöver din åtgärd först
+              </div>
             </div>
-            <div className="mt-4 md:mt-0">
+            
+            {/* Primary action - prominent positioning following UX best practices */}
+            <div className="flex flex-col sm:flex-row gap-3">
               <Link href="/deviations/new">
-                <Button className="inline-flex items-center bg-accent hover:bg-accent-dark text-white px-4 py-2 rounded font-medium shadow-sm transition-colors">
-                  <span className="material-icons mr-2">add</span>
-                  {t('action.newDeviation')}
+                <Button 
+                  size="lg" 
+                  className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-white font-semibold px-8 py-3 shadow-lg"
+                >
+                  ➕ Ny avvikelse
                 </Button>
               </Link>
             </div>
           </div>
-          
-          <DeviationList />
+
+          {/* Enhanced deviation list with better UX */}
+          <div className="space-y-6">
+            <DeviationList />
+          </div>
         </>
       )}
       

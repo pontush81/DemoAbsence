@@ -39,7 +39,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
         
         if (status && status !== 'all') {
-          query = query.eq('status', status);
+          // Handle the new "needs-action" combined filter (UX improvement)
+          if (status === 'needs-action') {
+            query = query.in('status', ['pending', 'returned', 'draft']); // Items that need user action
+          } else {
+            query = query.eq('status', status);
+          }
         }
         
         if (timeCode && timeCode !== 'all') {
@@ -108,7 +113,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       
       // Filter by status  
       if (status && status !== 'all') {
-        filteredDeviations = filteredDeviations.filter((d: any) => d.status === status);
+        if (status === 'needs-action') {
+          filteredDeviations = filteredDeviations.filter((d: any) => 
+            ['pending', 'returned', 'draft'].includes(d.status)
+          );
+        } else {
+          filteredDeviations = filteredDeviations.filter((d: any) => d.status === status);
+        }
       }
       
       // Filter by timeCode

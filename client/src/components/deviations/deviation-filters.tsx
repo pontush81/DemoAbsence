@@ -59,12 +59,13 @@ const DeviationFilters = ({ filters, onFilterChange }: DeviationFiltersProps) =>
                 <SelectValue placeholder={t('deviations.status')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">{t('deviations.allStatuses')}</SelectItem>
-                <SelectItem value="pending">{t('deviations.pending')}</SelectItem>
-                <SelectItem value="approved">{t('deviations.approved')}</SelectItem>
-                <SelectItem value="rejected">{t('deviations.rejected')}</SelectItem>
-                <SelectItem value="returned">{t('deviations.returned')}</SelectItem>
-                <SelectItem value="draft">{t('deviations.draft')}</SelectItem>
+                <SelectItem value="needs-action">🔥 Behöver åtgärd</SelectItem>
+                <SelectItem value="all">📋 Alla statusar</SelectItem>
+                <SelectItem value="pending">⏳ Väntande</SelectItem>
+                <SelectItem value="returned">↩️ Återskickade</SelectItem>
+                <SelectItem value="draft">📝 Utkast</SelectItem>
+                <SelectItem value="approved">✅ Godkända</SelectItem>
+                <SelectItem value="rejected">❌ Avslagna</SelectItem>
               </SelectContent>
             </Select>
           </div>

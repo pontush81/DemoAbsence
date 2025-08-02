@@ -433,7 +433,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       if (status && status !== 'all') {
-        filters.status = status;
+        // Handle the new "needs-action" combined filter (UX improvement)
+        if (status === 'needs-action') {
+          filters.statusIn = ['pending', 'returned', 'draft']; // Items that need user action
+        } else {
+          filters.status = status;
+        }
       }
       
       // Handle period filtering with date ranges
@@ -627,7 +632,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const filters: any = {};
       if (employeeId) filters.employeeId = employeeId;
-      if (status && status !== 'all') filters.status = status;
+      
+      // Handle leave-specific status filtering (adapted for planning workflow)
+      if (status && status !== 'all') {
+        if (status === 'active') {
+          // "Aktiv planering" - show pending + approved (relevant for planning)
+          filters.statusIn = ['pending', 'approved'];
+        } else {
+          filters.status = status;
+        }
+      }
       
       let leaveRequests = await restStorage.getLeaveRequests(filters);
       

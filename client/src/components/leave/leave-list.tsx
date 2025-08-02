@@ -22,10 +22,10 @@ const LeaveList = ({ onSelect }: LeaveListProps) => {
   const { user } = useStore();
   const employeeId = user.currentUser?.employeeId;
   
-  // Filters
+  // Filters - adapted for leave planning workflow (show upcoming/pending first)
   const [filters, setFilters] = useState({
-    period: 'all',
-    status: 'all',
+    period: 'upcoming', // Show future leave first (planning focus)
+    status: 'active', // Show pending + approved (what matters for planning)
     leaveType: 'all',
   });
   
@@ -86,11 +86,12 @@ const LeaveList = ({ onSelect }: LeaveListProps) => {
                 <SelectValue placeholder={t('deviations.status')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">{t('deviations.allStatuses')}</SelectItem>
-                <SelectItem value="pending">{t('deviations.pending')}</SelectItem>
-                <SelectItem value="approved">{t('deviations.approved')}</SelectItem>
-                <SelectItem value="rejected">{t('deviations.rejected')}</SelectItem>
-                <SelectItem value="draft">{t('deviations.draft')}</SelectItem>
+                <SelectItem value="active">🗓️ Aktiv planering</SelectItem>
+                <SelectItem value="all">📋 Alla statusar</SelectItem>
+                <SelectItem value="pending">⏳ Väntande</SelectItem>
+                <SelectItem value="approved">✅ Godkända</SelectItem>
+                <SelectItem value="rejected">❌ Avslagna</SelectItem>
+                <SelectItem value="draft">📝 Utkast</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -132,6 +133,23 @@ const LeaveList = ({ onSelect }: LeaveListProps) => {
   if (isLoading) {
     return (
       <div>
+        {/* Status info box - adapted for leave planning workflow */}
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+          <div className="flex items-start">
+            <div className="flex-shrink-0">
+              <span className="text-2xl">🗓️</span>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-green-800">
+                Laddar din ledighetsplanering
+              </h3>
+              <p className="mt-1 text-sm text-green-600">
+                Vi hämtar kommande och pågående ledighetsansökningar för bästa översikt
+              </p>
+            </div>
+          </div>
+        </div>
+        
         {renderFilters()}
         <div className="bg-white rounded-lg shadow-sm overflow-hidden responsive-table-card mt-6">
           <div className="responsive-table-wrapper">

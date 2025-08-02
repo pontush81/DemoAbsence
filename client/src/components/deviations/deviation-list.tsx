@@ -22,10 +22,10 @@ const DeviationList = ({ onSelect }: DeviationListProps) => {
   const { user } = useStore();
   const employeeId = user.currentUser?.employeeId;
   
-  // Filters - default to newest first and all-time so demo data from 2023 shows up
+  // Filters - default to show items needing action first (UX best practice)
   const [filters, setFilters] = useState({
-    period: 'all-time',
-    status: 'all',
+    period: 'current-month', // Show current month by default
+    status: 'needs-action', // New combined filter for pending+returned+draft
     timeCode: 'all',
     sortBy: 'date-desc', // Newest first by default
   });
@@ -67,6 +67,23 @@ const DeviationList = ({ onSelect }: DeviationListProps) => {
   if (isLoading) {
     return (
       <div>
+        {/* Status info box */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <div className="flex items-start">
+            <div className="flex-shrink-0">
+              <span className="text-2xl">🔄</span>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-blue-800">
+                Laddar avvikelser som behöver åtgärd
+              </h3>
+              <p className="mt-1 text-sm text-blue-600">
+                Vi hämtar avvikelser med status: väntande, återskickade och utkast
+              </p>
+            </div>
+          </div>
+        </div>
+        
         <DeviationFilters filters={filters} onFilterChange={handleFilterChange} />
         <div className="bg-white rounded-lg shadow-sm overflow-hidden mt-6">
           <div className="overflow-x-auto">

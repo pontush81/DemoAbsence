@@ -42,22 +42,33 @@ export default function Leave() {
     <section>
       {view === 'list' && (
         <>
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-            <div>
-              <h1 className="text-2xl font-bold">{t('leave.title')}</h1>
-              <p className="text-muted-foreground">{t('leave.description')}</p>
+          {/* Modern header with planning-focused hierarchy (konsekvent grundstruktur) */}
+          <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-8">
+            <div className="mb-4 md:mb-0">
+              <h1 className="text-3xl font-bold text-gray-900">{t('leave.title')}</h1>
+              <p className="text-lg text-muted-foreground mt-1">{t('leave.description')}</p>
+              <div className="mt-2 text-sm text-gray-500">
+                🗓️ <strong>Tips:</strong> Planera din ledighet i förväg för smidig godkännandeprocess
+              </div>
             </div>
-            <div className="mt-4 md:mt-0">
+            
+            {/* Primary action - adapted for leave planning workflow */}
+            <div className="flex flex-col sm:flex-row gap-3">
               <Link href="/leave/new">
-                <Button className="inline-flex items-center bg-accent hover:bg-accent-dark text-white px-4 py-2 rounded font-medium shadow-sm transition-colors">
-                  <span className="material-icons mr-2">add</span>
-                  {t('leave.newLeaveRequest')}
+                <Button 
+                  size="lg" 
+                  className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-semibold px-8 py-3 shadow-lg"
+                >
+                  📅 Ansök om ledighet
                 </Button>
               </Link>
             </div>
           </div>
-          
-          <LeaveList />
+
+          {/* Enhanced leave list with planning-focused UX */}
+          <div className="space-y-6">
+            <LeaveList />
+          </div>
         </>
       )}
       

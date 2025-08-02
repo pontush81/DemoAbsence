@@ -39,7 +39,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
         
         if (status && status !== 'all') {
-          query = query.eq('status', status);
+          // Handle leave-specific "active" filter for planning workflow
+          if (status === 'active') {
+            query = query.in('status', ['pending', 'approved']); // Active planning items
+          } else {
+            query = query.eq('status', status);
+          }
         }
         
         // Default sort by start date descending
@@ -70,7 +75,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       
       // Filter by status
       if (status && status !== 'all') {
-        filteredLeaveRequests = filteredLeaveRequests.filter((lr: any) => lr.status === status);
+        if (status === 'active') {
+          filteredLeaveRequests = filteredLeaveRequests.filter((lr: any) => 
+            ['pending', 'approved'].includes(lr.status)
+          );
+        } else {
+          filteredLeaveRequests = filteredLeaveRequests.filter((lr: any) => lr.status === status);
+        }
       }
       
       // Sort by start date descending

@@ -73,6 +73,13 @@ export class SupabaseRestStorage {
       filteredData = filteredData.filter((d: any) => d.status === filters.status);
     }
     
+    // Handle new "needs-action" combined filter (statusIn array)
+    if (filters.statusIn && Array.isArray(filters.statusIn)) {
+      filteredData = filteredData.filter((d: any) => 
+        filters.statusIn.includes(d.status)
+      );
+    }
+    
     if (filters.startDate) {
       filteredData = filteredData.filter((d: any) => d.date >= filters.startDate);
     }
@@ -125,6 +132,13 @@ export class SupabaseRestStorage {
     
     if (filters.status && filters.status !== 'all') {
       filteredData = filteredData.filter((lr: any) => lr.status === filters.status);
+    }
+    
+    // Handle "active" combined filter for leave planning (statusIn array)
+    if (filters.statusIn && Array.isArray(filters.statusIn)) {
+      filteredData = filteredData.filter((lr: any) => 
+        filters.statusIn.includes(lr.status)
+      );
     }
     
     return filteredData;
