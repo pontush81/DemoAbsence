@@ -357,11 +357,11 @@ const DeviationForm = ({ deviationId, onCancel }: DeviationFormProps) => {
                   variant="outline"
                   size="lg"
                   onClick={() => handleQuickAction(action)}
-                  className="h-16 flex flex-col items-center justify-center space-y-1 text-sm font-medium hover:bg-accent/10 border-2 hover:border-accent"
+                  className="h-16 flex flex-col items-center justify-center gap-1 text-sm font-medium hover:bg-accent/10 border-2 hover:border-accent"
                   disabled={isLoading || isPending}
                 >
-                  <span className="text-2xl">{action.icon}</span>
-                  <span className="text-center leading-tight">{action.label}</span>
+                  <span className="text-xl">{action.icon}</span>
+                  <span className="text-center leading-none text-xs">{action.label}</span>
                 </Button>
               ))}
             </div>
