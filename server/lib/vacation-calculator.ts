@@ -82,6 +82,8 @@ export async function updateVacationBalance(
 ): Promise<void> {
   if (daysToDeduct <= 0) return;
 
+  let supabaseSuccess = false;
+
   try {
     if (supabase) {
       // Update in Supabase
@@ -94,10 +96,40 @@ export async function updateVacationBalance(
         .eq('employee_id', employeeId);
 
       if (error) throw error;
-      console.log(`Updated vacation balance for ${employeeId}: -${daysToDeduct} days`);
+      console.log(`🎯 Updated vacation balance in Supabase for ${employeeId}: -${daysToDeduct} days`);
+      supabaseSuccess = true;
     }
   } catch (error) {
-    console.error('Failed to update vacation balance:', error);
-    // In production, this should probably throw or alert administrators
+    console.error('Failed to update vacation balance in Supabase:', error);
+  }
+
+  // Fallback: Update mock data if Supabase failed or not available
+  if (!supabaseSuccess) {
+    try {
+      console.log(`📁 Falling back to mock data update for ${employeeId}`);
+      const { getMockData, saveMockData } = await import('../storage.js');
+      
+      const timeBalances = await getMockData('timebalances.json');
+      let updated = false;
+
+      // Update all entries for this employee (there might be multiple)
+      for (let i = 0; i < timeBalances.length; i++) {
+        if (timeBalances[i].employeeId === employeeId) {
+          timeBalances[i].vacationDays = Math.max(0, timeBalances[i].vacationDays - daysToDeduct);
+          timeBalances[i].lastUpdated = new Date().toISOString();
+          updated = true;
+          console.log(`📁 Updated mock data for ${employeeId}: ${timeBalances[i].vacationDays} days remaining`);
+        }
+      }
+
+      if (updated) {
+        await saveMockData('timebalances.json', timeBalances);
+        console.log(`✅ Mock data saved successfully for ${employeeId}`);
+      } else {
+        console.warn(`⚠️ No time balance found for employee ${employeeId} in mock data`);
+      }
+    } catch (mockError) {
+      console.error('Failed to update mock data vacation balance:', mockError);
+    }
   }
 }

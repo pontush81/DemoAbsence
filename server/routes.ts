@@ -3,9 +3,10 @@ import { createServer, type Server } from "http";
 import { saveFile, getFile, listFiles, generateId, getMockData, saveMockData } from "./storage";
 import { storage } from "./supabase-storage"; 
 import { restStorage } from "./supabase-rest-storage";
-import { db } from "./db";
+import { db, supabase } from "./db";
 import { timeBalances } from "@shared/schema";
 import { generatePAXMLTransactions, generatePAXMLXML, generatePAXMLXMLWithSchedules, validatePAXMLData, convertXMLScheduleToAppSchedule, convertAppScheduleToXMLSchedule } from './lib/paxml.js';
+import { calculateVacationDeduction, updateVacationBalance } from './lib/vacation-calculator.js';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // ---- API ROUTES ----

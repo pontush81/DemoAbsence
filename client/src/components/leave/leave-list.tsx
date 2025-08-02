@@ -25,7 +25,7 @@ const LeaveList = ({ onSelect }: LeaveListProps) => {
   // Filters - adapted for leave planning workflow (show upcoming/pending first)
   const [filters, setFilters] = useState({
     period: 'upcoming', // Show future leave first (planning focus)
-    status: 'pending', // Show what needs manager attention first
+    status: 'all', // Show all leave requests - complete overview for users
     leaveType: 'all',
   });
   
