@@ -10,7 +10,7 @@ import { useI18n } from "@/lib/i18n";
 import { useStore } from "@/lib/store";
 import { Deviation } from "@shared/schema";
 import DeviationFilters from "./deviation-filters";
-import { formatTime } from "@/lib/utils/date";
+import { formatTime, formatDuration } from "@/lib/utils/date";
 
 interface DeviationListProps {
   onSelect?: (id: number) => void;
@@ -49,6 +49,31 @@ const DeviationList = ({ onSelect }: DeviationListProps) => {
   const getTimeCodeName = (timeCodeStr: string) => {
     const timeCode = timeCodes.find(tc => tc.code === timeCodeStr);
     return timeCode ? `${timeCode.code} - ${timeCode.name}` : timeCodeStr;
+  };
+
+  // Helper function to format deviation duration
+  const formatDeviationTime = (startTime: string, endTime: string) => {
+    try {
+      const start = new Date(`2000-01-01T${startTime}`);
+      const end = new Date(`2000-01-01T${endTime}`);
+      const diffMinutes = Math.floor((end.getTime() - start.getTime()) / (1000 * 60));
+      
+      // For full-day absences (8 hours = 480 minutes), show as duration
+      if (diffMinutes >= 480) {
+        const hours = Math.floor(diffMinutes / 60);
+        const minutes = diffMinutes % 60;
+        if (minutes === 0) {
+          return `${hours}h frånvaro`;
+        } else {
+          return `${hours}h ${minutes}min frånvaro`;
+        }
+      }
+      
+      // For shorter periods, show time range
+      return `${formatTime(startTime)} - ${formatTime(endTime)}`;
+    } catch {
+      return `${formatTime(startTime)} - ${formatTime(endTime)}`;
+    }
   };
   
   const handleFilterChange = (newFilters: typeof filters) => {
@@ -159,8 +184,8 @@ const DeviationList = ({ onSelect }: DeviationListProps) => {
         <div className="flex items-start gap-2">
           <span className="material-icons text-blue-600 text-sm mt-0.5">info</span>
           <div className="text-sm text-blue-800">
-            <strong>Svensk HR-praxis:</strong> Heldagssjukfrånvaro registreras som <em>arbetstid</em> 08:00-16:00 (8h), 
-            inte <em>närvaro</em> 08:00-17:00 (9h). Lunch är obetald rast enligt arbetstidslagen och ingår ej i sjukfrånvaro.
+            <strong>Tidsregistrering:</strong> Heldagsfrånvaro visas som <em>"8h frånvaro"</em> enligt svensk HR-praxis. 
+            Lunch är obetald rast och ingår ej i arbetstid eller sjukfrånvaro.
           </div>
         </div>
       </div>
@@ -188,7 +213,7 @@ const DeviationList = ({ onSelect }: DeviationListProps) => {
                   <TableCell className="whitespace-nowrap">{deviation.date}</TableCell>
                   <TableCell className="whitespace-nowrap">{getTimeCodeName(deviation.timeCode)}</TableCell>
                   <TableCell className="whitespace-nowrap">
-                    {formatTime(deviation.startTime)} - {formatTime(deviation.endTime)}
+                    {formatDeviationTime(deviation.startTime, deviation.endTime)}
                   </TableCell>
                   <TableCell>
                     <StatusBadge status={deviation.status as any} />
