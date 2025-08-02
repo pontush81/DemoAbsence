@@ -179,17 +179,6 @@ const DeviationList = ({ onSelect }: DeviationListProps) => {
     <div>
       <DeviationFilters filters={filters} onFilterChange={handleFilterChange} />
       
-      {/* Help text about time reporting */}
-      <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-        <div className="flex items-start gap-2">
-          <span className="material-icons text-blue-600 text-sm mt-0.5">info</span>
-          <div className="text-sm text-blue-800">
-            <strong>Tidsregistrering:</strong> Heldagsfrånvaro visas som <em>"8h frånvaro"</em> enligt svensk HR-praxis. 
-            Lunch är obetald rast och ingår ej i arbetstid eller sjukfrånvaro.
-          </div>
-        </div>
-      </div>
-      
       <div className="overflow-hidden mt-6">
         <div className="overflow-x-auto">
           <Table>
