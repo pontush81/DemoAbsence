@@ -190,11 +190,28 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   } else if (req.method === 'POST') {
     // POST - create new deviation
     try {
+      // Get time codes to check if approval is required
+      const timeCodes = await getMockData('timecodes.json');
+      const timeCode = timeCodes.find((tc: any) => tc.code === req.body.timeCode);
+      
+      // Determine status based on Swedish HR praxis
+      let status = req.body.status;
+      if (!status) {
+        // If no status provided, determine based on time code
+        if (timeCode && timeCode.requiresApproval === false) {
+          // Sjukdom (300) and VAB (400) don't require approval - auto-approve
+          status = 'approved';
+        } else {
+          // Other types (semester, övertid) require approval
+          status = 'pending';
+        }
+      }
+      
       const deviationData = {
         ...req.body,
         startTime: req.body.startTime && !req.body.startTime.includes(':00') ? req.body.startTime + ':00' : req.body.startTime,
         endTime: req.body.endTime && !req.body.endTime.includes(':00') ? req.body.endTime + ':00' : req.body.endTime,
-        status: req.body.status || 'pending'
+        status: status
       };
       
       let newDeviation;

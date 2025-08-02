@@ -174,14 +174,14 @@ export default function Dashboard() {
       startTime: "08:00",
       endTime: "16:00", // 8 hours work time (excluding lunch)
       comment: "",
-      status: "pending",
+      // Don't set status - let API determine it based on timeCode (will be auto-approved for sick leave)
       submitted: new Date().toISOString(),
     };
 
-    // Show immediate feedback
+    // Show immediate feedback - updated message for Swedish law
     toast({
-      title: "🤒 Sjukdom registrerad!",
-      description: `För ${format(new Date(), 'dd MMMM', { locale: sv })} - Skickas för godkännande...`,
+      title: "🤒 Sjukdom anmäld!",
+      description: `För ${format(new Date(), 'dd MMMM', { locale: sv })} - Automatiskt godkänd enligt svensk lag`,
     });
 
     // Submit to API

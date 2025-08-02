@@ -540,11 +540,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create deviation
   app.post('/api/deviations', async (req, res) => {
     try {
+      // Get time codes to check if approval is required
+      const timeCodes = await getMockData('timecodes.json');
+      const timeCode = timeCodes.find((tc: any) => tc.code === req.body.timeCode);
+      
+      // Determine status based on Swedish HR praxis
+      let status = req.body.status;
+      if (!status) {
+        // If no status provided, determine based on time code
+        if (timeCode && timeCode.requiresApproval === false) {
+          // Sjukdom (300) and VAB (400) don't require approval - auto-approve
+          status = 'approved';
+        } else {
+          // Other types (semester, övertid) require approval
+          status = 'pending';
+        }
+      }
+      
       const deviationData = {
         ...req.body,
         startTime: req.body.startTime + ':00', // Add seconds for consistency
         endTime: req.body.endTime + ':00',     // Add seconds for consistency
-        status: req.body.status || 'pending'
+        status: status
       };
       
       // Use consistent REST API for all operations

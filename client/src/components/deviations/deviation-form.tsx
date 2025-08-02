@@ -171,19 +171,22 @@ const DeviationForm = ({ deviationId, onCancel }: DeviationFormProps) => {
     setShowQuickActions(false);
     setShowDateConfirmDialog(false);
     
-    // Show success toast immediately 
+    // Show success toast immediately with correct message based on approval requirement
+    const isSickOrVAB = pendingAction.timeCode === '300' || pendingAction.timeCode === '400';
     toast({
       title: `${pendingAction.icon} ${pendingAction.label} registrerad!`,
-      description: `För ${format(new Date(confirmedDate), 'dd MMMM', { locale: sv })} - Skickas för godkännande...`,
+      description: isSickOrVAB 
+        ? `För ${format(new Date(confirmedDate), 'dd MMMM', { locale: sv })} - Automatiskt godkänd enligt svensk lag`
+        : `För ${format(new Date(confirmedDate), 'dd MMMM', { locale: sv })} - Skickas för godkännande...`,
     });
     
     // Auto-submit after a short delay to let user see the filled form
     setTimeout(() => {
-      setStatus("pending");
+      // Don't set status here - let API determine based on timeCode
       const formData = form.getValues();
       const submitData = {
         ...formData,
-        status: "pending",
+        // Don't set status - API will determine based on Swedish HR praxis
         submitted: new Date().toISOString(),
       };
       createMutation.mutate(submitData as any);
