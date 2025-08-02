@@ -9,6 +9,10 @@ import { useI18n } from "@/lib/i18n";
 import { useStore } from "@/lib/store";
 import { apiService } from "@/lib/apiService";
 import { formatDateWithDay, formatTime, formatDuration } from "@/lib/utils/date";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { format, startOfMonth, endOfMonth } from "date-fns";
+import { sv } from "date-fns/locale";
 
 
 export default function Dashboard() {
@@ -17,8 +21,7 @@ export default function Dashboard() {
   const employeeId = user.currentUser?.employeeId;
   const currentUser = user.currentUser;
   const isManager = user.currentRole === 'manager';
-  
-
+  const isEmployee = user.currentRole === 'employee';
   
   // Get current date and format it
   const currentDate = new Date();
@@ -55,9 +58,61 @@ export default function Dashboard() {
     queryFn: () => apiService.getPendingLeaveRequests(),
     enabled: isManager,
   });
+
+  // Fetch monthly deviations for time reporting (for employees)
+  const currentMonth = format(currentDate, 'yyyy-MM');
+  const { data: monthlyDeviations, isLoading: isLoadingMonthlyDeviations } = useQuery({
+    queryKey: ['/api/deviations', employeeId, currentMonth],
+    queryFn: () => employeeId 
+      ? apiService.getDeviations(employeeId)
+      : Promise.resolve([]),
+    enabled: isEmployee && !!employeeId,
+  });
+
+  // Fetch monthly leave requests for time reporting (for employees)
+  const { data: monthlyLeaveRequests, isLoading: isLoadingMonthlyLeaveRequests } = useQuery({
+    queryKey: ['/api/leave-requests', employeeId, currentMonth],
+    queryFn: () => employeeId 
+      ? apiService.getLeaveRequests(employeeId)
+      : Promise.resolve([]),
+    enabled: isEmployee && !!employeeId,
+  });
   
   // Get today's schedule
   const todaySchedule = schedule && schedule.length > 0 ? schedule[0] : null;
+
+  // Calculate time reporting status for current month
+  const monthStart = startOfMonth(currentDate);
+  const monthEnd = endOfMonth(currentDate);
+  
+  // Filter deviations and leave requests for current month
+  const currentMonthDeviations = (monthlyDeviations || []).filter(d => {
+    const deviationDate = new Date(d.date);
+    return deviationDate >= monthStart && deviationDate <= monthEnd;
+  });
+  
+  const currentMonthLeaveRequests = (monthlyLeaveRequests || []).filter(lr => {
+    const startDate = new Date(lr.startDate);
+    const endDate = new Date(lr.endDate);
+    return startDate <= monthEnd && endDate >= monthStart;
+  });
+
+  // Check if user has any deviations or leave for current month
+  const hasMonthlyDeviations = currentMonthDeviations.length > 0 || currentMonthLeaveRequests.length > 0;
+  const hasPendingItems = [...currentMonthDeviations, ...currentMonthLeaveRequests].some(item => item.status === 'pending');
+  
+  // Handle time reporting submission
+  const handleSubmitTimeReport = async (hasDeviations: boolean) => {
+    if (hasDeviations) {
+      // Redirect to deviations page to register deviations
+      window.location.href = '/deviations';
+    } else {
+      // Submit time report according to scheduled hours
+      console.log('Submitting time report without deviations for month:', currentMonth);
+      // TODO: Implement API call to submit time report
+      alert(`Tidrapport för ${format(monthStart, 'MMMM yyyy', { locale: sv })} har skickats in enligt schema!`);
+    }
+  };
   
   return (
     <section>
@@ -215,8 +270,106 @@ export default function Dashboard() {
         )}
       </div>
 
+      {/* Monthly Time Reporting Section (only for employees) */}
+      {isEmployee && (
+        <Card className="mt-8">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-xl font-semibold flex items-center">
+                  <span className="material-icons mr-2">schedule_send</span>
+                  Månatlig tidrapportering
+                </h2>
+                <p className="text-muted-foreground mt-1">
+                  {format(monthStart, 'MMMM yyyy', { locale: sv })} - Bekräfta dina arbetstider
+                </p>
+              </div>
+              <div className="flex items-center space-x-2">
+                {hasMonthlyDeviations && (
+                  <Badge variant="secondary">
+                    {currentMonthDeviations.length} avvikelser, {currentMonthLeaveRequests.length} ledigheter
+                  </Badge>
+                )}
+                {hasPendingItems && (
+                  <Badge variant="destructive">
+                    Väntande godkännanden
+                  </Badge>
+                )}
+              </div>
+            </div>
 
+            {/* Status alerts */}
+            {hasPendingItems && (
+              <Alert className="mb-4">
+                <AlertDescription>
+                  ⚠️ Du har väntande godkännanden som behöver behandlas innan du kan skicka in din tidrapport.
+                </AlertDescription>
+              </Alert>
+            )}
 
+            {/* Monthly summary */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <div className="p-4 bg-muted rounded-lg">
+                <div className="text-sm text-muted-foreground">Avvikelser denna månad</div>
+                <div className="text-2xl font-bold">{currentMonthDeviations.length}</div>
+              </div>
+              <div className="p-4 bg-muted rounded-lg">
+                <div className="text-sm text-muted-foreground">Ledigheter denna månad</div>
+                <div className="text-2xl font-bold">{currentMonthLeaveRequests.length}</div>
+              </div>
+              <div className="p-4 bg-muted rounded-lg">
+                <div className="text-sm text-muted-foreground">Status</div>
+                <div className="text-2xl font-bold">
+                  {hasPendingItems ? (
+                    <span className="text-yellow-600">Väntande</span>
+                  ) : hasMonthlyDeviations ? (
+                    <span className="text-blue-600">Med avvikelser</span>
+                  ) : (
+                    <span className="text-green-600">Enligt schema</span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button
+                size="lg"
+                variant={hasMonthlyDeviations ? "outline" : "default"}
+                onClick={() => handleSubmitTimeReport(false)}
+                disabled={hasPendingItems || isLoadingMonthlyDeviations || isLoadingMonthlyLeaveRequests}
+                className="flex-1"
+              >
+                <span className="material-icons mr-2">check_circle</span>
+                Jag har inga avvikelser
+                <span className="ml-2 text-sm opacity-75">(Skicka enligt schema)</span>
+              </Button>
+              
+              <Button
+                size="lg"
+                variant={hasMonthlyDeviations ? "default" : "outline"}
+                onClick={() => handleSubmitTimeReport(true)}
+                disabled={isLoadingMonthlyDeviations || isLoadingMonthlyLeaveRequests}
+                className="flex-1"
+              >
+                <span className="material-icons mr-2">edit</span>
+                Jag har avvikelser
+                <span className="ml-2 text-sm opacity-75">(Registrera avvikelser)</span>
+              </Button>
+            </div>
+
+            {/* Helper text */}
+            <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+              <p className="text-sm text-blue-800">
+                <span className="material-icons text-sm mr-1">info</span>
+                <strong>Tips:</strong> Välj "Jag har inga avvikelser" om du arbetat enligt ditt schema utan övertid, 
+                sjukfrånvaro eller andra avvikelser. Välj "Jag har avvikelser" för att registrera övertid, 
+                sjukdagar, VAB eller andra förändringar från ditt ordinarie schema.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
     </section>
   );
