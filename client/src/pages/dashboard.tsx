@@ -11,12 +11,16 @@ import { apiService } from "@/lib/apiService";
 import { formatDateWithDay, formatTime, formatDuration } from "@/lib/utils/date";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 import { sv } from "date-fns/locale";
+import { useState } from "react";
 
 
 export default function Dashboard() {
   const { t } = useI18n();
+  const [showDeviationDetails, setShowDeviationDetails] = useState(false);
+  const [showLeaveDetails, setShowLeaveDetails] = useState(false);
   const { user } = useStore();
   const employeeId = user.currentUser?.employeeId;
   const currentUser = user.currentUser;
@@ -77,6 +81,12 @@ export default function Dashboard() {
       : Promise.resolve([]),
     enabled: isEmployee && !!employeeId,
   });
+
+  // Fetch time codes for displaying readable names
+  const { data: timeCodes = [] } = useQuery({
+    queryKey: ['timeCodes'],
+    queryFn: () => apiService.getTimeCodes()
+  });
   
   // Get today's schedule
   const todaySchedule = schedule && schedule.length > 0 ? schedule[0] : null;
@@ -100,6 +110,12 @@ export default function Dashboard() {
   // Check if user has any deviations or leave for current month
   const hasMonthlyDeviations = currentMonthDeviations.length > 0 || currentMonthLeaveRequests.length > 0;
   const hasPendingItems = [...currentMonthDeviations, ...currentMonthLeaveRequests].some(item => item.status === 'pending');
+
+  // Helper function to get time code name
+  const getTimeCodeName = (code: string) => {
+    const timeCode = timeCodes.find(tc => tc.code === code);
+    return timeCode?.nameSV || code;
+  };
   
   // Handle time reporting submission
   const handleSubmitTimeReport = async (hasDeviations: boolean) => {
@@ -298,31 +314,83 @@ export default function Dashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-sm text-muted-foreground mb-1">Månadens tidrapport</div>
-                  <div className="flex items-center space-x-4">
+                  <div className="flex flex-col space-y-2">
                     {currentMonthDeviations.length > 0 && (
-                      <span className="text-sm">
-                        📝 {currentMonthDeviations.length} avvikelser
-                        <span className={`ml-1 ${
-                          currentMonthDeviations.some(d => d.status === 'pending') 
-                            ? 'text-orange-600' 
-                            : 'text-green-600'
-                        }`}>
-                          ({currentMonthDeviations.some(d => d.status === 'pending') ? 'väntande' : 'godkända'})
-                        </span>
-                      </span>
+                      <Collapsible open={showDeviationDetails} onOpenChange={setShowDeviationDetails}>
+                        <CollapsibleTrigger className="text-sm hover:text-primary cursor-pointer flex items-center">
+                          📝 {currentMonthDeviations.length} avvikelser
+                          <span className={`ml-1 ${
+                            currentMonthDeviations.some(d => d.status === 'pending') 
+                              ? 'text-orange-600' 
+                              : 'text-green-600'
+                          }`}>
+                            ({currentMonthDeviations.some(d => d.status === 'pending') ? 'väntande' : 'godkända'})
+                          </span>
+                          <span className="material-icons text-sm ml-1">
+                            {showDeviationDetails ? 'expand_less' : 'expand_more'}
+                          </span>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent className="mt-2 pl-4 border-l-2 border-muted">
+                          <div className="space-y-1">
+                            {currentMonthDeviations.map(deviation => (
+                              <div key={deviation.id} className="text-xs text-muted-foreground flex justify-between">
+                                <span>
+                                  {format(new Date(deviation.date), 'MMM dd', { locale: sv })} - {getTimeCodeName(deviation.timeCode)}
+                                </span>
+                                <Badge variant={
+                                  deviation.status === 'pending' ? 'secondary' :
+                                  deviation.status === 'approved' ? 'default' : 'destructive'
+                                } className="text-xs px-1 py-0">
+                                  {deviation.status === 'pending' ? 'Väntande' :
+                                   deviation.status === 'approved' ? 'Godkänd' : 'Avvisad'}
+                                </Badge>
+                              </div>
+                            ))}
+                          </div>
+                        </CollapsibleContent>
+                      </Collapsible>
                     )}
+                    
                     {currentMonthLeaveRequests.length > 0 && (
-                      <span className="text-sm">
-                        🏖️ {currentMonthLeaveRequests.length} ledigheter  
-                        <span className={`ml-1 ${
-                          currentMonthLeaveRequests.some(lr => lr.status === 'pending') 
-                            ? 'text-orange-600' 
-                            : 'text-green-600'
-                        }`}>
-                          ({currentMonthLeaveRequests.some(lr => lr.status === 'pending') ? 'väntande' : 'godkända'})
-                        </span>
-                      </span>
+                      <Collapsible open={showLeaveDetails} onOpenChange={setShowLeaveDetails}>
+                        <CollapsibleTrigger className="text-sm hover:text-primary cursor-pointer flex items-center">
+                          🏖️ {currentMonthLeaveRequests.length} ledigheter  
+                          <span className={`ml-1 ${
+                            currentMonthLeaveRequests.some(lr => lr.status === 'pending') 
+                              ? 'text-orange-600' 
+                              : 'text-green-600'
+                          }`}>
+                            ({currentMonthLeaveRequests.some(lr => lr.status === 'pending') ? 'väntande' : 'godkända'})
+                          </span>
+                          <span className="material-icons text-sm ml-1">
+                            {showLeaveDetails ? 'expand_less' : 'expand_more'}
+                          </span>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent className="mt-2 pl-4 border-l-2 border-muted">
+                          <div className="space-y-1">
+                            {currentMonthLeaveRequests.map(leave => (
+                              <div key={leave.id} className="text-xs text-muted-foreground flex justify-between">
+                                <span>
+                                  {format(new Date(leave.startDate), 'MMM dd', { locale: sv })} - 
+                                  {leave.startDate !== leave.endDate 
+                                    ? format(new Date(leave.endDate), 'MMM dd', { locale: sv })
+                                    : ''
+                                  } {leave.leaveType}
+                                </span>
+                                <Badge variant={
+                                  leave.status === 'pending' ? 'secondary' :
+                                  leave.status === 'approved' ? 'default' : 'destructive'
+                                } className="text-xs px-1 py-0">
+                                  {leave.status === 'pending' ? 'Väntande' :
+                                   leave.status === 'approved' ? 'Godkänd' : 'Avvisad'}
+                                </Badge>
+                              </div>
+                            ))}
+                          </div>
+                        </CollapsibleContent>
+                      </Collapsible>
                     )}
+                    
                     {!hasMonthlyDeviations && (
                       <span className="text-sm text-green-600">✅ Enligt ordinarie schema</span>
                     )}
