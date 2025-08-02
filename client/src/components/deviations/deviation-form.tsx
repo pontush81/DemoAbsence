@@ -103,6 +103,7 @@ const DeviationForm = ({ deviationId, onCancel }: DeviationFormProps) => {
   const [status, setStatus] = useState<"draft" | "pending">("pending");
   const [showQuickActions, setShowQuickActions] = useState(!deviationId); // Show for new deviations only
   const [showDateConfirmDialog, setShowDateConfirmDialog] = useState(false);
+  const [showCustomDatePicker, setShowCustomDatePicker] = useState(false);
   const [pendingAction, setPendingAction] = useState<typeof quickActions[0] | null>(null);
 
   // Quick Actions - Pre-configured common deviations (8h arbetstid för tjänstemän)
@@ -199,15 +200,17 @@ const DeviationForm = ({ deviationId, onCancel }: DeviationFormProps) => {
     // If it's before 9 AM and it's a sick/VAB action, suggest yesterday as primary option
     if (currentHour < 9 && (action.timeCode === '300' || action.timeCode === '400')) {
       return [
-        { date: yesterday, label: `Igår (${format(new Date(yesterday), 'dd MMM', { locale: sv })})`, primary: true },
-        { date: today, label: `Idag (${format(new Date(today), 'dd MMM', { locale: sv })})`, primary: false }
+        { date: yesterday, label: `Igår (${format(new Date(yesterday), 'dd MMM', { locale: sv })})`, primary: true, type: 'quick' },
+        { date: today, label: `Idag (${format(new Date(today), 'dd MMM', { locale: sv })})`, primary: false, type: 'quick' },
+        { date: '', label: 'Annat datum...', primary: false, type: 'custom' }
       ];
     }
     
     // Default: today first, yesterday second
     return [
-      { date: today, label: `Idag (${format(new Date(today), 'dd MMM', { locale: sv })})`, primary: true },
-      { date: yesterday, label: `Igår (${format(new Date(yesterday), 'dd MMM', { locale: sv })})`, primary: false }
+      { date: today, label: `Idag (${format(new Date(today), 'dd MMM', { locale: sv })})`, primary: true, type: 'quick' },
+      { date: yesterday, label: `Igår (${format(new Date(yesterday), 'dd MMM', { locale: sv })})`, primary: false, type: 'quick' },
+      { date: '', label: 'Annat datum...', primary: false, type: 'custom' }
     ];
   };
   
@@ -634,30 +637,55 @@ const DeviationForm = ({ deviationId, onCancel }: DeviationFormProps) => {
               {pendingAction?.icon} {pendingAction?.label}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Vilken dag gäller denna avvikelse? Välj datum nedan:
+              Vilken dag är du {pendingAction?.timeCode === '300' ? 'sjuk' : pendingAction?.timeCode === '400' ? 'VAB' : 'frånvarande'}? Välj nedan:
             </AlertDialogDescription>
           </AlertDialogHeader>
           
           <div className="space-y-3 py-4">
-            {pendingAction && getDateSuggestions(pendingAction).map((suggestion) => (
+            {pendingAction && getDateSuggestions(pendingAction).map((suggestion, index) => (
               <Button
-                key={suggestion.date}
+                key={suggestion.date || index}
                 variant={suggestion.primary ? "default" : "outline"}
                 size="lg"
-                onClick={() => executeQuickAction(suggestion.date)}
-                className="w-full justify-start"
+                onClick={() => {
+                  if (suggestion.type === 'custom') {
+                    setShowCustomDatePicker(true);
+                  } else {
+                    executeQuickAction(suggestion.date);
+                  }
+                }}
+                className="w-full justify-start h-12 text-left" // 48px höjd för 44px+ tillgänglighet
               >
-                <span className="material-icons mr-2">
-                  {suggestion.primary ? 'today' : 'yesterday'}
+                <span className="material-icons mr-3 text-lg">
+                  {suggestion.type === 'custom' ? 'calendar_month' : 
+                   suggestion.primary ? 'today' : 'yesterday'}
                 </span>
-                {suggestion.label}
+                <span className="text-base">{suggestion.label}</span>
               </Button>
             ))}
           </div>
           
+          {/* Custom Date Selection */}
+          {showCustomDatePicker && (
+            <div className="space-y-3 border-t pt-4">
+              <div className="text-sm font-medium text-muted-foreground">Ange specifikt datum:</div>
+              <Input
+                type="date"
+                onChange={(e) => {
+                  if (e.target.value) {
+                    executeQuickAction(e.target.value);
+                  }
+                }}
+                className="w-full"
+                max={format(new Date(), 'yyyy-MM-dd')} // Kan inte välja framtida datum
+              />
+            </div>
+          )}
+
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => {
               setShowDateConfirmDialog(false);
+              setShowCustomDatePicker(false);
               setPendingAction(null);
             }}>
               Avbryt
