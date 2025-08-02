@@ -210,16 +210,10 @@ export default function Dashboard() {
               </h3>
               <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
                 <span className="flex items-center gap-1">
-                  🕐 08:00 - 17:00 <span className="text-xs text-gray-500">(närvaro)</span>
+                  🕐 08:00 - 17:00
                 </span>
                 <span className="flex items-center gap-1">
                   📅 Måndag - Fredag
-                </span>
-                <span className="flex items-center gap-1">
-                  ⏱️ 08:00 - 16:00 <span className="text-xs text-gray-500">(arbetstid)</span>
-                </span>
-                <span className="flex items-center gap-1">
-                  ☕ 12:00 - 13:00 <span className="text-xs text-gray-500">(lunch, ej arbetstid)</span>
                 </span>
               </div>
             </div>
