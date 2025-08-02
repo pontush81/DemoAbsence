@@ -468,11 +468,16 @@ export default function Dashboard() {
               </p>
             </div>
 
-            {/* Status alerts */}
+            {/* Status alerts - Consolidated warning with action */}
             {hasPendingItems && (
-              <Alert className="mb-4">
-                <AlertDescription>
-                  ⚠️ Du har väntande godkännanden som behöver behandlas innan du kan skicka in din tidrapport.
+              <Alert className="mb-4 border-orange-200 bg-orange-50">
+                <AlertDescription className="flex items-center justify-between">
+                  <div>
+                    ⚠️ <strong>{currentMonthDeviations.filter(d => d.status === 'pending').length + currentMonthLeaveRequests.filter(lr => lr.status === 'pending').length} väntande godkännanden</strong> blockerar tidrapport
+                  </div>
+                  <Link href="/manager" className="text-orange-600 hover:text-orange-800 text-sm font-medium underline">
+                    Hantera nu →
+                  </Link>
                 </AlertDescription>
               </Alert>
             )}
@@ -486,15 +491,15 @@ export default function Dashboard() {
                     {currentMonthDeviations.length > 0 && (
                       <Collapsible open={showDeviationDetails} onOpenChange={setShowDeviationDetails}>
                         <CollapsibleTrigger className="text-sm hover:text-primary cursor-pointer flex items-center">
-                          📝 {currentMonthDeviations.length} avvikelser
-                          <span className={`ml-1 ${
+                          <span className={`flex items-center gap-1 ${
                             currentMonthDeviations.some(d => d.status === 'pending') 
                               ? 'text-orange-600' 
                               : 'text-green-600'
                           }`}>
-                            ({currentMonthDeviations.some(d => d.status === 'pending') ? 'väntande' : 'godkända'})
+                            📝 {currentMonthDeviations.length} avvikelser
+                            {currentMonthDeviations.some(d => d.status === 'pending') && <span className="w-2 h-2 bg-orange-500 rounded-full"></span>}
                           </span>
-                          <span className="material-icons text-sm ml-1">
+                          <span className="material-icons text-sm ml-auto">
                             {showDeviationDetails ? 'expand_less' : 'expand_more'}
                           </span>
                         </CollapsibleTrigger>
@@ -522,15 +527,15 @@ export default function Dashboard() {
                     {currentMonthLeaveRequests.length > 0 && (
                       <Collapsible open={showLeaveDetails} onOpenChange={setShowLeaveDetails}>
                         <CollapsibleTrigger className="text-sm hover:text-primary cursor-pointer flex items-center">
-                          🏖️ {currentMonthLeaveRequests.length} ledigheter  
-                          <span className={`ml-1 ${
+                          <span className={`flex items-center gap-1 ${
                             currentMonthLeaveRequests.some(lr => lr.status === 'pending') 
                               ? 'text-orange-600' 
                               : 'text-green-600'
                           }`}>
-                            ({currentMonthLeaveRequests.some(lr => lr.status === 'pending') ? 'väntande' : 'godkända'})
+                            🏖️ {currentMonthLeaveRequests.length} ledigheter
+                            {currentMonthLeaveRequests.some(lr => lr.status === 'pending') && <span className="w-2 h-2 bg-orange-500 rounded-full"></span>}
                           </span>
-                          <span className="material-icons text-sm ml-1">
+                          <span className="material-icons text-sm ml-auto">
                             {showLeaveDetails ? 'expand_less' : 'expand_more'}
                           </span>
                         </CollapsibleTrigger>
@@ -578,26 +583,26 @@ export default function Dashboard() {
                 // User already has deviations - just submit the report
                 <Button
                   size="lg"
-                  variant="default"
+                  variant={hasPendingItems ? "secondary" : "default"}
                   onClick={() => handleSubmitTimeReport(true)}
                   disabled={hasPendingItems || isLoadingMonthlyDeviations || isLoadingMonthlyLeaveRequests}
                   className="flex-1"
                 >
-                  <span className="material-icons mr-2">send</span>
-                  Skicka tidrapport
+                  <span className="material-icons mr-2">{hasPendingItems ? 'block' : 'send'}</span>
+                  {hasPendingItems ? 'Väntande godkännanden först' : 'Skicka tidrapport'}
                 </Button>
               ) : (
                 // User has no deviations - give them options
                 <>
                   <Button
                     size="lg"
-                    variant="default"
+                    variant={hasPendingItems ? "secondary" : "default"}
                     onClick={() => handleSubmitTimeReport(false)}
                     disabled={hasPendingItems || isLoadingMonthlyDeviations || isLoadingMonthlyLeaveRequests}
                     className="flex-1"
                   >
-                    <span className="material-icons mr-2">check_circle</span>
-                    Jag har inga avvikelser
+                    <span className="material-icons mr-2">{hasPendingItems ? 'block' : 'check_circle'}</span>
+                    {hasPendingItems ? 'Hantera godkännanden först' : 'Jag har inga avvikelser'}
                   </Button>
                   
                   <Button
@@ -614,18 +619,14 @@ export default function Dashboard() {
               )}
             </div>
 
-            {/* Helper text */}
-            <div className="mt-4 text-center">
-              <p className="text-sm text-muted-foreground">
-                <span className="material-icons text-sm mr-1">info</span>
-                {hasMonthlyDeviations 
-                  ? hasPendingItems 
-                    ? "Väntande avvikelser/ledigheter måste godkännas av chef innan tidrapport kan skickas."
-                    : "Alla dina avvikelser och ledigheter är godkända. Tidrapporten är redo att skickas för lönekörning."
-                  : "Välj första alternativet om du arbetat enligt schema. Andra alternativet för att registrera övertid, sjukfrånvaro eller VAB."
-                }
-              </p>
-            </div>
+            {/* Simplified helper text - only when no blocking issues */}
+            {!hasPendingItems && !hasMonthlyDeviations && (
+              <div className="mt-4 text-center">
+                <p className="text-sm text-muted-foreground">
+                  Välj första alternativet om du arbetat enligt schema, andra för att registrera avvikelser
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
