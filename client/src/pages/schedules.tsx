@@ -75,16 +75,27 @@ export default function SchedulesPage() {
         return;
     }
 
-    // Konvertera till YYYY-MM-DD format
-    setStartDate(start.toISOString().split('T')[0]);
-    setEndDate(end.toISOString().split('T')[0]);
+    // Konvertera till YYYY-MM-DD format (lokal tid, inte UTC)
+    const formatLocalDate = (date: Date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+    
+    setStartDate(formatLocalDate(start));
+    setEndDate(formatLocalDate(end));
     
     // Debug-logging för att verifiera datumen
     console.log(`🗓️ Snabbfilter "${type}":`, {
-      från: start.toISOString().split('T')[0],
-      till: end.toISOString().split('T')[0],
+      från: formatLocalDate(start),
+      till: formatLocalDate(end),
       startDatum: start.toLocaleDateString('sv-SE'),
-      slutDatum: end.toLocaleDateString('sv-SE')
+      slutDatum: end.toLocaleDateString('sv-SE'),
+      gamlaUTC: {
+        från: start.toISOString().split('T')[0], 
+        till: end.toISOString().split('T')[0]
+      }
     });
   };
 
