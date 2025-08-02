@@ -25,38 +25,67 @@ export default function SchedulesPage() {
   const [error, setError] = useState<string | null>(null);
   const [showImport, setShowImport] = useState(false);
 
-  // Quick filter functions for world-class UX
+  // Quick filter functions for world-class UX - FIXAD datumlogik
   const setQuickFilter = (type: 'thisWeek' | 'nextWeek' | 'thisMonth' | 'nextMonth' | 'today') => {
     const today = new Date();
     let start: Date, end: Date;
 
     switch (type) {
       case 'today':
-        start = end = new Date(today);
+        start = new Date(today);
+        end = new Date(today);
         break;
       case 'thisWeek':
-        start = new Date(today.setDate(today.getDate() - today.getDay() + 1)); // Monday
-        end = new Date(today.setDate(today.getDate() + 6)); // Sunday
+        // Skapa nya datum-objekt för att undvika mutation
+        const thisWeekToday = new Date(today);
+        const dayOfWeek = thisWeekToday.getDay(); // 0 = söndag, 1 = måndag, etc.
+        const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Om söndag, gå 6 dagar bakåt
+        
+        start = new Date(thisWeekToday);
+        start.setDate(thisWeekToday.getDate() + mondayOffset); // Måndag denna vecka
+        
+        end = new Date(start);
+        end.setDate(start.getDate() + 6); // Söndag denna vecka
         break;
       case 'nextWeek':
-        const nextWeekStart = new Date(today.setDate(today.getDate() - today.getDay() + 8)); // Next Monday
-        start = nextWeekStart;
-        end = new Date(nextWeekStart.getTime() + 6 * 24 * 60 * 60 * 1000); // Next Sunday
+        // Skapa nya datum-objekt
+        const nextWeekToday = new Date(today);
+        const nextDayOfWeek = nextWeekToday.getDay();
+        const nextMondayOffset = nextDayOfWeek === 0 ? 1 : 8 - nextDayOfWeek; // Nästa måndag
+        
+        start = new Date(nextWeekToday);
+        start.setDate(nextWeekToday.getDate() + nextMondayOffset); // Måndag nästa vecka
+        
+        end = new Date(start);
+        end.setDate(start.getDate() + 6); // Söndag nästa vecka
         break;
       case 'thisMonth':
+        // Första dagen i månaden
         start = new Date(today.getFullYear(), today.getMonth(), 1);
+        // Sista dagen i månaden (dag 0 i nästa månad = sista dagen i denna månad)
         end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
         break;
       case 'nextMonth':
+        // Första dagen i nästa månad
         start = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+        // Sista dagen i nästa månad
         end = new Date(today.getFullYear(), today.getMonth() + 2, 0);
         break;
       default:
         return;
     }
 
+    // Konvertera till YYYY-MM-DD format
     setStartDate(start.toISOString().split('T')[0]);
     setEndDate(end.toISOString().split('T')[0]);
+    
+    // Debug-logging för att verifiera datumen
+    console.log(`🗓️ Snabbfilter "${type}":`, {
+      från: start.toISOString().split('T')[0],
+      till: end.toISOString().split('T')[0],
+      startDatum: start.toLocaleDateString('sv-SE'),
+      slutDatum: end.toLocaleDateString('sv-SE')
+    });
   };
 
   // Rollbaserade behörigheter
