@@ -25,8 +25,10 @@ import { apiRequest } from "@/lib/queryClient";
 import { apiService } from "@/lib/apiService";
 import { useStore } from "@/lib/store";
 import { format } from "date-fns";
+import { sv } from "date-fns/locale";
 import { getWorkflowInfo } from "@/lib/approvalWorkflows";
 import { Card, CardContent } from "@/components/ui/card";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 // Create the schema with custom validation using translations
 const createDeviationFormSchema = (t: (key: string) => string) => insertDeviationSchema.extend({
@@ -100,6 +102,8 @@ const DeviationForm = ({ deviationId, onCancel }: DeviationFormProps) => {
   const { user } = useStore();
   const [status, setStatus] = useState<"draft" | "pending">("pending");
   const [showQuickActions, setShowQuickActions] = useState(!deviationId); // Show for new deviations only
+  const [showDateConfirmDialog, setShowDateConfirmDialog] = useState(false);
+  const [pendingAction, setPendingAction] = useState<typeof quickActions[0] | null>(null);
 
   // Quick Actions - Pre-configured common deviations (8h arbetstid för tjänstemän)
   const quickActions = [
@@ -145,25 +149,31 @@ const DeviationForm = ({ deviationId, onCancel }: DeviationFormProps) => {
     }
   ];
 
-  // Handle quick action selection
-  const handleQuickAction = async (action: typeof quickActions[0]) => {
-    const today = format(new Date(), 'yyyy-MM-dd');
-    const yesterday = format(new Date(Date.now() - 24 * 60 * 60 * 1000), 'yyyy-MM-dd');
+  // Handle quick action selection - show date confirmation first
+  const handleQuickAction = (action: typeof quickActions[0]) => {
+    setPendingAction(action);
+    setShowDateConfirmDialog(true);
+  };
+
+  // Execute the quick action after date confirmation
+  const executeQuickAction = async (confirmedDate: string) => {
+    if (!pendingAction) return;
     
     // Set form values
-    form.setValue('date', action.label.includes('igår') ? yesterday : today);
-    form.setValue('startTime', action.startTime);
-    form.setValue('endTime', action.endTime);
-    form.setValue('timeCode', action.timeCode);
-    form.setValue('comment', action.comment);
+    form.setValue('date', confirmedDate);
+    form.setValue('startTime', pendingAction.startTime);
+    form.setValue('endTime', pendingAction.endTime);
+    form.setValue('timeCode', pendingAction.timeCode);
+    form.setValue('comment', pendingAction.comment);
     
-    // Hide quick actions
+    // Hide quick actions and dialog
     setShowQuickActions(false);
+    setShowDateConfirmDialog(false);
     
     // Show success toast immediately 
     toast({
-      title: `${action.icon} ${action.label} registrerad!`,
-      description: "Avvikelsen skickas för godkännande...",
+      title: `${pendingAction.icon} ${pendingAction.label} registrerad!`,
+      description: `För ${format(new Date(confirmedDate), 'dd MMMM', { locale: sv })} - Skickas för godkännande...`,
     });
     
     // Auto-submit after a short delay to let user see the filled form
@@ -177,6 +187,28 @@ const DeviationForm = ({ deviationId, onCancel }: DeviationFormProps) => {
       };
       createMutation.mutate(submitData as any);
     }, 800);
+  };
+
+  // Smart date suggestions based on time of day and action type
+  const getDateSuggestions = (action: typeof quickActions[0]) => {
+    const now = new Date();
+    const today = format(now, 'yyyy-MM-dd');
+    const yesterday = format(new Date(now.getTime() - 24 * 60 * 60 * 1000), 'yyyy-MM-dd');
+    const currentHour = now.getHours();
+    
+    // If it's before 9 AM and it's a sick/VAB action, suggest yesterday as primary option
+    if (currentHour < 9 && (action.timeCode === '300' || action.timeCode === '400')) {
+      return [
+        { date: yesterday, label: `Igår (${format(new Date(yesterday), 'dd MMM', { locale: sv })})`, primary: true },
+        { date: today, label: `Idag (${format(new Date(today), 'dd MMM', { locale: sv })})`, primary: false }
+      ];
+    }
+    
+    // Default: today first, yesterday second
+    return [
+      { date: today, label: `Idag (${format(new Date(today), 'dd MMM', { locale: sv })})`, primary: true },
+      { date: yesterday, label: `Igår (${format(new Date(yesterday), 'dd MMM', { locale: sv })})`, primary: false }
+    ];
   };
   
   // Fetch time codes
@@ -593,6 +625,46 @@ const DeviationForm = ({ deviationId, onCancel }: DeviationFormProps) => {
           </form>
         </Form>
       </div>
+
+      {/* Date Confirmation Dialog */}
+      <AlertDialog open={showDateConfirmDialog} onOpenChange={setShowDateConfirmDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center">
+              {pendingAction?.icon} {pendingAction?.label}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Vilken dag gäller denna avvikelse? Välj datum nedan:
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          
+          <div className="space-y-3 py-4">
+            {pendingAction && getDateSuggestions(pendingAction).map((suggestion) => (
+              <Button
+                key={suggestion.date}
+                variant={suggestion.primary ? "default" : "outline"}
+                size="lg"
+                onClick={() => executeQuickAction(suggestion.date)}
+                className="w-full justify-start"
+              >
+                <span className="material-icons mr-2">
+                  {suggestion.primary ? 'today' : 'yesterday'}
+                </span>
+                {suggestion.label}
+              </Button>
+            ))}
+          </div>
+          
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => {
+              setShowDateConfirmDialog(false);
+              setPendingAction(null);
+            }}>
+              Avbryt
+            </AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
