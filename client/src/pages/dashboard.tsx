@@ -300,10 +300,28 @@ export default function Dashboard() {
                   <div className="text-sm text-muted-foreground mb-1">Månadens tidrapport</div>
                   <div className="flex items-center space-x-4">
                     {currentMonthDeviations.length > 0 && (
-                      <span className="text-sm">📝 {currentMonthDeviations.length} avvikelser</span>
+                      <span className="text-sm">
+                        📝 {currentMonthDeviations.length} avvikelser
+                        <span className={`ml-1 ${
+                          currentMonthDeviations.some(d => d.status === 'pending') 
+                            ? 'text-orange-600' 
+                            : 'text-green-600'
+                        }`}>
+                          ({currentMonthDeviations.some(d => d.status === 'pending') ? 'väntande' : 'godkända'})
+                        </span>
+                      </span>
                     )}
                     {currentMonthLeaveRequests.length > 0 && (
-                      <span className="text-sm">🏖️ {currentMonthLeaveRequests.length} ledigheter</span>
+                      <span className="text-sm">
+                        🏖️ {currentMonthLeaveRequests.length} ledigheter  
+                        <span className={`ml-1 ${
+                          currentMonthLeaveRequests.some(lr => lr.status === 'pending') 
+                            ? 'text-orange-600' 
+                            : 'text-green-600'
+                        }`}>
+                          ({currentMonthLeaveRequests.some(lr => lr.status === 'pending') ? 'väntande' : 'godkända'})
+                        </span>
+                      </span>
                     )}
                     {!hasMonthlyDeviations && (
                       <span className="text-sm text-green-600">✅ Enligt ordinarie schema</span>
@@ -365,7 +383,9 @@ export default function Dashboard() {
               <p className="text-sm text-muted-foreground">
                 <span className="material-icons text-sm mr-1">info</span>
                 {hasMonthlyDeviations 
-                  ? "Dina registrerade avvikelser och ledigheter inkluderas automatiskt i tidrapporten."
+                  ? hasPendingItems 
+                    ? "Väntande avvikelser/ledigheter måste godkännas av chef innan tidrapport kan skickas."
+                    : "Alla dina avvikelser och ledigheter är godkända. Tidrapporten är redo att skickas för lönekörning."
                   : "Välj första alternativet om du arbetat enligt schema. Andra alternativet för att registrera övertid, sjukfrånvaro eller VAB."
                 }
               </p>
