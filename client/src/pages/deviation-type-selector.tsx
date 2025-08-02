@@ -47,7 +47,7 @@ export default function DeviationTypeSelector() {
           <Button 
             size="lg" 
             variant="outline"
-            className="w-full border-2 border-blue-300 text-blue-700 hover:bg-blue-50 py-3 sm:py-6 text-base sm:text-lg font-semibold shadow-md hover:shadow-lg transition-all duration-200 group"
+            className="w-full border-2 border-blue-300 bg-white text-blue-700 hover:bg-blue-100 hover:border-blue-400 py-3 sm:py-6 text-base sm:text-lg font-semibold shadow-md hover:shadow-lg transition-all duration-200 group"
           >
             <div className="flex items-center justify-center space-x-2 sm:space-x-3">
               <div className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 rounded-full group-hover:bg-blue-200 transition-colors">
