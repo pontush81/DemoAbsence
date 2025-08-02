@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import StatusCard from "@/components/dashboard/status-card";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 import { useI18n } from "@/lib/i18n";
 import { useStore } from "@/lib/store";
@@ -273,118 +274,185 @@ export default function Dashboard() {
       </Card>
 
       {/* Status Cards Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+      <TooltipProvider>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
 
-        {/* Time Balance Card */}
-        <StatusCard
-          title={t('dashboard.timeBalance')}
-          value={
-            isLoadingTimeBalance ? (
-              <Skeleton className="h-6 w-24" />
-            ) : timeBalance ? (
-              formatDuration(timeBalance.timeBalance ?? 0)
-            ) : (
-              "0"
-            )
-          }
-          icon="hourglass_top"
-          footer={
-            isLoadingTimeBalance ? (
-              <div className="flex justify-between text-sm">
-                <Skeleton className="h-4 w-28" />
-                <Skeleton className="h-4 w-16" />
+          {/* Time Balance Card with Tooltip */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div>
+                <StatusCard
+                  title={t('dashboard.timeBalance')}
+                  value={
+                    isLoadingTimeBalance ? (
+                      <Skeleton className="h-6 w-24" />
+                    ) : timeBalance ? (
+                      formatDuration(timeBalance.timeBalance ?? 0)
+                    ) : (
+                      "0"
+                    )
+                  }
+                  icon="hourglass_top"
+                  footer={
+                    isLoadingTimeBalance ? (
+                      <div className="flex justify-between text-sm">
+                        <Skeleton className="h-4 w-28" />
+                        <Skeleton className="h-4 w-16" />
+                      </div>
+                    ) : timeBalance?.compensationTime ? (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">{t('dashboard.compensationTime')}:</span>
+                        <span>{formatDuration(timeBalance.compensationTime)}</span>
+                      </div>
+                    ) : null
+                  }
+                />
               </div>
-            ) : timeBalance?.compensationTime ? (
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">{t('dashboard.compensationTime')}:</span>
-                <span>{formatDuration(timeBalance.compensationTime)}</span>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="max-w-xs">
+              <div className="space-y-2">
+                <p><strong>🕐 Tidssaldo:</strong> Din totala arbetstidsbalans</p>
+                <p className="text-sm">• <strong>Positivt:</strong> Du har jobbat mer än schema</p>
+                <p className="text-sm">• <strong>Negativt:</strong> Du har jobbat mindre än schema</p>
+                {timeBalance?.compensationTime && (
+                  <>
+                    <hr className="my-2" />
+                    <p><strong>⏰ Kompsaldo:</strong> Tid du kan ta ut som ledighet</p>
+                    <p className="text-sm">Kommer från godkänd övertid som blivit kompensationsledighet</p>
+                  </>
+                )}
               </div>
-            ) : null
-          }
-        />
+            </TooltipContent>
+          </Tooltip>
 
-        {/* Vacation Balance Card */}
-        <StatusCard
-          title={t('dashboard.vacationBalance')}
-          value={
-            isLoadingTimeBalance ? (
-              <Skeleton className="h-6 w-24" />
-            ) : timeBalance ? (
-              `${timeBalance.vacationDays} ${t('days')}`
-            ) : (
-              "0 " + t('days')
-            )
-          }
-          icon="beach_access"
-          footer={
-            isLoadingTimeBalance ? (
-              <div className="flex justify-between text-sm">
-                <Skeleton className="h-4 w-28" />
-                <Skeleton className="h-4 w-16" />
+          {/* Vacation Balance Card with Tooltip */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div>
+                <StatusCard
+                  title={t('dashboard.vacationBalance')}
+                  value={
+                    isLoadingTimeBalance ? (
+                      <Skeleton className="h-6 w-24" />
+                    ) : timeBalance ? (
+                      `${timeBalance.vacationDays} ${t('days')}`
+                    ) : (
+                      "0 " + t('days')
+                    )
+                  }
+                  icon="beach_access"
+                  footer={
+                    isLoadingTimeBalance ? (
+                      <div className="flex justify-between text-sm">
+                        <Skeleton className="h-4 w-28" />
+                        <Skeleton className="h-4 w-16" />
+                      </div>
+                    ) : timeBalance?.savedVacationDays ? (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">{t('dashboard.savedDays')}:</span>
+                        <span>
+                          {Object.values(timeBalance.savedVacationDays).reduce((a, b) => a + (b as number), 0)} {t('days')}
+                        </span>
+                      </div>
+                    ) : null
+                  }
+                />
               </div>
-            ) : timeBalance?.savedVacationDays ? (
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">{t('dashboard.savedDays')}:</span>
-                <span>
-                  {Object.values(timeBalance.savedVacationDays).reduce((a, b) => a + (b as number), 0)} {t('days')}
-                </span>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="max-w-xs">
+              <div className="space-y-2">
+                <p><strong>🏖️ Semestersaldo:</strong> Dina tillgängliga semesterdagar</p>
+                <p className="text-sm">• Antalet dagar du kan ansöka om som semester</p>
+                <p className="text-sm">• Minskar när semester godkänns och tas ut</p>
+                {timeBalance?.savedVacationDays && Object.values(timeBalance.savedVacationDays).reduce((a, b) => a + (b as number), 0) > 0 && (
+                  <>
+                    <hr className="my-1" />
+                    <p className="text-sm"><strong>Sparade dagar:</strong> Semester från tidigare år som du ännu inte tagit</p>
+                  </>
+                )}
               </div>
-            ) : null
-          }
-        />
+            </TooltipContent>
+          </Tooltip>
 
-        {/* Pending Deviations Card (only for managers) */}
-        {isManager && (
-          <StatusCard
-            title={t('dashboard.pendingDeviations')}
-            value={
-              isLoadingPendingDeviations ? (
-                <Skeleton className="h-6 w-24" />
-              ) : pendingDeviations ? (
-                `${pendingDeviations.length} ${t('items')}`
-              ) : (
-                "0 " + t('items')
-              )
-            }
-            icon="pending_actions"
-            className="bg-[#FFC107] bg-opacity-5"
-            footer={
-              <Link href="/manager">
-                <div className="text-sm text-primary flex items-center cursor-pointer">
-                  {t('dashboard.viewAll')}
-                  <span className="material-icons text-sm ml-1">arrow_forward</span>
+          {/* Pending Deviations Card (only for managers) with Tooltip */}
+          {isManager && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div>
+                  <StatusCard
+                    title={t('dashboard.pendingDeviations')}
+                    value={
+                      isLoadingPendingDeviations ? (
+                        <Skeleton className="h-6 w-24" />
+                      ) : pendingDeviations ? (
+                        `${pendingDeviations.length} ${t('items')}`
+                      ) : (
+                        "0 " + t('items')
+                      )
+                    }
+                    icon="pending_actions"
+                    className="bg-[#FFC107] bg-opacity-5"
+                    footer={
+                      <Link href="/manager">
+                        <div className="text-sm text-primary flex items-center cursor-pointer">
+                          {t('dashboard.viewAll')}
+                          <span className="material-icons text-sm ml-1">arrow_forward</span>
+                        </div>
+                      </Link>
+                    }
+                  />
                 </div>
-              </Link>
-            }
-          />
-        )}
-
-        {/* Pending Leave Requests Card (only for managers) */}
-        {isManager && (
-          <StatusCard
-            title={t('dashboard.pendingLeaveRequests')}
-            value={
-              isLoadingPendingLeaveRequests ? (
-                <Skeleton className="h-6 w-24" />
-              ) : pendingLeaveRequests ? (
-                `${pendingLeaveRequests.length} ${t('items')}`
-              ) : (
-                "0 " + t('items')
-              )
-            }
-            icon="event_available"
-            className="bg-[#4CAF50] bg-opacity-5"
-            footer={
-              <Link href="/manager">
-                <div className="text-sm text-primary flex items-center cursor-pointer">
-                  {t('dashboard.viewAll')}
-                  <span className="material-icons text-sm ml-1">arrow_forward</span>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="max-w-xs">
+                <div className="space-y-2">
+                  <p><strong>⏳ Väntande avvikelser:</strong> Behöver ditt godkännande</p>
+                  <p className="text-sm">• Avvikelser som medarbetare skickat in</p>
+                  <p className="text-sm">• Klicka för att granska och godkänna/avvisa</p>
                 </div>
-              </Link>
-            }
-          />
-        )}
-      </div>
+              </TooltipContent>
+            </Tooltip>
+          )}
+
+          {/* Pending Leave Requests Card (only for managers) with Tooltip */}
+          {isManager && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div>
+                  <StatusCard
+                    title={t('dashboard.pendingLeaveRequests')}
+                    value={
+                      isLoadingPendingLeaveRequests ? (
+                        <Skeleton className="h-6 w-24" />
+                      ) : pendingLeaveRequests ? (
+                        `${pendingLeaveRequests.length} ${t('items')}`
+                      ) : (
+                        "0 " + t('items')
+                      )
+                    }
+                    icon="event_available"
+                    className="bg-[#4CAF50] bg-opacity-5"
+                    footer={
+                      <Link href="/manager">
+                        <div className="text-sm text-primary flex items-center cursor-pointer">
+                          {t('dashboard.viewAll')}
+                          <span className="material-icons text-sm ml-1">arrow_forward</span>
+                        </div>
+                      </Link>
+                    }
+                  />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="max-w-xs">
+                <div className="space-y-2">
+                  <p><strong>🏖️ Väntande ledighet:</strong> Behöver ditt godkännande</p>
+                  <p className="text-sm">• Semesteransökningar från medarbetare</p>
+                  <p className="text-sm">• Klicka för att granska och godkänna/avvisa</p>
+                </div>
+              </TooltipContent>
+            </Tooltip>
+          )}
+        </div>
+      </TooltipProvider>
 
       {/* Monthly Time Reporting Section (only for employees) */}
       {isEmployee && (
