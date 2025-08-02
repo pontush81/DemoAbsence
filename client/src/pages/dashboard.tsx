@@ -320,34 +320,54 @@ export default function Dashboard() {
 
             {/* Action buttons */}
             <div className="flex flex-col sm:flex-row gap-3">
-              <Button
-                size="lg"
-                variant={hasMonthlyDeviations ? "outline" : "default"}
-                onClick={() => handleSubmitTimeReport(false)}
-                disabled={hasPendingItems || isLoadingMonthlyDeviations || isLoadingMonthlyLeaveRequests}
-                className="flex-1"
-              >
-                <span className="material-icons mr-2">check_circle</span>
-                Jag har inga avvikelser
-              </Button>
-              
-              <Button
-                size="lg"
-                variant={hasMonthlyDeviations ? "default" : "outline"}
-                onClick={() => handleSubmitTimeReport(true)}
-                disabled={isLoadingMonthlyDeviations || isLoadingMonthlyLeaveRequests}
-                className="flex-1"
-              >
-                <span className="material-icons mr-2">edit</span>
-                Jag har avvikelser
-              </Button>
+              {hasMonthlyDeviations ? (
+                // User already has deviations - just submit the report
+                <Button
+                  size="lg"
+                  variant="default"
+                  onClick={() => handleSubmitTimeReport(true)}
+                  disabled={hasPendingItems || isLoadingMonthlyDeviations || isLoadingMonthlyLeaveRequests}
+                  className="flex-1"
+                >
+                  <span className="material-icons mr-2">send</span>
+                  Skicka tidrapport
+                </Button>
+              ) : (
+                // User has no deviations - give them options
+                <>
+                  <Button
+                    size="lg"
+                    variant="default"
+                    onClick={() => handleSubmitTimeReport(false)}
+                    disabled={hasPendingItems || isLoadingMonthlyDeviations || isLoadingMonthlyLeaveRequests}
+                    className="flex-1"
+                  >
+                    <span className="material-icons mr-2">check_circle</span>
+                    Jag har inga avvikelser
+                  </Button>
+                  
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    onClick={() => handleSubmitTimeReport(true)}
+                    disabled={isLoadingMonthlyDeviations || isLoadingMonthlyLeaveRequests}
+                    className="flex-1"
+                  >
+                    <span className="material-icons mr-2">add</span>
+                    Registrera avvikelser
+                  </Button>
+                </>
+              )}
             </div>
 
             {/* Helper text */}
             <div className="mt-4 text-center">
               <p className="text-sm text-muted-foreground">
                 <span className="material-icons text-sm mr-1">info</span>
-                Välj första alternativet om du arbetat enligt schema. Andra alternativet för övertid, sjukfrånvaro eller VAB.
+                {hasMonthlyDeviations 
+                  ? "Dina registrerade avvikelser och ledigheter inkluderas automatiskt i tidrapporten."
+                  : "Välj första alternativet om du arbetat enligt schema. Andra alternativet för att registrera övertid, sjukfrånvaro eller VAB."
+                }
               </p>
             </div>
           </CardContent>
