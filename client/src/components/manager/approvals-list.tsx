@@ -16,7 +16,7 @@ import DeviationDetails from "@/components/deviations/deviation-details";
 import { getWorkflowInfo, getManagerActionText, getStatusText } from "@/lib/approvalWorkflows";
 import type { TimeCode } from "@shared/schema";
 
-type ApprovalType = 'deviations' | 'leaveRequests';
+type ApprovalType = 'deviations' | 'leaveRequests' | 'history';
 
 interface ApprovalsListProps {
   type: ApprovalType;
@@ -32,13 +32,41 @@ const ApprovalsList = ({ type }: ApprovalsListProps) => {
   const managerId = user.currentUser?.employeeId;
   
   const { data: pendingItems = [], isLoading, error, refetch } = useQuery({
-    queryKey: [`/api/manager/${type}/pending`, managerId],
+    queryKey: [`/api/manager/${type}${type === 'history' ? '' : '/pending'}`, managerId],
     queryFn: async () => {
       if (type === 'deviations') {
         return await apiService.getPendingDeviations(managerId);
-      } else {
+      } else if (type === 'leaveRequests') {
         return await apiService.getPendingLeaveRequests();
+      } else if (type === 'history') {
+        // Fetch both approved and rejected items separately
+        const [
+          approvedDeviations,
+          rejectedDeviations,
+          approvedLeaveRequests,
+          rejectedLeaveRequests
+        ] = await Promise.all([
+          apiService.getAllDeviations({ status: 'approved' }),
+          apiService.getAllDeviations({ status: 'rejected' }),
+          apiService.getAllLeaveRequests({ status: 'approved' }),
+          apiService.getAllLeaveRequests({ status: 'rejected' })
+        ]);
+        
+        // Combine all items and sort by decision date (newest first)
+        const combined = [
+          ...approvedDeviations.map((d: any) => ({ ...d, itemType: 'deviation' })),
+          ...rejectedDeviations.map((d: any) => ({ ...d, itemType: 'deviation' })),
+          ...approvedLeaveRequests.map((l: any) => ({ ...l, itemType: 'leaveRequest' })),
+          ...rejectedLeaveRequests.map((l: any) => ({ ...l, itemType: 'leaveRequest' }))
+        ].sort((a, b) => {
+          const dateA = new Date(a.approvedAt || a.approved_at || a.rejectedAt || a.rejected_at || a.lastUpdated || a.last_updated);
+          const dateB = new Date(b.approvedAt || b.approved_at || b.rejectedAt || b.rejected_at || b.lastUpdated || b.last_updated);
+          return dateB.getTime() - dateA.getTime();
+        });
+        
+        return combined;
       }
+      return [];
     },
   });
 
@@ -259,17 +287,127 @@ const ApprovalsList = ({ type }: ApprovalsListProps) => {
       <div className="bg-white rounded-lg shadow-sm p-6 text-center">
         <span className="material-icons text-4xl text-muted-foreground mb-2">task_alt</span>
         <h3 className="text-lg font-medium">
-          {t(type === 'deviations' ? 'manager.noDeviations' : 'manager.noLeaveRequests')}
+          {t(type === 'deviations' ? 'manager.noDeviations' : 
+             type === 'leaveRequests' ? 'manager.noLeaveRequests' : 
+             'manager.noHistory')}
         </h3>
         <p className="text-muted-foreground">
-          {t(type === 'deviations' ? 'manager.noDeviationsDescription' : 'manager.noLeaveRequestsDescription')}
+          {t(type === 'deviations' ? 'manager.noDeviationsDescription' : 
+             type === 'leaveRequests' ? 'manager.noLeaveRequestsDescription' :
+             'manager.noHistoryDescription')}
         </p>
       </div>
     );
   }
   
   // Render the appropriate list based on type
-  if (type === 'deviations') {
+  if (type === 'history') {
+    return (
+      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t('manager.employee')}</TableHead>
+                <TableHead>Typ</TableHead>
+                <TableHead>Datum/Period</TableHead>
+                <TableHead>Detaljer</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Beslutsdatum</TableHead>
+                <TableHead>{t('deviations.comment')}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {(pendingItems as any[]).map((item: any) => {
+                const isDeviation = item.itemType === 'deviation';
+                const employeeId = item.employeeId || item.employee_id;
+                const status = item.status;
+                const isApproved = status === 'approved';
+                const decisionDate = item.approvedAt || item.rejectedAt || item.lastUpdated;
+                
+                return (
+                  <TableRow key={`${item.itemType}-${item.id}`} className="hover:bg-background-dark transition-colors">
+                    <TableCell>
+                      <div className="flex items-center">
+                        <Avatar className="h-8 w-8 bg-primary bg-opacity-10">
+                          <AvatarFallback className="text-primary">
+                            {(() => {
+                              const employee = employees.find((e: any) => 
+                                (e.employeeId === employeeId) || (e.employee_id === employeeId)
+                              );
+                              const firstName = (employee as any)?.firstName || (employee as any)?.first_name;
+                              const lastName = (employee as any)?.lastName || (employee as any)?.last_name;
+                              return firstName && lastName 
+                                ? `${firstName.charAt(0)}${lastName.charAt(0)}` 
+                                : employeeId?.substring(0, 2).toUpperCase() || '??';
+                            })()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="ml-4">
+                          <div className="text-sm font-medium">{getEmployeeName(employeeId)}</div>
+                          <div className="text-sm text-muted-foreground">ID: {employeeId}</div>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <span className="material-icons text-sm text-muted-foreground">
+                          {isDeviation ? 'schedule' : 'beach_access'}
+                        </span>
+                        <span className="text-sm font-medium">
+                          {isDeviation ? 'Avvikelse' : 'Ledighet'}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="whitespace-nowrap">
+                      {isDeviation ? 
+                        item.date : 
+                        `${item.startDate || item.start_date} - ${item.endDate || item.end_date}`
+                      }
+                    </TableCell>
+                    <TableCell>
+                      {isDeviation ? (
+                        <div>
+                          <div className="font-medium">{item.timeCode || item.time_code}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {(() => {
+                              const startTime = item.startTime || item.start_time;
+                              const endTime = item.endTime || item.end_time;
+                              return startTime && endTime ? `${formatTime(startTime)} - ${formatTime(endTime)}` : '';
+                            })()}
+                          </div>
+                        </div>
+                      ) : (
+                        <div>
+                          <div className="font-medium">{item.leaveType || item.leave_type}</div>
+                          <div className="text-xs text-muted-foreground">{item.scope}</div>
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        isApproved 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-red-100 text-red-800'
+                      }`}>
+                        {isApproved ? 'Godkänd' : 'Avvisad'}
+                      </span>
+                    </TableCell>
+                    <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
+                      {decisionDate ? new Date(decisionDate).toLocaleDateString('sv-SE') : '-'}
+                    </TableCell>
+                    <TableCell className="max-w-xs truncate-text">
+                      {item.comment || item.managerComment || item.manager_comment || '-'}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
+    );
+  } else if (type === 'deviations') {
     return (
       <>
         <div className="bg-white rounded-lg shadow-sm overflow-hidden">

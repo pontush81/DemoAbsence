@@ -25,10 +25,10 @@ const MobileSidebar = () => {
       active: currentRoute === "/"
     },
     {
-      href: "/deviations",
+      href: "/new-deviation",
       icon: "event_note",
       label: t('nav.deviations'),
-      active: currentRoute.startsWith("/deviations")
+      active: currentRoute.startsWith("/deviations") || currentRoute === "/new-deviation"
     },
     {
       href: "/leave",
@@ -42,12 +42,7 @@ const MobileSidebar = () => {
       label: t('nav.payslips'),
       active: currentRoute === "/payslips"
     },
-    {
-      href: "/schedules",
-      icon: "schedule",
-      label: t('nav.schedules'),
-      active: currentRoute === "/schedules"
-    },
+
     {
       href: "/settings",
       icon: "settings",

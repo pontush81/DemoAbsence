@@ -431,6 +431,48 @@ class ApiService {
     }
   }
   
+  async getAllLeaveRequests(filters?: { 
+    period?: string, 
+    status?: string, 
+    leaveType?: string 
+  }): Promise<LeaveRequest[]> {
+    try {
+      await delay(MOCK_DELAY);
+      let url = '/api/leave-requests';
+      
+      if (filters) {
+        const params = new URLSearchParams();
+        if (filters.period) params.append('period', filters.period);
+        if (filters.status) params.append('status', filters.status);
+        if (filters.leaveType) params.append('leaveType', filters.leaveType);
+        
+        if (params.toString()) {
+          url += `?${params.toString()}`;
+        }
+      }
+      
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new ApiError(`Failed to fetch all leave requests: ${response.statusText}`, response.status);
+      }
+      
+      const rawData = await response.json();
+      
+      // Map snake_case fields to camelCase for TypeScript compatibility
+      return rawData.map((leave: any) => ({
+        ...leave,
+        employeeId: leave.employee_id || leave.employeeId,
+        leaveType: leave.leave_type || leave.leaveType,
+        startDate: leave.start_date || leave.startDate,
+        endDate: leave.end_date || leave.endDate,
+      }));
+    } catch (error) {
+      console.error('Error fetching all leave requests:', error);
+      throw error;
+    }
+  }
+  
   async getLeaveRequest(id: number): Promise<LeaveRequest> {
     try {
       await delay(MOCK_DELAY);

@@ -55,7 +55,7 @@ export default function Deviations() {
             
             {/* Primary action - prominent positioning following UX best practices */}
             <div className="flex flex-col sm:flex-row gap-3">
-              <Link href="/deviations/new">
+              <Link href="/new-deviation">
                 <Button 
                   size="lg" 
                   className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-white font-semibold px-8 py-3 shadow-lg"

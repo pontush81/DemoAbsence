@@ -13,7 +13,7 @@ import Payslips from "@/pages/payslips";
 import Manager from "@/pages/manager";
 import Attestation from "@/pages/attestation";
 import PAXMLExportPage from "@/pages/paxml-export";
-import SchedulesPage from "@/pages/schedules";
+import DeviationTypeSelector from "@/pages/deviation-type-selector";
 import PayrollDashboard from "@/pages/payroll-dashboard";
 import { useEffect } from "react";
 import { useStore } from "./lib/store";
@@ -42,6 +42,7 @@ function Router() {
     <AppShell>
       <Switch>
         <Route path="/" component={Dashboard} />
+        <Route path="/new-deviation" component={DeviationTypeSelector} />
         <Route path="/deviations/:id?" component={Deviations} />
         <Route path="/leave/new" component={Leave} />
         <Route path="/leave/edit/:id" component={Leave} />
@@ -52,7 +53,13 @@ function Router() {
         <Route path="/manager" component={Manager} />
         <Route path="/attestation" component={Attestation} />
         <Route path="/paxml-export" component={PAXMLExportPage} />
-        <Route path="/schedules" component={SchedulesPage} />
+        <Route path="/schedules">
+          {() => {
+            // Redirect to dashboard since schedules functionality is now integrated there
+            location.href = '/';
+            return null;
+          }}
+        </Route>
         <Route path="/payroll-dashboard" component={PayrollDashboard} />
         <Route component={NotFound} />
       </Switch>

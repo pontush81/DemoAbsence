@@ -142,7 +142,7 @@ const DeviationList = ({ onSelect }: DeviationListProps) => {
           <span className="material-icons text-4xl text-muted-foreground mb-2">event_busy</span>
           <h3 className="text-lg font-medium">{t('deviations.noDeviations')}</h3>
           <p className="text-muted-foreground">{t('deviations.noDeviationsDescription')}</p>
-          <Link href="/deviations/new">
+                      <Link href="/new-deviation">
             <Button className="mt-4 bg-accent hover:bg-accent-dark text-white">
               <span className="material-icons mr-2">add</span>
               {t('action.newDeviation')}

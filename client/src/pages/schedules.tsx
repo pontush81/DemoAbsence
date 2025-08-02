@@ -289,7 +289,7 @@ export default function SchedulesPage() {
               className="bg-accent hover:bg-accent-dark text-white px-8 py-3 text-lg"
               onClick={() => {
                 // Navigate to deviations page
-                window.location.href = '/deviations';
+                window.location.href = '/new-deviation';
               }}
             >
               <span className="material-icons mr-2">add</span>

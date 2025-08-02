@@ -30,10 +30,10 @@ const Sidebar = () => {
       active: location === "/"
     },
     {
-      href: "/deviations",
+      href: "/new-deviation",
       icon: "event_note",
       label: t('nav.deviations'),
-      active: location.startsWith("/deviations")
+      active: location.startsWith("/deviations") || location === "/new-deviation"
     },
     {
       href: "/leave",
@@ -47,12 +47,7 @@ const Sidebar = () => {
       label: t('nav.payslips'),
       active: location === "/payslips"
     },
-    {
-      href: "/schedules",
-      icon: "schedule",
-      label: t('nav.schedules'),
-      active: location === "/schedules"
-    },
+
     {
       href: "/settings",
       icon: "settings",

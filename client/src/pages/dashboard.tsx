@@ -121,7 +121,7 @@ export default function Dashboard() {
   const handleSubmitTimeReport = async (hasDeviations: boolean) => {
     if (hasDeviations) {
       // Redirect to deviations page to register deviations
-      window.location.href = '/deviations';
+      window.location.href = '/new-deviation';
     } else {
       // Submit time report according to scheduled hours
       console.log('Submitting time report without deviations for month:', currentMonth);
@@ -132,48 +132,75 @@ export default function Dashboard() {
   
   return (
     <section>
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">
-            {t('dashboard.greeting')}, {currentUser?.firstName || ''}!
-          </h1>
-          <p className="text-muted-foreground">{formattedDate}</p>
-        </div>
-        <div className="mt-4 md:mt-0">
-          <Link href="/deviations/new">
-            <Button className="inline-flex items-center bg-accent hover:bg-accent-dark text-white px-4 py-2 rounded font-medium shadow-sm transition-colors">
-              <span className="material-icons mr-2">add</span>
-              {t('action.newDeviation')}
-            </Button>
-          </Link>
-        </div>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold">
+          {t('dashboard.greeting')}, {currentUser?.firstName || ''}!
+        </h1>
+        <p className="text-muted-foreground">{formattedDate}</p>
       </div>
 
+      {/* Enhanced Work Schedule Overview */}
+      <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 mb-6">
+        <CardContent className="p-6">
+          <div className="flex items-center gap-4">
+            <div className="h-12 w-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white">
+              <span className="material-icons text-xl">schedule</span>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                Din ordinarie arbetstid
+              </h3>
+              <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
+                <span className="flex items-center gap-1">
+                  🕐 08:00 - 17:00
+                </span>
+                <span className="flex items-center gap-1">
+                  📅 Måndag - Fredag
+                </span>
+                <span className="flex items-center gap-1">
+                  ⏱️ 8h per dag
+                </span>
+                <span className="flex items-center gap-1">
+                  ☕ 12:00 - 13:00 lunch
+                </span>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Main Action - Report Deviation */}
+      <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 mb-8">
+        <CardContent className="p-6">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="h-16 w-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center text-white">
+                <span className="material-icons text-2xl">add_alert</span>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-1">
+                  Anmäl avvikelse
+                </h3>
+                <p className="text-gray-600">
+                  Registrera sjukdom, semester, övertid eller andra avvikelser från din ordinarie arbetstid
+                </p>
+              </div>
+            </div>
+            <Link href="/new-deviation">
+              <Button 
+                size="lg" 
+                className="bg-accent hover:bg-accent-dark text-white px-8 py-3 text-lg"
+              >
+                <span className="material-icons mr-2">add</span>
+                {t('action.newDeviation')}
+              </Button>
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Status Cards Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {/* Work Schedule Card */}
-        <StatusCard
-          title={t('dashboard.workSchedule')}
-          value={
-            isLoadingSchedule ? (
-              <Skeleton className="h-6 w-36" />
-            ) : todaySchedule ? (
-              `${formatTime(todaySchedule.startTime)} - ${formatTime(todaySchedule.endTime)}`
-            ) : (
-              t('dashboard.noSchedule')
-            )
-          }
-          icon="schedule"
-          footer={
-            isLoadingSchedule ? (
-              <Skeleton className="h-4 w-32" />
-            ) : todaySchedule?.breakStart && todaySchedule?.breakEnd ? (
-              <p className="text-sm text-muted-foreground">
-                {t('dashboard.break')}: {formatTime(todaySchedule.breakStart)} - {formatTime(todaySchedule.breakEnd)}
-              </p>
-            ) : null
-          }
-        />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
 
         {/* Time Balance Card */}
         <StatusCard
