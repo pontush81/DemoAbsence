@@ -705,7 +705,12 @@ const DeviationForm = ({ deviationId, onCancel }: DeviationFormProps) => {
               {pendingAction?.icon} {pendingAction?.label}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Vilken dag är du {pendingAction?.timeCode === '300' ? 'sjuk' : pendingAction?.timeCode === '400' ? 'VAB' : 'frånvarande'}? Välj nedan:
+              {(() => {
+                if (pendingAction?.timeCode === '300') return 'Vilken dag är du sjuk? Välj nedan:';
+                if (pendingAction?.timeCode === '400') return 'Vilken dag är du VAB? Välj nedan:';
+                if (pendingAction?.timeCode === '200' || formType === 'overtime') return 'Vilken dag arbetar du övertid? Välj nedan:';
+                return 'Vilken dag gäller avvikelsen? Välj nedan:';
+              })()}
             </AlertDialogDescription>
           </AlertDialogHeader>
           
