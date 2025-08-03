@@ -1,4 +1,5 @@
 import { useForm } from "react-hook-form";
+import { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -60,15 +61,17 @@ const BankInfoForm = () => {
   });
   
   // Update form when employee data loads
-  if (employee && !form.formState.isDirty) {
-    form.reset({
-      bankClearingNumber: employee.bankClearingNumber || "",
-      bankAccountNumber: employee.bankAccountNumber || "",
-      bankBIC: employee.bankBIC || "",
-      bankCountryCode: employee.bankCountryCode || "SE",
-      bankIBAN: employee.bankIBAN || "",
-    });
-  }
+  useEffect(() => {
+    if (employee && !form.formState.isDirty) {
+      form.reset({
+        bankClearingNumber: employee.bankClearingNumber || "",
+        bankAccountNumber: employee.bankAccountNumber || "",
+        bankBIC: employee.bankBIC || "",
+        bankCountryCode: employee.bankCountryCode || "SE",
+        bankIBAN: employee.bankIBAN || "",
+      });
+    }
+  }, [employee, form]);
   
   // Update mutation
   const updateMutation = useMutation({
