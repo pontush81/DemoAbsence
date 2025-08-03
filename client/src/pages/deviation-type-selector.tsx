@@ -19,19 +19,19 @@ export default function DeviationTypeSelector() {
 
       {/* Quick Action Buttons */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-        {/* Oplanerad frånvaro - Primary */}
+        {/* Frånvaro - Primary */}
         <Link href="/deviations/new">
           <Button 
             size="lg" 
-            className="w-full bg-orange-600 hover:bg-orange-700 text-white py-4 sm:py-6 text-base sm:text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+            className="w-full bg-red-600 hover:bg-red-700 text-white py-4 sm:py-6 text-base sm:text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
           >
             <div className="flex items-center justify-center space-x-2 sm:space-x-3">
-              <div className="text-2xl sm:text-3xl">🚫</div>
+              <div className="text-2xl sm:text-3xl">🏠</div>
               <div className="text-center">
                 <div className="font-bold text-lg sm:text-xl">
                   Frånvaro
                 </div>
-                <div className="text-xs text-orange-100 opacity-80 hidden sm:block">
+                <div className="text-xs text-red-100 opacity-80 hidden sm:block">
                   Sjuk • VAB • Övertid
                 </div>
               </div>
@@ -39,12 +39,12 @@ export default function DeviationTypeSelector() {
           </Button>
         </Link>
 
-        {/* Planerad frånvaro - Secondary */}
+        {/* Planerad ledighet - Secondary */}
         <Link href="/leave/new">
           <Button 
             size="lg" 
             variant="outline"
-            className="w-full border-2 border-blue-300 bg-white text-blue-700 hover:bg-blue-100 hover:border-blue-400 py-4 sm:py-6 text-base sm:text-lg font-semibold shadow-md hover:shadow-lg transition-all duration-200"
+            className="w-full border-2 border-green-300 bg-white text-green-700 hover:bg-green-100 hover:border-green-400 py-4 sm:py-6 text-base sm:text-lg font-semibold shadow-md hover:shadow-lg transition-all duration-200"
           >
             <div className="flex items-center justify-center space-x-2 sm:space-x-3">
               <div className="text-2xl sm:text-3xl">🌴</div>
@@ -52,7 +52,7 @@ export default function DeviationTypeSelector() {
                 <div className="font-bold text-lg sm:text-xl">
                   Ledighet
                 </div>
-                <div className="text-xs text-blue-600 opacity-70 hidden sm:block">
+                <div className="text-xs text-green-600 opacity-70 hidden sm:block">
                   Semester • Föräldraledighet
                 </div>
               </div>

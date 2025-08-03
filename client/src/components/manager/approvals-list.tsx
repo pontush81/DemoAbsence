@@ -27,6 +27,16 @@ const ApprovalsList = ({ type }: ApprovalsListProps) => {
   const { toast } = useToast();
   const [selectedItemId, setSelectedItemId] = useState<number | null>(null);
   
+  // Helper function to format dates safely
+  const formatDate = (dateString: string | null | undefined): string => {
+    if (!dateString) return '-';
+    try {
+      return new Date(dateString).toLocaleDateString('sv-SE');
+    } catch {
+      return '-';
+    }
+  };
+  
   // Fetch pending approvals
   const { user } = useStore();
   const managerId = user.currentUser?.employeeId;
@@ -361,8 +371,8 @@ const ApprovalsList = ({ type }: ApprovalsListProps) => {
                     </TableCell>
                     <TableCell className="whitespace-nowrap">
                       {isDeviation ? 
-                        item.date : 
-                        `${item.startDate || item.start_date} - ${item.endDate || item.end_date}`
+                        formatDate(item.date) : 
+                        `${formatDate(item.startDate || item.start_date)} - ${formatDate(item.endDate || item.end_date)}`
                       }
                     </TableCell>
                     <TableCell>
@@ -394,7 +404,7 @@ const ApprovalsList = ({ type }: ApprovalsListProps) => {
                       </span>
                     </TableCell>
                     <TableCell className="whitespace-nowrap text-sm text-muted-foreground">
-                      {decisionDate ? new Date(decisionDate).toLocaleDateString('sv-SE') : '-'}
+                      {formatDate(decisionDate)}
                     </TableCell>
                     <TableCell className="max-w-xs truncate-text">
                       {item.comment || item.managerComment || item.manager_comment || '-'}
@@ -460,7 +470,7 @@ const ApprovalsList = ({ type }: ApprovalsListProps) => {
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell className="whitespace-nowrap">{deviation.date}</TableCell>
+                      <TableCell className="whitespace-nowrap">{formatDate(deviation.date)}</TableCell>
                       <TableCell className="whitespace-nowrap">
                         <div>
                           <div className="font-medium">{timeCodeStr}</div>
@@ -586,8 +596,8 @@ const ApprovalsList = ({ type }: ApprovalsListProps) => {
                       const startDate = leave.startDate || leave.start_date;
                       const endDate = leave.endDate || leave.end_date;
                       return startDate === endDate 
-                        ? startDate 
-                        : `${startDate} - ${endDate}`;
+                        ? formatDate(startDate) 
+                        : `${formatDate(startDate)} - ${formatDate(endDate)}`;
                     })()}
                   </TableCell>
                   <TableCell className="whitespace-nowrap">{leave.leaveType || leave.leave_type}</TableCell>
