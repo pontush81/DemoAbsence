@@ -2,15 +2,14 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card, CardContent } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import StatusBadge from "@/components/ui/status-badge";
 import { apiService } from "@/lib/apiService";
 import { useI18n } from "@/lib/i18n";
 import { useStore } from "@/lib/store";
 import { LeaveRequest } from "@shared/schema";
-import { Card, CardContent } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface LeaveListProps {
   onSelect?: (id: number) => void;
@@ -132,17 +131,17 @@ const LeaveList = ({ onSelect }: LeaveListProps) => {
   if (isLoading) {
     return (
       <div>
-        {/* Status info box - adapted for leave planning workflow */}
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+        {/* Loading info box */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
           <div className="flex items-start">
             <div className="flex-shrink-0">
-              <span className="text-2xl">🗓️</span>
+              <span className="text-2xl">⏳</span>
             </div>
             <div className="ml-3">
-              <h3 className="text-sm font-medium text-green-800">
+              <h3 className="text-sm font-medium text-blue-800">
                 Laddar din ledighetsplanering
               </h3>
-              <p className="mt-1 text-sm text-green-600">
+              <p className="mt-1 text-sm text-blue-600">
                 Vi hämtar kommande och pågående ledighetsansökningar för bästa översikt
               </p>
             </div>
@@ -150,44 +149,43 @@ const LeaveList = ({ onSelect }: LeaveListProps) => {
         </div>
         
         {renderFilters()}
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden responsive-table-card mt-6">
-          <div className="responsive-table-wrapper">
-            <Table className="responsive-table">
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="whitespace-nowrap date-cell">{t('leave.period')}</TableHead>
-                  <TableHead className="whitespace-nowrap type-cell">{t('leave.leaveType')}</TableHead>
-                  <TableHead className="whitespace-nowrap scope-cell">{t('leave.scope')}</TableHead>
-                  <TableHead className="whitespace-nowrap status-cell">{t('deviations.status')}</TableHead>
-                  <TableHead className="comment-cell">{t('deviations.comment')}</TableHead>
-                  <TableHead className="text-right whitespace-nowrap actions-cell">{t('deviations.actions')}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {Array.from({ length: 3 }).map((_, index) => (
-                  <TableRow key={index}>
-                    <TableCell data-label={t('leave.period')}>
-                      <span><Skeleton className="h-4 w-36" /></span>
-                    </TableCell>
-                    <TableCell data-label={t('leave.leaveType')}>
-                      <span><Skeleton className="h-4 w-32" /></span>
-                    </TableCell>
-                    <TableCell data-label={t('leave.scope')}>
-                      <span><Skeleton className="h-4 w-24" /></span>
-                    </TableCell>
-                    <TableCell data-label={t('deviations.status')}>
-                      <span><Skeleton className="h-5 w-20 rounded-full" /></span>
-                    </TableCell>
-                    <TableCell data-label={t('deviations.comment')}>
-                      <span><Skeleton className="h-4 w-48" /></span>
-                    </TableCell>
-                    <TableCell data-label={t('deviations.actions')} className="text-right">
-                      <span><Skeleton className="h-4 w-16 ml-auto" /></span>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+        
+        {/* Loading skeleton cards */}
+        <div className="mt-6 space-y-8">
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <Skeleton className="h-6 w-32" />
+              <div className="flex-1 h-px bg-gray-200"></div>
+              <Skeleton className="h-4 w-20" />
+            </div>
+            
+            <div className="grid gap-4">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <Card key={index} className="border-l-4 border-gray-200">
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1 space-y-2">
+                        <div className="flex items-center gap-3">
+                          <Skeleton className="h-8 w-8 rounded" />
+                          <div className="space-y-1">
+                            <Skeleton className="h-4 w-24" />
+                            <Skeleton className="h-3 w-32" />
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <Skeleton className="h-3 w-16" />
+                          <Skeleton className="h-3 w-20" />
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-end gap-2">
+                        <Skeleton className="h-6 w-20 rounded-full" />
+                        <Skeleton className="h-8 w-16 rounded" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -199,16 +197,21 @@ const LeaveList = ({ onSelect }: LeaveListProps) => {
     return (
       <div>
         {renderFilters()}
-        <div className="bg-white rounded-lg shadow-sm p-6 mt-6">
-          <p className="text-destructive">{t('leave.loadError')}: {(error as Error)?.message || 'Unknown error'}</p>
-          <Button 
-            onClick={() => window.location.reload()} 
-            variant="outline" 
-            className="mt-4"
-          >
-            {t('action.retry')}
-          </Button>
-        </div>
+        <Card className="mt-6 text-center p-8">
+          <CardContent className="space-y-4">
+            <div className="text-6xl mb-4">⚠️</div>
+            <h3 className="text-lg font-medium text-gray-900">Ett fel uppstod</h3>
+            <p className="text-red-600">{t('leave.loadError')}: {(error as Error)?.message || 'Unknown error'}</p>
+            <Button 
+              onClick={() => window.location.reload()} 
+              variant="outline" 
+              className="mt-4"
+            >
+              <span className="mr-2">🔄</span>
+              {t('action.retry')}
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -218,17 +221,19 @@ const LeaveList = ({ onSelect }: LeaveListProps) => {
     return (
       <div>
         {renderFilters()}
-        <div className="bg-white rounded-lg shadow-sm p-6 mt-6 text-center">
-          <span className="material-icons text-4xl text-muted-foreground mb-2">event_busy</span>
-          <h3 className="text-lg font-medium">{t('leave.noLeaveRequests')}</h3>
-          <p className="text-muted-foreground">{t('leave.noLeaveRequestsDescription')}</p>
-          <Link href="/leave/new">
-            <Button className="mt-4 bg-accent hover:bg-accent-dark text-white">
-              <span className="material-icons mr-2">add</span>
-              {t('leave.newLeaveRequest')}
-            </Button>
-          </Link>
-        </div>
+        <Card className="mt-6 text-center p-8">
+          <CardContent className="space-y-4">
+            <div className="text-6xl mb-4">🏖️</div>
+            <h3 className="text-lg font-medium text-gray-900">{t('leave.noLeaveRequests')}</h3>
+            <p className="text-gray-600">{t('leave.noLeaveRequestsDescription')}</p>
+            <Link href="/leave/new">
+              <Button className="mt-4 bg-green-600 hover:bg-green-700 text-white px-6 py-3">
+                <span className="mr-2">📅</span>
+                {t('leave.newLeaveRequest')}
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -262,86 +267,159 @@ const LeaveList = ({ onSelect }: LeaveListProps) => {
     return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
   }) || [];
   
+  // Helper function to get leave type icon
+  const getLeaveTypeIcon = (type: string) => {
+    const iconMap: Record<string, string> = {
+      'vacation': '🏖️',
+      'comp-leave': '⚖️',
+      'unpaid-leave': '💸',
+      'parental-leave': '👶',
+      'study-leave': '📚'
+    };
+    return iconMap[type] || '📅';
+  };
+
+  // Helper function to get status color and icon
+  const getStatusInfo = (status: string) => {
+    const statusMap: Record<string, { color: string; bg: string; icon: string; text: string }> = {
+      'approved': { color: 'text-green-700', bg: 'bg-green-100', icon: '✅', text: 'Godkänd' },
+      'pending': { color: 'text-yellow-700', bg: 'bg-yellow-100', icon: '⏳', text: 'Väntande' },
+      'rejected': { color: 'text-red-700', bg: 'bg-red-100', icon: '❌', text: 'Ej godkänd' },
+      'draft': { color: 'text-gray-700', bg: 'bg-gray-100', icon: '📝', text: 'Utkast' },
+      'paused': { color: 'text-blue-700', bg: 'bg-blue-100', icon: '⏸️', text: 'Pausad' }
+    };
+    return statusMap[status] || statusMap['pending'];
+  };
+
+  // Group leave requests by month for better organization
+  const groupLeavesByMonth = (leaves: typeof sortedLeaveRequests) => {
+    const groups: Record<string, typeof leaves> = {};
+    
+    leaves.forEach(leave => {
+      const date = new Date(leave.startDate);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      const monthName = date.toLocaleDateString('sv-SE', { year: 'numeric', month: 'long' });
+      
+      if (!groups[monthKey]) {
+        groups[monthKey] = [];
+      }
+      groups[monthKey].push(leave);
+    });
+
+    // Sort months in descending order (newest first)
+    return Object.keys(groups)
+      .sort((a, b) => b.localeCompare(a))
+      .map(monthKey => {
+        const date = new Date(monthKey + '-01');
+        const monthName = date.toLocaleDateString('sv-SE', { year: 'numeric', month: 'long' });
+        return {
+          monthKey,
+          monthName: monthName.charAt(0).toUpperCase() + monthName.slice(1),
+          leaves: groups[monthKey].sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())
+        };
+      });
+  };
+
+  const groupedLeaves = groupLeavesByMonth(sortedLeaveRequests);
+
   return (
     <div>
       {renderFilters()}
       
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden responsive-table-card mt-6">
-        <div className="responsive-table-wrapper">
-          <Table className="responsive-table">
-            <TableHeader>
-              <TableRow>
-                <TableHead className="whitespace-nowrap date-cell">{t('leave.period')}</TableHead>
-                <TableHead className="whitespace-nowrap type-cell">{t('leave.leaveType')}</TableHead>
-                <TableHead className="whitespace-nowrap scope-cell">{t('leave.scope')}</TableHead>
-                <TableHead className="whitespace-nowrap status-cell">{t('deviations.status')}</TableHead>
-                <TableHead className="comment-cell">{t('deviations.comment')}</TableHead>
-                <TableHead className="text-right whitespace-nowrap actions-cell">{t('deviations.actions')}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sortedLeaveRequests.map((leave) => (
-                <TableRow 
-                  key={leave.id} 
-                  className="hover:bg-background-dark transition-colors cursor-pointer"
-                  onClick={() => handleRowClick(leave)}
-                >
-                  <TableCell className="whitespace-nowrap date-cell" data-label={t('leave.period')}>
-                    <span>
-                      {leave.startDate === leave.endDate 
-                        ? leave.startDate 
-                        : `${leave.startDate} - ${leave.endDate}`}
-                    </span>
-                  </TableCell>
-                  <TableCell className="whitespace-nowrap type-cell" data-label={t('leave.leaveType')}>
-                    <span>{getLeaveTypeLabel(leave.leaveType)}</span>
-                  </TableCell>
-                  <TableCell className="whitespace-nowrap scope-cell" data-label={t('leave.scope')}>
-                    <span>{getScopeLabel(leave.scope || '')}</span>
-                  </TableCell>
-                  <TableCell className="whitespace-nowrap status-cell" data-label={t('deviations.status')}>
-                    <StatusBadge status={leave.status as any} />
-                  </TableCell>
-                  <TableCell className="comment-cell truncate-text" data-label={t('deviations.comment')}>
-                    <span>{leave.comment || '-'}</span>
-                  </TableCell>
-                  <TableCell className="text-right whitespace-nowrap actions-cell" data-label={t('deviations.actions')}>
-                    {leave.status === 'draft' ? (
-                      <Button 
-                        variant="link" 
-                        className="text-primary hover:text-primary-dark"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setLocation(`/leave/edit/${leave.id}`);
-                        }}
-                      >
-                        {t('action.edit')}
-                      </Button>
-                    ) : (
-                      <Button 
-                        variant="link" 
-                        className="text-primary hover:text-primary-dark"
-                      >
-                        {t('action.view')}
-                      </Button>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-        
-        {/* Pagination (simplified) */}
-        <div className="px-4 py-3 bg-background-dark flex items-center justify-between border-t border-border">
-          <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">
-                {t('pagination.showing')} <span className="font-medium">1</span> {t('pagination.to')} <span className="font-medium">{sortedLeaveRequests.length}</span> {t('pagination.of')} <span className="font-medium">{sortedLeaveRequests.length}</span> {t('pagination.results')}
-              </p>
+      <div className="mt-6 space-y-8">
+        {groupedLeaves.map(({ monthKey, monthName, leaves }) => (
+          <div key={monthKey} className="space-y-4">
+            {/* Month Header */}
+            <div className="flex items-center gap-3">
+              <h3 className="text-lg font-semibold text-gray-900">📅 {monthName}</h3>
+              <div className="flex-1 h-px bg-gray-200"></div>
+              <span className="text-sm text-gray-500">{leaves.length} ansökningar</span>
+            </div>
+
+            {/* Leave Cards */}
+            <div className="grid gap-4">
+              {leaves.map((leave) => {
+                const statusInfo = getStatusInfo(leave.status);
+                const leaveIcon = getLeaveTypeIcon(leave.leaveType);
+                
+                return (
+                  <Card 
+                    key={leave.id} 
+                    className="hover:shadow-md transition-shadow cursor-pointer border-l-4"
+                    style={{ borderLeftColor: statusInfo.color.includes('green') ? '#10b981' : 
+                                               statusInfo.color.includes('yellow') ? '#f59e0b' :
+                                               statusInfo.color.includes('red') ? '#ef4444' : '#6b7280' }}
+                    onClick={() => handleRowClick(leave)}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between">
+                        {/* Main Info */}
+                        <div className="flex-1 space-y-2">
+                          <div className="flex items-center gap-3">
+                            <span className="text-2xl">{leaveIcon}</span>
+                            <div>
+                              <h4 className="font-semibold text-gray-900">
+                                {getLeaveTypeLabel(leave.leaveType)}
+                              </h4>
+                              <p className="text-sm text-gray-600">
+                                {leave.startDate === leave.endDate 
+                                  ? leave.startDate 
+                                  : `${leave.startDate} - ${leave.endDate}`}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Scope and Comment */}
+                          <div className="flex items-center gap-4 text-sm text-gray-600">
+                            <span>📋 {getScopeLabel(leave.scope || 'full-day')}</span>
+                            {leave.comment && (
+                              <span className="truncate max-w-xs">💬 {leave.comment}</span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Status and Action */}
+                        <div className="flex flex-col items-end gap-2">
+                          <span 
+                            className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${statusInfo.bg} ${statusInfo.color}`}
+                          >
+                            <span>{statusInfo.icon}</span>
+                            {statusInfo.text}
+                          </span>
+                          
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            className="text-xs"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (leave.status === 'draft') {
+                                setLocation(`/leave/edit/${leave.id}`);
+                              } else {
+                                handleRowClick(leave);
+                              }
+                            }}
+                          >
+                            {leave.status === 'draft' ? '✏️ Redigera' : '👁️ Visa'}
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           </div>
-        </div>
+        ))}
+
+        {/* Summary Footer */}
+        {sortedLeaveRequests.length > 0 && (
+          <div className="bg-gray-50 rounded-lg p-4 text-center">
+            <p className="text-sm text-gray-600">
+              📊 Totalt <span className="font-medium">{sortedLeaveRequests.length}</span> ledighetsansökningar
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
