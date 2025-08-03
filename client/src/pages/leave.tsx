@@ -6,6 +6,7 @@ import { useI18n } from "@/lib/i18n";
 import LeaveList from "@/components/leave/leave-list";
 import LeaveForm from "@/components/leave/leave-form";
 import LeaveDetails from "@/components/leave/leave-details";
+import LeaveCalendar from "@/components/leave/leave-calendar";
 import { apiService } from "@/lib/apiService";
 
 export default function Leave() {
@@ -14,6 +15,7 @@ export default function Leave() {
   const [location, navigate] = useLocation();
   const [view, setView] = useState<'list' | 'new' | 'edit' | 'details'>('list');
   const [leaveId, setLeaveId] = useState<number | null>(null);
+  const [displayMode, setDisplayMode] = useState<'calendar' | 'list'>('calendar'); // Default to calendar (UX best practice)
   
   // Determine the view based on the route
   useEffect(() => {
@@ -53,8 +55,28 @@ export default function Leave() {
               </div>
             </div>
             
-            {/* Primary action - adapted for leave planning workflow */}
+            {/* Primary action + View toggle - adapted for leave planning workflow */}
             <div className="flex flex-col sm:flex-row gap-3">
+              {/* View Toggle - Following Perplexity's UX best practice */}
+              <div className="flex bg-gray-100 rounded-lg p-1">
+                <Button
+                  variant={displayMode === 'calendar' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setDisplayMode('calendar')}
+                  className="flex items-center gap-2"
+                >
+                  📅 Kalender
+                </Button>
+                <Button
+                  variant={displayMode === 'list' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setDisplayMode('list')}
+                  className="flex items-center gap-2"
+                >
+                  📋 Lista
+                </Button>
+              </div>
+              
               <Link href="/leave/new">
                 <Button 
                   size="lg" 
@@ -66,9 +88,13 @@ export default function Leave() {
             </div>
           </div>
 
-          {/* Enhanced leave list with planning-focused UX */}
+          {/* Enhanced leave display with calendar/list toggle - Following UX best practices */}
           <div className="space-y-6">
-            <LeaveList />
+            {displayMode === 'calendar' ? (
+              <LeaveCalendar />
+            ) : (
+              <LeaveList />
+            )}
           </div>
         </>
       )}
