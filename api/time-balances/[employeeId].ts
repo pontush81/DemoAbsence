@@ -24,6 +24,23 @@ async function getMockData(filename: string) {
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const { employeeId } = req.query;
+    const { currentUser } = req.query;
+
+    // 🚨 DEMO SECURITY: Prevent IDOR - can only view own time balance
+    if (!currentUser) {
+      return res.status(400).json({
+        error: 'currentUser parameter required',
+        message: 'Du måste ange vem du är för att se tidssaldo'
+      });
+    }
+
+    if (currentUser !== employeeId) {
+      return res.status(403).json({
+        error: 'Access denied',
+        message: 'Du kan bara se ditt eget tidssaldo'
+      });
+    }
+
     let timeBalance;
     
     // Try Supabase first, fallback to mock data

@@ -8,6 +8,25 @@ const supabaseKey = process.env.SUPABASE_ANON_KEY;
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
+    const { currentUser } = req.query;
+
+    // 🚨 DEMO SECURITY: Only managers can access bulk employee data
+    if (!currentUser) {
+      return res.status(400).json({
+        error: 'currentUser parameter required',
+        message: 'Du måste ange vem du är för att se medarbetardata'
+      });
+    }
+
+    // Check if currentUser is a manager (E005 is manager in our demo data)
+    const allowedManagerIds = ['E005']; // Mikael is the manager
+    if (!allowedManagerIds.includes(currentUser as string)) {
+      return res.status(403).json({
+        error: 'Access denied - Manager rights required',
+        message: 'Bara chefer kan se all medarbetardata'
+      });
+    }
+
     // Require Supabase configuration
     if (!supabaseUrl || !supabaseKey) {
       throw new Error('🚨 CRITICAL: Supabase configuration missing. Check SUPABASE_URL and SUPABASE_ANON_KEY environment variables.');
