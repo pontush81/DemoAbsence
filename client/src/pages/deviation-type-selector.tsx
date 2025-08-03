@@ -25,17 +25,14 @@ export default function DeviationTypeSelector() {
             size="lg" 
             className="w-full bg-orange-600 hover:bg-orange-700 text-white py-3 sm:py-6 text-base sm:text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 group"
           >
-            <div className="flex items-center justify-center space-x-2 sm:space-x-3">
-              <div className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-white/20 rounded-full group-hover:bg-white/30 transition-colors">
-                <span className="material-icons text-lg sm:text-xl">schedule</span>
-              </div>
-              <div className="text-left">
-                <div className="font-bold text-sm sm:text-base">
-                  <span className="hidden sm:inline">Registrera oplanerad frånvaro</span>
-                  <span className="sm:hidden">Oplanerad frånvaro</span>
+            <div className="flex items-center justify-center space-x-3 sm:space-x-4">
+              <div className="text-3xl sm:text-4xl">🚫</div>
+              <div className="text-center">
+                <div className="font-bold text-xl sm:text-2xl">
+                  Frånvaro
                 </div>
-                <div className="text-xs sm:text-sm text-orange-100 opacity-90">
-                  Sjuk • VAB • Övertid • Kom sent
+                <div className="text-xs sm:text-sm text-orange-100 opacity-80 mt-1">
+                  Sjuk • VAB • Övertid
                 </div>
               </div>
             </div>
@@ -49,17 +46,14 @@ export default function DeviationTypeSelector() {
             variant="outline"
             className="w-full border-2 border-blue-300 bg-white text-blue-700 hover:bg-blue-100 hover:border-blue-400 py-3 sm:py-6 text-base sm:text-lg font-semibold shadow-md hover:shadow-lg transition-all duration-200 group"
           >
-            <div className="flex items-center justify-center space-x-2 sm:space-x-3">
-              <div className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 rounded-full group-hover:bg-blue-200 transition-colors">
-                <span className="material-icons text-lg sm:text-xl text-blue-600">event_available</span>
-              </div>
-              <div className="text-left">
-                <div className="font-bold text-sm sm:text-base">
-                  <span className="hidden sm:inline">Ansök om planerad ledighet</span>
-                  <span className="sm:hidden">Planerad ledighet</span>
+            <div className="flex items-center justify-center space-x-3 sm:space-x-4">
+              <div className="text-3xl sm:text-4xl">🌴</div>
+              <div className="text-center">
+                <div className="font-bold text-xl sm:text-2xl">
+                  Ledighet
                 </div>
-                <div className="text-xs sm:text-sm text-blue-600 opacity-80">
-                  Semester • Föräldraledighet • Tjänstledighet
+                <div className="text-xs sm:text-sm text-blue-600 opacity-70 mt-1">
+                  Semester • Föräldraledighet
                 </div>
               </div>
             </div>
