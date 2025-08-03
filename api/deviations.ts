@@ -194,15 +194,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const timeCodes = await getMockData('timecodes.json');
       const timeCode = timeCodes.find((tc: any) => tc.code === req.body.timeCode);
       
-      // Determine status based on Swedish HR praxis
+      // Determine status based on Swedish HR law compliance
       let status = req.body.status;
       if (!status) {
-        // If no status provided, determine based on time code
+        // If no status provided, determine based on time code requirements
         if (timeCode && timeCode.requiresApproval === false) {
-          // Sjukdom (300) and VAB (400) don't require approval - auto-approve
+          // Auto-approve only if explicitly configured as no approval required
           status = 'approved';
         } else {
-          // Other types (semester, övertid) require approval
+          // All types require manager approval per Swedish labor law
           status = 'pending';
         }
       }

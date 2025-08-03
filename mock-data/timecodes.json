@@ -36,8 +36,8 @@
     "nameSV": "Sjukdom",
     "nameEN": "Sick Leave",
     "category": "sick",
-    "requiresApproval": false,
-    "approvalType": "notification"
+    "requiresApproval": true,
+    "approvalType": "attestation"
   },
   {
     "id": 5,
@@ -46,8 +46,8 @@
     "nameSV": "Vård av barn (VAB)",
     "nameEN": "Care of Child",
     "category": "vab",
-    "requiresApproval": false,
-    "approvalType": "notification"
+    "requiresApproval": true,
+    "approvalType": "attestation"
   },
   {
     "id": 6,

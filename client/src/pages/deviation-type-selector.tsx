@@ -19,14 +19,14 @@ export default function DeviationTypeSelector() {
 
       {/* Quick Action Buttons */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-8">
-        {/* Sjuk/VAB - Primary */}
+        {/* Sjuk/VAB - Neutral informational (Perplexity's recommendation) */}
         <Link href="/deviations/new?type=sick">
           <Button 
             size="lg" 
-            className="w-full bg-red-600 hover:bg-red-700 text-white py-6 sm:py-8 text-sm sm:text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-200 min-h-[80px] sm:min-h-[100px]"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-6 sm:py-8 text-sm sm:text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-200 min-h-[80px] sm:min-h-[100px]"
           >
             <div className="flex flex-col items-center justify-center space-y-2">
-              <div className="text-xl sm:text-2xl">🤒</div>
+              <div className="text-xl sm:text-2xl">🏥</div>
               <div className="text-center">
                 <div className="font-bold text-sm sm:text-base leading-tight">
                   Sjuk/VAB
@@ -36,15 +36,15 @@ export default function DeviationTypeSelector() {
           </Button>
         </Link>
 
-        {/* Övertid - Secondary */}
+        {/* Övertid - Work-related neutral */}
         <Link href="/deviations/new?type=overtime">
           <Button 
             size="lg" 
             variant="outline"
-            className="w-full border-2 border-blue-300 bg-white text-blue-700 hover:bg-blue-100 hover:border-blue-400 py-6 sm:py-8 text-sm sm:text-base font-semibold shadow-md hover:shadow-lg transition-all duration-200 min-h-[80px] sm:min-h-[100px]"
+            className="w-full border-2 border-indigo-300 bg-white text-indigo-700 hover:bg-indigo-100 hover:border-indigo-400 py-6 sm:py-8 text-sm sm:text-base font-semibold shadow-md hover:shadow-lg transition-all duration-200 min-h-[80px] sm:min-h-[100px]"
           >
             <div className="flex flex-col items-center justify-center space-y-2">
-              <div className="text-xl sm:text-2xl">💼</div>
+              <div className="text-xl sm:text-2xl">⏰</div>
               <div className="text-center">
                 <div className="font-bold text-sm sm:text-base leading-tight">
                   Övertid
