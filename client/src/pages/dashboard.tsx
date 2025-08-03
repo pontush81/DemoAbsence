@@ -547,7 +547,7 @@ export default function Dashboard() {
                       size="lg"
                       onClick={() => handleSubmitTimeReport(true)}
                       disabled={isLoadingMonthlyDeviations || isLoadingMonthlyLeaveRequests}
-                      className="flex-1 min-w-[120px]"
+                      className="flex-1 min-w-[120px] py-4 text-base font-semibold"
                     >
                       <span className="material-icons mr-2">send</span>
                       <span className="hidden sm:inline">Skicka tidrapport</span>
@@ -559,7 +559,7 @@ export default function Dashboard() {
                         size="lg"
                         onClick={() => handleSubmitTimeReport(false)}
                         disabled={isLoadingMonthlyDeviations || isLoadingMonthlyLeaveRequests}
-                        className="flex-1 min-w-[120px]"
+                        className="flex-1 min-w-[120px] py-4 text-base font-semibold"
                       >
                         <span className="material-icons mr-2">check_circle</span>
                         <span className="hidden sm:inline">Jag har inga avvikelser</span>
@@ -571,7 +571,7 @@ export default function Dashboard() {
                         variant="outline"
                         onClick={() => handleSubmitTimeReport(true)}
                         disabled={isLoadingMonthlyDeviations || isLoadingMonthlyLeaveRequests}
-                        className="flex-1 min-w-[120px]"
+                        className="flex-1 min-w-[120px] py-4 text-base font-semibold"
                       >
                         <span className="material-icons mr-2">add</span>
                         <span className="hidden sm:inline">Registrera avvikelser</span>
