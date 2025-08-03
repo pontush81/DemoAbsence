@@ -23,6 +23,7 @@ async function getMockData(filename: string) {
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
+    const { managerId } = req.query;
     let pendingLeaveRequests;
     
     // Try Supabase first, fallback to mock data
@@ -45,6 +46,44 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       console.log('Supabase not configured, using mock data');
       const allLeaveRequests = await getMockData('leave-requests.json');
       pendingLeaveRequests = allLeaveRequests.filter((lr: any) => lr.status === 'pending');
+    }
+
+    // ⚠️ CRITICAL: Filter out manager's own leave requests and only show subordinates'
+    if (managerId && pendingLeaveRequests) {
+      try {
+        let allEmployees;
+        
+        // Get all employees to find which ones report to this manager
+        if (supabase) {
+          try {
+            const { data, error } = await supabase.from('employees').select('*');
+            if (error) throw error;
+            allEmployees = data || [];
+          } catch (error) {
+            console.log('Supabase employees failed, using mock data:', error);
+            allEmployees = await getMockData('employees.json');
+          }
+        } else {
+          allEmployees = await getMockData('employees.json');
+        }
+        
+        // Find employees who report to this manager
+        const managerEmployees = allEmployees.filter((emp: any) => emp.manager === managerId);
+        const employeeIds = managerEmployees.map((emp: any) => emp.employeeId || emp.employee_id);
+        
+        // Filter leave requests to EXCLUDE manager's own requests and ONLY include subordinates
+        pendingLeaveRequests = pendingLeaveRequests.filter((leave: any) => {
+          const leaveEmployeeId = leave.employee_id || leave.employeeId;
+          // Include only subordinates' requests, exclude manager's own requests
+          return employeeIds.includes(leaveEmployeeId) && leaveEmployeeId !== managerId;
+        });
+        
+        console.log(`Manager ${managerId} has ${pendingLeaveRequests.length} pending leave requests from employees: ${employeeIds.join(', ')} (excluding own requests)`);
+      } catch (filterError) {
+        console.error('Error filtering leave requests by manager:', filterError);
+        // If filtering fails, return empty array for security (better to show nothing than manager's own requests)
+        pendingLeaveRequests = [];
+      }
     }
     
     // Map snake_case to camelCase for frontend compatibility

@@ -1022,6 +1022,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get pending leave requests (for manager)
   app.get('/api/manager/leave-requests/pending', async (req, res) => {
     try {
+      const { managerId } = req.query;
       let pendingLeaveRequests;
       
       // Try storage first, fallback to restStorage
@@ -1031,6 +1032,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log('Storage failed, using restStorage fallback:', storageError);
         const allLeaveRequests = await restStorage.getLeaveRequests({ status: 'pending' });
         pendingLeaveRequests = allLeaveRequests.filter((lr: any) => lr.status === 'pending');
+      }
+
+      // ⚠️ CRITICAL: Filter out manager's own leave requests and only show subordinates'
+      if (managerId && pendingLeaveRequests) {
+        try {
+          // Get all employees to find which ones report to this manager
+          const allEmployees = await restStorage.getEmployees();
+          const managerEmployees = allEmployees.filter((emp: any) => emp.manager === managerId);
+          const employeeIds = managerEmployees.map((emp: any) => emp.employeeId);
+          
+          // Filter leave requests to EXCLUDE manager's own requests and ONLY include subordinates
+          pendingLeaveRequests = pendingLeaveRequests.filter((leave: any) => {
+            const leaveEmployeeId = leave.employee_id || leave.employeeId;
+            // Include only subordinates' requests, exclude manager's own requests
+            return employeeIds.includes(leaveEmployeeId) && leaveEmployeeId !== managerId;
+          });
+          
+          console.log(`Manager ${managerId} has ${pendingLeaveRequests.length} pending leave requests from employees: ${employeeIds.join(', ')} (excluding own requests)`);
+        } catch (filterError) {
+          console.error('Error filtering leave requests by manager:', filterError);
+          // If filtering fails, return empty array for security (better to show nothing than manager's own requests)
+          pendingLeaveRequests = [];
+        }
       }
       
       // Map snake_case to camelCase for frontend compatibility

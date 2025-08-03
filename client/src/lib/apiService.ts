@@ -551,10 +551,17 @@ class ApiService {
   
   // --------------- Manager Leave Approvals APIs ---------------
   
-  async getPendingLeaveRequests(): Promise<LeaveRequest[]> {
+  async getPendingLeaveRequests(managerId?: string): Promise<LeaveRequest[]> {
     try {
       await delay(MOCK_DELAY);
-      const response = await fetch('/api/manager/leave-requests/pending');
+      let url = '/api/manager/leave-requests/pending';
+      
+      // Add managerId as query parameter for proper filtering
+      if (managerId) {
+        url += `?managerId=${encodeURIComponent(managerId)}`;
+      }
+      
+      const response = await fetch(url);
       
       if (!response.ok) {
         throw new ApiError(`Failed to fetch pending leave requests: ${response.statusText}`, response.status);

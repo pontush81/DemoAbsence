@@ -47,7 +47,7 @@ const ApprovalsList = ({ type }: ApprovalsListProps) => {
       if (type === 'deviations') {
         return await apiService.getPendingDeviations(managerId);
       } else if (type === 'leaveRequests') {
-        return await apiService.getPendingLeaveRequests();
+        return await apiService.getPendingLeaveRequests(managerId);
       } else if (type === 'history') {
         // Fetch both approved and rejected items separately
         const [
