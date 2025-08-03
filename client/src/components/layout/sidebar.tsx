@@ -14,13 +14,20 @@ const Sidebar = () => {
   const showTravelExpenses = isFeatureEnabled('enableTravelExpenses');
   const isManager = user.currentRole === 'manager';
   const isHR = user.currentRole === 'hr';
-  const isPayroll = user.currentRole === 'payroll';
+  const isHRManager = user.currentRole === 'hr-manager';
+  const isPayrollAdmin = user.currentRole === 'payroll-admin';
+  const isPayrollManager = user.currentRole === 'payroll-manager';
+  const isFinanceController = user.currentRole === 'finance-controller';
   const isEmployee = user.currentRole === 'employee';
   
   // Rollväxling hanteras nu via persona-växlaren
   
   // Roles that can access manager functions
-  const canAccessManagerFunctions = isManager || isHR || isPayroll;
+  const canAccessManagerFunctions = isManager || isHR || isHRManager || isPayrollAdmin || isPayrollManager;
+  
+  // 🔒 PAYROLL EXPORT - HIGHLY RESTRICTED per GDPR and Swedish law
+  // Only specific payroll roles + HR-manager (if they have payroll responsibility)
+  const canAccessPayrollExport = isPayrollAdmin || isPayrollManager || isHRManager;
   
   const menuItems = [
     {
@@ -70,7 +77,7 @@ const Sidebar = () => {
       label: t('nav.attestation'),
       active: location === "/attestation"
     }] : []),
-    ...(isPayroll || isHR ? [{
+    ...(canAccessPayrollExport ? [{
       href: "/paxml-export",
       icon: "file_download",
       label: t('nav.payrollExport'),
@@ -78,18 +85,11 @@ const Sidebar = () => {
     }] : [])
   ];
 
-  // HR-specific items
-  const hrMenuItems = isHR ? [
-    {
-      href: "/hr-dashboard",
-      icon: "people",
-      label: "HR Översikt",
-      active: location === "/hr-dashboard"
-    }
-  ] : [];
+  // HR-specific items - REMOVED HR Översikt as it has no corresponding page
+  const hrMenuItems: any[] = [];
 
   // Payroll-specific items  
-  const payrollMenuItems = isPayroll ? [
+  const payrollMenuItems = (isPayrollAdmin || isPayrollManager) ? [
     {
       href: "/payroll-dashboard", 
       icon: "account_balance_wallet",
@@ -142,7 +142,7 @@ const Sidebar = () => {
             <>
               <li className="border-t mt-2 pt-2 border-sidebar-border">
                 <div className="px-4 py-2 text-xs font-semibold text-muted-foreground">
-                  {isHR ? 'HR-funktioner' : isPayroll ? 'Lönefunktioner' : t('nav.managerFunctions')}
+                  {isHR || isHRManager ? 'HR-funktioner' : (isPayrollAdmin || isPayrollManager) ? 'Lönefunktioner' : t('nav.managerFunctions')}
                 </div>
               </li>
               
