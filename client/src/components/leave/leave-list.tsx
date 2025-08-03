@@ -22,9 +22,9 @@ const LeaveList = ({ onSelect }: LeaveListProps) => {
   const { user } = useStore();
   const employeeId = user.currentUser?.employeeId;
   
-  // Filters - adapted for leave planning workflow (show upcoming/pending first)
+  // Filters - show all periods by default so users see their submitted requests immediately
   const [filters, setFilters] = useState({
-    period: 'upcoming', // Show future leave first (planning focus)
+    period: 'all', // Show all periods - users want to see their submitted requests immediately
     status: 'all', // Show all leave requests - complete overview for users
     leaveType: 'all',
   });
