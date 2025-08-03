@@ -947,11 +947,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get existing leave requests for this employee
       let existingRequests = [];
       try {
-        existingRequests = await restStorage.getLeaveRequests(employeeId, { status: 'all' });
+        console.log('🔍 EXPRESS VALIDATION - Fetching requests for employeeId:', employeeId);
+        existingRequests = await restStorage.getLeaveRequests({ employeeId: employeeId, status: 'all' });
+        console.log('🔍 EXPRESS VALIDATION - Raw requests returned:', existingRequests.length);
+        console.log('🔍 EXPRESS VALIDATION - First few requests:', JSON.stringify(existingRequests.slice(0, 3), null, 2));
+        
         const activeRequests = existingRequests.filter((lr: any) => 
           ['approved', 'pending'].includes(lr.status)
         );
         console.log('🔍 EXPRESS VALIDATION - Found active requests:', activeRequests.length);
+       
+        // Double-check that we're only looking at the correct employee  
+        const wrongEmployeeRequests = activeRequests.filter((lr: any) => lr.employeeId !== employeeId);
+        if (wrongEmployeeRequests.length > 0) {
+          console.log('🚨 EXPRESS VALIDATION - BUGG: Found requests for wrong employee!', wrongEmployeeRequests.length);
+          console.log('🚨 Wrong employee requests:', JSON.stringify(wrongEmployeeRequests, null, 2));
+        }
         
         // Check for date overlaps
         const newStart = new Date(startDate);
@@ -1133,6 +1144,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/manager/deviations/pending', async (req, res) => {
     try {
       const { managerId } = req.query;
+      
+      // 🚨 SECURITY: Require managerId to prevent data leakage
+      if (!managerId) {
+        return res.status(400).json({ 
+          error: 'managerId is required',
+          message: 'Du måste ange managerId för att se väntande avvikelser'
+        });
+      }
+      
       let pendingDeviations;
       
       // Try storage first, fallback to restStorage
@@ -1341,6 +1361,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/manager/leave-requests/pending', async (req, res) => {
     try {
       const { managerId } = req.query;
+      
+      // 🚨 SECURITY: Require managerId to prevent data leakage
+      if (!managerId) {
+        return res.status(400).json({ 
+          error: 'managerId is required',
+          message: 'Du måste ange managerId för att se väntande ansökningar'
+        });
+      }
+      
       let pendingLeaveRequests;
       
       // Try storage first, fallback to restStorage

@@ -24,6 +24,15 @@ async function getMockData(filename: string) {
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const { managerId } = req.query;
+    
+    // 🚨 SECURITY: Require managerId to prevent data leakage
+    if (!managerId) {
+      return res.status(400).json({ 
+        error: 'managerId is required',
+        message: 'Du måste ange managerId för att se väntande ansökningar'
+      });
+    }
+    
     let pendingLeaveRequests;
     
     // Try Supabase first, fallback to mock data
