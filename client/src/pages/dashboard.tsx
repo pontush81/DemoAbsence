@@ -578,7 +578,7 @@ export default function Dashboard() {
             </div>
 
             {/* Action buttons */}
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex flex-col sm:flex-row gap-3 w-full">
               {hasMonthlyDeviations ? (
                 // User already has deviations - just submit the report
                 <Button
@@ -586,14 +586,14 @@ export default function Dashboard() {
                   variant={hasPendingItems ? "secondary" : "default"}
                   onClick={() => handleSubmitTimeReport(true)}
                   disabled={hasPendingItems || isLoadingMonthlyDeviations || isLoadingMonthlyLeaveRequests}
-                  className="flex-1"
+                  className="flex-1 min-w-[120px]"
                 >
                   <span className="material-icons mr-2">{hasPendingItems ? 'block' : 'send'}</span>
                   <span className="hidden sm:inline">
                     {hasPendingItems ? 'Väntande godkännanden först' : 'Skicka tidrapport'}
                   </span>
                   <span className="sm:hidden">
-                    {hasPendingItems ? 'Väntande' : 'Skicka'}
+                    {hasPendingItems ? 'Väntar' : 'Skicka'}
                   </span>
                 </Button>
               ) : (
@@ -604,14 +604,14 @@ export default function Dashboard() {
                     variant={hasPendingItems ? "secondary" : "default"}
                     onClick={() => handleSubmitTimeReport(false)}
                     disabled={hasPendingItems || isLoadingMonthlyDeviations || isLoadingMonthlyLeaveRequests}
-                    className="flex-1"
+                    className="flex-1 min-w-[120px]"
                   >
                     <span className="material-icons mr-2">{hasPendingItems ? 'block' : 'check_circle'}</span>
                     <span className="hidden sm:inline">
                       {hasPendingItems ? 'Hantera godkännanden först' : 'Jag har inga avvikelser'}
                     </span>
                     <span className="sm:hidden">
-                      {hasPendingItems ? 'Hantera' : 'Inga avvikelser'}
+                      {hasPendingItems ? 'Hantera' : 'Inga'}
                     </span>
                   </Button>
                   
@@ -620,7 +620,7 @@ export default function Dashboard() {
                     variant="outline"
                     onClick={() => handleSubmitTimeReport(true)}
                     disabled={isLoadingMonthlyDeviations || isLoadingMonthlyLeaveRequests}
-                    className="flex-1"
+                    className="flex-1 min-w-[120px]"
                   >
                     <span className="material-icons mr-2">add</span>
                     <span className="hidden sm:inline">Registrera avvikelser</span>
