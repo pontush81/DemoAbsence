@@ -50,9 +50,6 @@ export default function Leave() {
             <div className="mb-4 md:mb-0">
               <h1 className="text-3xl font-bold text-gray-900">{t('leave.title')}</h1>
               <p className="text-lg text-muted-foreground mt-1">{t('leave.description')}</p>
-              <div className="mt-2 text-sm text-gray-500">
-                🗓️ <strong>Tips:</strong> Planera din ledighet i förväg för smidig godkännandeprocess
-              </div>
             </div>
             
             {/* Primary action + View toggle - adapted for leave planning workflow */}
