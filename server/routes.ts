@@ -706,6 +706,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/leave-requests/:id', async (req, res) => {
     try {
       const leaveRequest = await restStorage.getLeaveRequest(parseInt(req.params.id));
+      
+      console.log('🔍 GET DEBUG - Raw leave request from storage:', JSON.stringify(leaveRequest, null, 2));
+      
       if (leaveRequest) {
         // 🎯 CRITICAL FIX: Map snake_case to camelCase for frontend compatibility  
         const mappedLeaveRequest = {
@@ -723,6 +726,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           pausedAt: leaveRequest.paused_at || leaveRequest.pausedAt,
           pauseReason: leaveRequest.pause_reason || leaveRequest.pauseReason,
         };
+        
+        console.log('🔍 GET DEBUG - Mapped leave request:', JSON.stringify(mappedLeaveRequest, null, 2));
         
         res.json(mappedLeaveRequest);
       } else {
