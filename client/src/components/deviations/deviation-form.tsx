@@ -106,33 +106,90 @@ const DeviationForm = ({ deviationId, onCancel }: DeviationFormProps) => {
   const [showCustomDatePicker, setShowCustomDatePicker] = useState(false);
   const [pendingAction, setPendingAction] = useState<typeof quickActions[0] | null>(null);
 
+  // Get URL parameters to pre-fill form based on button clicked
+  const urlParams = new URLSearchParams(window.location.search);
+  const formType = urlParams.get('type'); // 'sick', 'overtime', etc.
+
   // Quick Actions - Pre-configured common deviations (8h arbetstid för tjänstemän)
-  const quickActions = [
-    {
-      icon: "🤒",
-      label: "Sjuk hela dagen",
-      timeCode: "300",
-      startTime: "08:00",
-      endTime: "16:00", // 8 timmar arbetstid (exklusive lunch)
-      comment: ""
-    },
-    {
-      icon: "👶",
-      label: "VAB hela dagen", 
-      timeCode: "400",
-      startTime: "08:00",
-      endTime: "16:00", // 8 timmar arbetstid (exklusive lunch)
-      comment: ""
-    },
-    {
-      icon: "🤒",
-      label: "Sjuk halvdag",
-      timeCode: "300", 
-      startTime: "08:00",
-      endTime: "12:00", // 4 timmar (morgon)
-      comment: ""
+  const getQuickActions = () => {
+    if (formType === 'sick') {
+      return [
+        {
+          icon: "🤒",
+          label: "Sjuk hela dagen",
+          timeCode: "300",
+          startTime: "08:00",
+          endTime: "16:00",
+          comment: ""
+        },
+        {
+          icon: "👶",
+          label: "VAB hela dagen", 
+          timeCode: "400",
+          startTime: "08:00",
+          endTime: "16:00",
+          comment: ""
+        },
+        {
+          icon: "🤒",
+          label: "Sjuk halvdag",
+          timeCode: "300", 
+          startTime: "08:00",
+          endTime: "12:00",
+          comment: ""
+        }
+      ];
+    } else if (formType === 'overtime') {
+      return [
+        {
+          icon: "⏰",
+          label: "2h övertid",
+          timeCode: "200",
+          startTime: "17:00",
+          endTime: "19:00",
+          comment: ""
+        },
+        {
+          icon: "⏰",
+          label: "4h övertid",
+          timeCode: "200",
+          startTime: "17:00",
+          endTime: "21:00",
+          comment: ""
+        },
+        {
+          icon: "⏰",
+          label: "Morgon övertid",
+          timeCode: "200",
+          startTime: "06:00",
+          endTime: "08:00",
+          comment: ""
+        }
+      ];
+    } else {
+      // Default quick actions for general form
+      return [
+        {
+          icon: "🤒",
+          label: "Sjuk hela dagen",
+          timeCode: "300",
+          startTime: "08:00",
+          endTime: "16:00",
+          comment: ""
+        },
+        {
+          icon: "👶",
+          label: "VAB hela dagen", 
+          timeCode: "400",
+          startTime: "08:00",
+          endTime: "16:00",
+          comment: ""
+        }
+      ];
     }
-  ];
+  };
+
+  const quickActions = getQuickActions();
 
   // Handle quick action selection - show date confirmation first
   const handleQuickAction = (action: typeof quickActions[0]) => {
@@ -207,19 +264,43 @@ const DeviationForm = ({ deviationId, onCancel }: DeviationFormProps) => {
     queryFn: () => apiService.getTimeCodes(),
   });
   
-  // Form setup with default values FIRST
-  const deviationFormSchema = createDeviationFormSchema(t);
-  const form = useForm<DeviationFormValues>({
-    resolver: zodResolver(deviationFormSchema),
-    defaultValues: {
+  // Helper function to get default values based on form type
+  const getDefaultValues = () => {
+    const baseDefaults = {
       employeeId: user.currentUser?.employeeId || '',
       date: format(new Date(), 'yyyy-MM-dd'),
       startTime: '08:00',
       endTime: '16:00', // 8 timmar arbetstid (exklusive lunch) - konsistent med Quick Actions
       timeCode: '',
       comment: '',
-      status: 'pending',
-    },
+      status: 'pending' as const,
+    };
+
+    // Pre-fill based on URL parameter
+    switch (formType) {
+      case 'sick':
+        return {
+          ...baseDefaults,
+          timeCode: '300', // Sjukdom
+          endTime: '16:00', // Hela dagen
+        };
+      case 'overtime':
+        return {
+          ...baseDefaults,
+          timeCode: '200', // Övertid 1 (vardagar)
+          startTime: '17:00', // Efter ordinarie arbetstid
+          endTime: '19:00', // 2 timmars övertid som exempel
+        };
+      default:
+        return baseDefaults;
+    }
+  };
+
+  // Form setup with default values FIRST
+  const deviationFormSchema = createDeviationFormSchema(t);
+  const form = useForm<DeviationFormValues>({
+    resolver: zodResolver(deviationFormSchema),
+    defaultValues: getDefaultValues(),
   });
 
   // Fetch deviation if editing
