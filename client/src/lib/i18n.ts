@@ -219,6 +219,10 @@ const translations: Translations = {
     sv: 'Skicka tillbaka',
     en: 'Return',
   },
+  'action.pause': {
+    sv: 'Pausa',
+    en: 'Pause',
+  },
   
   // Time codes
   'timecode.100': {
