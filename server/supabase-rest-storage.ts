@@ -10,13 +10,31 @@ export class SupabaseRestStorage {
     return supabase !== null;
   }
   
-  // Helper method to get data from Supabase (NO FALLBACK - real data only!)
+  // Helper method to get data from Supabase with JSON fallback
   private async getDataFromSupabase<T>(
     tableName: string,
     filters?: any
   ): Promise<T> {
     if (!this.isSupabaseAvailable()) {
-      throw new Error(`🚨 CRITICAL: Supabase not available for ${tableName}. Check your environment variables: DATABASE_URL, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY`);
+      console.log(`🔄 Supabase not available for ${tableName}, falling back to JSON files`);
+      // Map table name to JSON filename
+      const filenameMap: Record<string, string> = {
+        'employees': 'employees.json',
+        'schedules': 'schedules.json',
+        'deviations': 'deviations.json',
+        'leave_requests': 'leave-requests.json',
+        'time_codes': 'timecodes.json',
+        'time_balances': 'timebalances.json',
+        'payslips': 'payslips.json'
+      };
+      
+      const filename = filenameMap[tableName];
+      if (filename) {
+        return await getMockData(filename) as T;
+      } else {
+        console.warn(`No JSON file mapping for table: ${tableName}`);
+        return [] as T;
+      }
     }
     
     let query = supabase!.from(tableName).select('*');
@@ -33,7 +51,24 @@ export class SupabaseRestStorage {
     const { data, error } = await query;
     
     if (error) {
-      throw new Error(`❌ Supabase query failed for ${tableName}: ${error.message}`);
+      console.error(`❌ Supabase query failed for ${tableName}, falling back to JSON:`, error.message);
+      // Fallback to JSON files
+      const filenameMap: Record<string, string> = {
+        'employees': 'employees.json',
+        'schedules': 'schedules.json',
+        'deviations': 'deviations.json',
+        'leave_requests': 'leave-requests.json',
+        'time_codes': 'timecodes.json',
+        'time_balances': 'timebalances.json',
+        'payslips': 'payslips.json'
+      };
+      
+      const filename = filenameMap[tableName];
+      if (filename) {
+        return await getMockData(filename) as T;
+      } else {
+        throw new Error(`❌ Both Supabase and JSON fallback failed for ${tableName}`);
+      }
     }
     
     return data as T;

@@ -12,6 +12,13 @@ const MobileSidebar = () => {
   const currentRoute = navigation.currentRoute;
   const showTravelExpenses = isFeatureEnabled('enableTravelExpenses');
   const isManager = user.currentRole === 'manager';
+  const isHR = user.currentRole === 'hr';
+  const isHRManager = user.currentRole === 'hr-manager';
+  const isPayrollAdmin = user.currentRole === 'payroll-admin';
+  const isPayrollManager = user.currentRole === 'payroll-manager';
+  
+  // 🔒 PAYROLL EXPORT - HIGHLY RESTRICTED per GDPR and Swedish law
+  const canAccessPayrollExport = isPayrollAdmin || isPayrollManager || isHRManager;
   
   const closeSidebar = () => {
     setMobileSidebarOpen(false);
@@ -64,12 +71,13 @@ const MobileSidebar = () => {
       label: t('nav.attestation'),
       active: currentRoute === "/attestation"
     },
-    {
+    // 🔒 PAYROLL EXPORT - HIGHLY RESTRICTED per GDPR and Swedish law
+    ...(canAccessPayrollExport ? [{
       href: "/paxml-export",
       icon: "file_download",
       label: t('nav.payrollExport'),
       active: currentRoute === "/paxml-export"
-    }
+    }] : [])
   ];
   
   const travelExpensesMenuItem = {
@@ -132,8 +140,8 @@ const MobileSidebar = () => {
             </li>
           ))}
           
-          {/* Manager section */}
-          {isManager && (
+          {/* Manager/Administrative section */}
+          {(isManager || isHR || isHRManager || isPayrollAdmin || isPayrollManager) && (
             <>
               <li className="border-t mt-2 pt-2 border-sidebar-border">
                 <div className="px-4 py-2 text-xs font-semibold text-muted-foreground">

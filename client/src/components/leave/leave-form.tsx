@@ -27,9 +27,10 @@ import { apiRequest } from "@/lib/queryClient";
 import { apiService } from "@/lib/apiService";
 import { useStore } from "@/lib/store";
 import { format } from "date-fns";
+import { checkLeaveRequestOverlap } from "@/lib/leaveValidation";
 
 // Create the schema with custom validation using translations
-const createLeaveFormSchema = (t: (key: string) => string) => insertLeaveRequestSchema.extend({
+const createLeaveFormSchema = (t: (key: string) => string, existingRequests: any[] = [], currentRequestId?: number) => insertLeaveRequestSchema.extend({
   startDate: z.string().min(1, t('validation.startDateRequired')),
   endDate: z.string().min(1, t('validation.endDateRequired')),
   leaveType: z.string().min(1, t('validation.leaveTypeRequired')),
@@ -41,6 +42,24 @@ const createLeaveFormSchema = (t: (key: string) => string) => insertLeaveRequest
 }, {
   message: t('validation.endDateAfterStartDate'),
   path: ["endDate"],
+}).refine((data) => {
+  // Skip validation if we don't have employee ID or existing requests
+  if (!data.employeeId || !existingRequests.length) return true;
+  
+  const overlapResult = checkLeaveRequestOverlap(
+    {
+      startDate: data.startDate,
+      endDate: data.endDate,
+      employeeId: data.employeeId
+    },
+    existingRequests,
+    currentRequestId
+  );
+  
+  return !overlapResult.hasOverlap;
+}, {
+  message: t('validation.leaveOverlap') || 'Du har redan ansökt om ledighet för dessa datum',
+  path: ["startDate"],
 });
 
 type LeaveFormValues = z.infer<ReturnType<typeof createLeaveFormSchema>>;
@@ -64,8 +83,15 @@ const LeaveForm = ({ leaveRequestId, onCancel }: LeaveFormProps) => {
     enabled: !!leaveRequestId,
   });
   
+  // Fetch existing leave requests for overlap validation
+  const { data: existingLeaveRequests = [] } = useQuery({
+    queryKey: ['/api/leave-requests', user.currentUser?.employeeId, 'all'],
+    queryFn: () => user.currentUser?.employeeId ? apiService.getLeaveRequests(user.currentUser.employeeId, { status: 'all' }) : Promise.resolve([]),
+    enabled: !!user.currentUser?.employeeId,
+  });
+  
   // Form setup with default values
-  const leaveFormSchema = createLeaveFormSchema(t);
+  const leaveFormSchema = createLeaveFormSchema(t, existingLeaveRequests, leaveRequestId);
   const form = useForm<LeaveFormValues>({
     resolver: zodResolver(leaveFormSchema),
     defaultValues: {

@@ -119,6 +119,70 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         lastUpdated: now.toISOString()
       };
       
+      // VALIDATION: Check for overlapping leave requests
+      const { startDate, endDate, employeeId } = leaveRequestData;
+      if (!startDate || !endDate || !employeeId) {
+        return res.status(400).json({ error: 'startDate, endDate, and employeeId are required' });
+      }
+      
+      // Get existing leave requests for this employee
+      let existingRequests = [];
+      if (supabase) {
+        try {
+          const { data, error } = await supabase
+            .from('leave_requests')
+            .select('*')
+            .eq('employee_id', employeeId)
+            .in('status', ['approved', 'pending']);
+          
+          if (error) throw error;
+          existingRequests = data || [];
+        } catch (error) {
+          console.log('Supabase validation check failed, using mock data:', error);
+          const mockData = await getMockData('leave-requests.json');
+          existingRequests = mockData.filter((lr: any) => 
+            (lr.employeeId === employeeId || lr.employee_id === employeeId) &&
+            ['approved', 'pending'].includes(lr.status)
+          );
+        }
+      } else {
+        const mockData = await getMockData('leave-requests.json');
+        existingRequests = mockData.filter((lr: any) => 
+          (lr.employeeId === employeeId || lr.employee_id === employeeId) &&
+          ['approved', 'pending'].includes(lr.status)
+        );
+      }
+      
+      // Check for date overlaps
+      const newStart = new Date(startDate);
+      const newEnd = new Date(endDate);
+      
+      const hasOverlap = existingRequests.some((existing: any) => {
+        const existingStart = new Date(existing.start_date || existing.startDate);
+        const existingEnd = new Date(existing.end_date || existing.endDate);
+        
+        // Two ranges overlap if: start1 <= end2 AND start2 <= end1
+        return newStart <= existingEnd && existingStart <= newEnd;
+      });
+      
+      if (hasOverlap) {
+        const conflictingRequest = existingRequests.find((existing: any) => {
+          const existingStart = new Date(existing.start_date || existing.startDate);
+          const existingEnd = new Date(existing.end_date || existing.endDate);
+          return newStart <= existingEnd && existingStart <= newEnd;
+        });
+        
+        const conflictStart = new Date(conflictingRequest.start_date || conflictingRequest.startDate).toLocaleDateString('sv-SE');
+        const conflictEnd = new Date(conflictingRequest.end_date || conflictingRequest.endDate).toLocaleDateString('sv-SE');
+        const conflictDates = conflictStart === conflictEnd ? conflictStart : `${conflictStart} - ${conflictEnd}`;
+        
+        return res.status(409).json({ 
+          error: 'Överlappande ledighet',
+          message: `Du har redan ansökt om ledighet som överlappar med dessa datum. Befintlig ledighet: ${conflictDates}`,
+          conflictingDates: { start: conflictStart, end: conflictEnd }
+        });
+      }
+      
       let newLeaveRequest;
       
       // Try Supabase first, fallback to mock data

@@ -16,6 +16,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ message: 'API is working', timestamp: new Date() });
   });
 
+  // Debug endpoint to test JSON reading
+  app.get('/api/debug/schedules', async (req, res) => {
+    try {
+      const jsonData = await getMockData('schedules.json');
+      res.json({
+        totalCount: Array.isArray(jsonData) ? jsonData.length : 0,
+        e001Count: Array.isArray(jsonData) ? jsonData.filter((s: any) => s.employeeId === 'E001').length : 0,
+        sample: Array.isArray(jsonData) ? jsonData.slice(0, 3) : jsonData
+      });
+    } catch (error) {
+      res.status(500).json({ error: (error as Error).message });
+    }
+  });
+
+  // Debug endpoint to test restStorage
+  app.get('/api/debug/reststorage-schedules', async (req, res) => {
+    try {
+      const schedules = await restStorage.getSchedules();
+      res.json({
+        totalCount: Array.isArray(schedules) ? schedules.length : 0,
+        e001Count: Array.isArray(schedules) ? schedules.filter((s: any) => (s.employeeId === 'E001' || s.employee_id === 'E001')).length : 0,
+        sample: Array.isArray(schedules) ? schedules.slice(0, 3) : schedules
+      });
+    } catch (error) {
+      res.status(500).json({ error: (error as Error).message });
+    }
+  });
+
   // Simple test deviation creation
   app.post('/api/test-deviation', async (req, res) => {
     try {
@@ -1498,12 +1526,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { employeeId, startDate, endDate } = req.query;
       
-      const filters: any = {};
-      if (employeeId) filters.employeeId = employeeId;
-      if (startDate) filters.startDate = startDate;
-      if (endDate) filters.endDate = endDate;
-      
-      const schedules = await restStorage.getSchedules(filters);
+      // Try restStorage first, fallback to JSON
+      let schedules;
+      try {
+        const filters: any = {};
+        if (employeeId) filters.employeeId = employeeId;
+        if (startDate) filters.startDate = startDate;
+        if (endDate) filters.endDate = endDate;
+        
+        schedules = await restStorage.getSchedules(filters);
+        
+        // If we get very few results, it might be cache/database issue, fallback to JSON
+        if (!Array.isArray(schedules) || schedules.length < 10) {
+          console.log('🔄 RestStorage returned few results, trying JSON fallback...');
+          throw new Error('Low result count, trying JSON fallback');
+        }
+      } catch (error) {
+        console.log('🔄 RestStorage failed, using JSON fallback for schedules');
+        // Fallback to JSON file
+        const allSchedules = await getMockData('schedules.json');
+        schedules = Array.isArray(allSchedules) ? allSchedules : [];
+        
+        // Apply client-side filtering
+        if (employeeId) {
+          schedules = schedules.filter((s: any) => s.employeeId === employeeId);
+        }
+        if (startDate) {
+          schedules = schedules.filter((s: any) => s.date >= startDate);
+        }
+        if (endDate) {
+          schedules = schedules.filter((s: any) => s.date <= endDate);
+        }
+      }
       
       // Map snake_case to camelCase for consistency
       const mappedSchedules = Array.isArray(schedules) ? schedules.map((schedule: any) => {

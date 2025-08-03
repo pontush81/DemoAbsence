@@ -16,6 +16,59 @@ const RoleSwitcher = () => {
   // Regular employees changing their own roles is a critical security risk
   const canChangeRoles = user.currentRole === 'hr'; // Only HR can change roles
   
+  // Helper functions for role display
+  const getRoleDisplayName = (role: UserRole): string => {
+    switch (role) {
+      case 'employee': return 'Medarbetare';
+      case 'manager': return 'Chef';
+      case 'hr': return 'HR-specialist';
+      case 'hr-manager': return 'HR-chef';
+      case 'payroll-admin': return 'Löneadministratör';
+      case 'payroll-manager': return 'Lönechef';
+      case 'finance-controller': return 'Ekonomicontroller';
+      default: return role;
+    }
+  };
+  
+  const getRoleColor = (role: UserRole): string => {
+    switch (role) {
+      case 'employee': return 'bg-green-100 text-green-800';
+      case 'manager': return 'bg-blue-100 text-blue-800';
+      case 'hr': return 'bg-purple-100 text-purple-800';
+      case 'hr-manager': return 'bg-purple-200 text-purple-900';
+      case 'payroll-admin': return 'bg-orange-100 text-orange-800';
+      case 'payroll-manager': return 'bg-orange-200 text-orange-900';
+      case 'finance-controller': return 'bg-indigo-100 text-indigo-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+  
+  const getRoleIcon = (role: UserRole): string => {
+    switch (role) {
+      case 'employee': return 'person';
+      case 'manager': return 'supervisor_account';
+      case 'hr': return 'people';
+      case 'hr-manager': return 'manage_accounts';
+      case 'payroll-admin': return 'account_balance_wallet';
+      case 'payroll-manager': return 'account_balance';
+      case 'finance-controller': return 'analytics';
+      default: return 'person';
+    }
+  };
+  
+  const getRoleDescription = (role: UserRole): string => {
+    switch (role) {
+      case 'employee': return 'Du kan skicka in avvikelser och ledighetsansökningar för godkännande.';
+      case 'manager': return 'Du kan nu godkänna avvikelser och ledighetsansökningar i Chefsektionen.';
+      case 'hr': return 'Du kan hantera personalärenden och se översikt över alla anställda.';
+      case 'hr-manager': return 'Du kan hantera HR-funktioner, personalärenden och exportera lönedata.';
+      case 'payroll-admin': return 'Du kan hantera löner, exportera PAXML och se löneoversikt.';
+      case 'payroll-manager': return 'Du kan hantera löneprocesser, godkänna löner och exportera PAXML.';
+      case 'finance-controller': return 'Du kan se ekonomiska rapporter och kontrollera finansiell data.';
+      default: return 'Standard användarrättigheter.';
+    }
+  };
+  
   const handleRoleChange = (role: string) => {
     if (!canChangeRoles) {
       console.warn('🚨 SECURITY: Unauthorized role change attempt blocked', {
@@ -83,17 +136,9 @@ const RoleSwitcher = () => {
           </div>
           <Badge 
             variant="secondary"
-            className={`text-md py-1.5 px-3 ${
-              user.currentRole === 'manager' ? 'bg-blue-100 text-blue-800' :
-              user.currentRole === 'hr' ? 'bg-purple-100 text-purple-800' :
-              user.currentRole === 'payroll' ? 'bg-orange-100 text-orange-800' :
-              'bg-green-100 text-green-800'
-            }`}
+            className={`text-md py-1.5 px-3 ${getRoleColor(user.currentRole)}`}
           >
-            {user.currentRole === 'manager' ? 'Chef' :
-             user.currentRole === 'hr' ? 'HR-specialist' :
-             user.currentRole === 'payroll' ? 'Löneadministratör' :
-             'Medarbetare'}
+            {getRoleDisplayName(user.currentRole)}
           </Badge>
         </div>
       </CardHeader>
@@ -143,16 +188,10 @@ const RoleSwitcher = () => {
                 <div className="w-full p-3 bg-gray-50 border border-gray-200 rounded-md flex items-center justify-between">
                   <div className="flex items-center">
                     <span className="material-icons text-sm mr-2 text-gray-600">
-                      {user.currentRole === 'manager' ? 'supervisor_account' :
-                       user.currentRole === 'hr' ? 'people' :
-                       user.currentRole === 'payroll' ? 'account_balance_wallet' :
-                       'person'}
+                      {getRoleIcon(user.currentRole)}
                     </span>
                     <span className="font-medium text-gray-700">
-                      {user.currentRole === 'manager' ? 'Chef' :
-                       user.currentRole === 'hr' ? 'HR-specialist' :
-                       user.currentRole === 'payroll' ? 'Löneadministratör' :
-                       'Medarbetare'}
+                      {getRoleDisplayName(user.currentRole)}
                     </span>
                   </div>
                   <span className="material-icons text-gray-400 cursor-not-allowed">lock</span>
@@ -173,30 +212,24 @@ const RoleSwitcher = () => {
           </div>
           
           <div className="pt-2 flex items-center gap-2">
-            <div className={`w-3 h-3 rounded-full ${
+            <div             className={`w-3 h-3 rounded-full ${
               user.currentRole === 'manager' ? 'bg-blue-500' :
               user.currentRole === 'hr' ? 'bg-purple-500' :
-              user.currentRole === 'payroll' ? 'bg-orange-500' :
+              user.currentRole === 'hr-manager' ? 'bg-purple-600' :
+              user.currentRole === 'payroll-admin' ? 'bg-orange-500' :
+              user.currentRole === 'payroll-manager' ? 'bg-orange-600' :
+              user.currentRole === 'finance-controller' ? 'bg-indigo-500' :
               'bg-green-500'
             }`}></div>
             <span className="text-sm">
-              {user.currentRole === 'manager' ? 'Chefsroll aktiv' :
-               user.currentRole === 'hr' ? 'HR-specialist roll aktiv' :
-               user.currentRole === 'payroll' ? 'Löneadministratör roll aktiv' :
-               'Medarbetarroll aktiv'}
+              {getRoleDisplayName(user.currentRole)} roll aktiv
             </span>
           </div>
           
           <div className="bg-muted p-4 rounded-md">
             <h4 className="font-medium mb-2">{t('settings.roleInfo') || 'Role Information'}</h4>
             <p className="text-sm text-muted-foreground">
-              {user.currentRole === 'manager'
-                ? 'Du kan nu godkänna avvikelser och ledighetsansökningar i Chefsektionen.'
-                : user.currentRole === 'hr'
-                ? 'Du kan hantera personalärenden och se översikt över alla anställda.'
-                : user.currentRole === 'payroll'
-                ? 'Du kan hantera löner, exportera PAXML och se löneoversikt.'
-                : 'Du kan skicka in avvikelser och ledighetsansökningar för godkännande.'}
+              {getRoleDescription(user.currentRole)}
             </p>
           </div>
           
@@ -230,7 +263,7 @@ const RoleSwitcher = () => {
               Gå till HR-område
             </Button>
           )}
-          {user.currentRole === 'payroll' && (
+          {(user.currentRole === 'payroll-admin' || user.currentRole === 'payroll-manager') && (
             <Button 
               type="button"
               className="w-full mt-4 bg-orange-600 hover:bg-orange-700 relative z-10" 

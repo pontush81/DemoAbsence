@@ -70,16 +70,43 @@ export default function LeaveCalendar() {
     calendarWeeks.push(currentWeek);
   }
 
-  // Check if a date has leave (exclude rejected requests)
+  // Check if a date has leave (exclude rejected requests and deduplicate)
   const getLeaveForDate = (date: Date) => {
     const dateStr = date.toISOString().split('T')[0];
-    return leaveRequests.filter((leave: LeaveRequest) => {
+    const matchingLeaves = leaveRequests.filter((leave: LeaveRequest) => {
       const start = new Date(leave.startDate);
       const end = new Date(leave.endDate);
       const checkDate = new Date(dateStr);
       // Only show approved and pending requests in calendar
       return (checkDate >= start && checkDate <= end) && leave.status !== 'rejected';
     });
+
+    // Deduplicate by grouping same employee + same type + overlapping dates
+    const deduplicatedLeaves = matchingLeaves.reduce((acc: LeaveRequest[], current: LeaveRequest) => {
+      const existing = acc.find(item => 
+        item.employeeId === current.employeeId && 
+        item.leaveType === current.leaveType &&
+        // Check if they overlap (same day or period)
+        (new Date(item.startDate) <= new Date(current.endDate) && 
+         new Date(item.endDate) >= new Date(current.startDate))
+      );
+      
+      if (!existing) {
+        acc.push(current);
+      } else {
+        // Keep the most recent/relevant one (approved over pending, higher ID)
+        if (current.status === 'approved' && existing.status === 'pending') {
+          const index = acc.indexOf(existing);
+          acc[index] = current;
+        } else if (current.status === existing.status && current.id > existing.id) {
+          const index = acc.indexOf(existing);
+          acc[index] = current;
+        }
+      }
+      return acc;
+    }, []);
+
+    return deduplicatedLeaves;
   };
 
   // Navigate months

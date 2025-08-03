@@ -30,8 +30,11 @@ function getRoleDescription(role: UserRole): string {
   switch (role) {
     case 'employee': return 'Visa endast egna uppgifter';
     case 'manager': return 'Godkänn ansökningar från medarbetare';
-    case 'hr': return 'Hantera personalärenden';
-    case 'payroll': return 'Hantera löner och PAXML-export';
+    case 'hr': return 'Hantera personalärenden (begränsad)';
+    case 'hr-manager': return 'Hantera HR och löneexport';
+    case 'payroll-admin': return 'Löneadministration och PAXML-export';
+    case 'payroll-manager': return 'Lönechefsansvar och PAXML-export';
+    case 'finance-controller': return 'Ekonomi och rapporter (begränsad)';
     default: return '';
   }
 }
@@ -41,7 +44,10 @@ export function getRoleLabel(role: UserRole): string {
     case 'employee': return 'Medarbetare';
     case 'manager': return 'Chef';
     case 'hr': return 'HR-specialist';
-    case 'payroll': return 'Löneadministratör';
+    case 'hr-manager': return 'HR-chef';
+    case 'payroll-admin': return 'Löneadministratör';
+    case 'payroll-manager': return 'Lönechef';
+    case 'finance-controller': return 'Ekonomicontroller';
     default: return role;
   }
 }
@@ -51,7 +57,10 @@ export function getRoleIcon(role: UserRole): string {
     case 'employee': return 'person';
     case 'manager': return 'supervisor_account';
     case 'hr': return 'people';
-    case 'payroll': return 'account_balance_wallet';
+    case 'hr-manager': return 'manage_accounts';
+    case 'payroll-admin': return 'account_balance_wallet';
+    case 'payroll-manager': return 'account_balance';
+    case 'finance-controller': return 'analytics';
     default: return 'person';
   }
 }
@@ -61,7 +70,10 @@ export function getRoleColor(role: UserRole): string {
     case 'employee': return 'bg-green-100 text-green-800';
     case 'manager': return 'bg-blue-100 text-blue-800';
     case 'hr': return 'bg-purple-100 text-purple-800';
-    case 'payroll': return 'bg-orange-100 text-orange-800';
+    case 'hr-manager': return 'bg-purple-200 text-purple-900';
+    case 'payroll-admin': return 'bg-orange-100 text-orange-800';
+    case 'payroll-manager': return 'bg-orange-200 text-orange-900';
+    case 'finance-controller': return 'bg-indigo-100 text-indigo-800';
     default: return 'bg-gray-100 text-gray-800';
   }
 }

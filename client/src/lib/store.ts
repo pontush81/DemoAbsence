@@ -4,7 +4,7 @@ import { persist } from 'zustand/middleware';
 import { demoPersonas } from './demoPersonas';
 import { simulateProductionLogin } from './productionUsers';
 
-export type UserRole = 'employee' | 'manager' | 'hr' | 'payroll';
+export type UserRole = 'employee' | 'manager' | 'hr' | 'hr-manager' | 'payroll-admin' | 'payroll-manager' | 'finance-controller';
 
 export type UserState = {
   isAuthenticated: boolean;

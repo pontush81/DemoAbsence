@@ -1387,6 +1387,10 @@ const translations: Translations = {
     sv: 'Slutdatum måste vara på eller efter startdatum',
     en: 'End date must be on or after start date',
   },
+  'validation.leaveOverlap': {
+    sv: 'Du har redan ansökt om ledighet för dessa datum',
+    en: 'You have already applied for leave on these dates',
+  },
   'validation.personnummerRequired': {
     sv: 'Personnummer krävs',
     en: 'Personal number required',
