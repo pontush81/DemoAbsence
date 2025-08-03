@@ -23,15 +23,15 @@ export default function DeviationTypeSelector() {
         <Link href="/deviations/new?type=sick">
           <Button 
             size="lg" 
-            className="w-full bg-red-600 hover:bg-red-700 text-white py-4 sm:py-5 text-sm sm:text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+            className="w-full bg-red-600 hover:bg-red-700 text-white py-6 sm:py-8 text-sm sm:text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-200 min-h-[80px] sm:min-h-[100px]"
           >
-            <div className="flex flex-col items-center justify-center space-y-1">
-              <div className="text-2xl sm:text-3xl">🤒</div>
+            <div className="flex flex-col items-center justify-center space-y-2">
+              <div className="text-xl sm:text-2xl">🤒</div>
               <div className="text-center">
-                <div className="font-bold text-sm sm:text-base">
+                <div className="font-bold text-sm sm:text-base leading-tight">
                   Sjuk/VAB
                 </div>
-                <div className="text-xs text-red-100 opacity-80 hidden sm:block">
+                <div className="text-xs text-red-100 opacity-80 hidden sm:block mt-1">
                   Auto-godkänt
                 </div>
               </div>
@@ -44,15 +44,15 @@ export default function DeviationTypeSelector() {
           <Button 
             size="lg" 
             variant="outline"
-            className="w-full border-2 border-blue-300 bg-white text-blue-700 hover:bg-blue-100 hover:border-blue-400 py-4 sm:py-5 text-sm sm:text-base font-semibold shadow-md hover:shadow-lg transition-all duration-200"
+            className="w-full border-2 border-blue-300 bg-white text-blue-700 hover:bg-blue-100 hover:border-blue-400 py-6 sm:py-8 text-sm sm:text-base font-semibold shadow-md hover:shadow-lg transition-all duration-200 min-h-[80px] sm:min-h-[100px]"
           >
-            <div className="flex flex-col items-center justify-center space-y-1">
-              <div className="text-2xl sm:text-3xl">💼</div>
+            <div className="flex flex-col items-center justify-center space-y-2">
+              <div className="text-xl sm:text-2xl">💼</div>
               <div className="text-center">
-                <div className="font-bold text-sm sm:text-base">
+                <div className="font-bold text-sm sm:text-base leading-tight">
                   Övertid
                 </div>
-                <div className="text-xs text-blue-600 opacity-70 hidden sm:block">
+                <div className="text-xs text-blue-600 opacity-70 hidden sm:block mt-1">
                   Kräver godkännande
                 </div>
               </div>
@@ -65,15 +65,15 @@ export default function DeviationTypeSelector() {
           <Button 
             size="lg" 
             variant="outline"
-            className="w-full border-2 border-green-300 bg-white text-green-700 hover:bg-green-100 hover:border-green-400 py-4 sm:py-5 text-sm sm:text-base font-semibold shadow-md hover:shadow-lg transition-all duration-200"
+            className="w-full border-2 border-green-300 bg-white text-green-700 hover:bg-green-100 hover:border-green-400 py-6 sm:py-8 text-sm sm:text-base font-semibold shadow-md hover:shadow-lg transition-all duration-200 min-h-[80px] sm:min-h-[100px]"
           >
-            <div className="flex flex-col items-center justify-center space-y-1">
-              <div className="text-2xl sm:text-3xl">🌴</div>
+            <div className="flex flex-col items-center justify-center space-y-2">
+              <div className="text-xl sm:text-2xl">🌴</div>
               <div className="text-center">
-                <div className="font-bold text-sm sm:text-base">
+                <div className="font-bold text-sm sm:text-base leading-tight">
                   Ledighet
                 </div>
-                <div className="text-xs text-green-600 opacity-70 hidden sm:block">
+                <div className="text-xs text-green-600 opacity-70 hidden sm:block mt-1">
                   Semester, föräldra
                 </div>
               </div>
