@@ -12,7 +12,26 @@ const RoleSwitcher = () => {
   const { user, setCurrentRole } = useStore();
   const [, setLocation] = useLocation();
   
+  // SECURITY: Only HR administrators should be able to change roles
+  // Regular employees changing their own roles is a critical security risk
+  const canChangeRoles = user.currentRole === 'hr'; // Only HR can change roles
+  
   const handleRoleChange = (role: string) => {
+    if (!canChangeRoles) {
+      console.warn('🚨 SECURITY: Unauthorized role change attempt blocked', {
+        currentUser: user.currentUser?.employeeId,
+        currentRole: user.currentRole,
+        attemptedRole: role,
+        timestamp: new Date().toISOString()
+      });
+      // TODO: In production, log this security event to audit system
+      return;
+    }
+    console.log('✅ AUTHORIZED: Role change by HR administrator', {
+      from: user.currentRole,
+      to: role,
+      user: user.currentUser?.employeeId
+    });
     setCurrentRole(role as UserRole);
   };
   
@@ -54,9 +73,12 @@ const RoleSwitcher = () => {
       <CardHeader className="pb-3">
         <div className="flex flex-row justify-between items-center">
           <div>
-            <CardTitle className="text-xl">{t('settings.roleSwitch') || 'Role Settings'}</CardTitle>
+            <CardTitle className="text-xl">{t('settings.roleSwitch') || 'Rollhantering'}</CardTitle>
             <CardDescription className="mt-1.5">
-              {t('settings.roleSwitchDescription') || 'Switch between employee and manager roles to test different views.'}
+              {canChangeRoles 
+                ? 'Som HR-administratör kan du ändra användarroller för systemtestning.'
+                : 'Din nuvarande systemroll och behörigheter. Endast HR kan ändra roller.'
+              }
             </CardDescription>
           </div>
           <Badge 
@@ -81,37 +103,73 @@ const RoleSwitcher = () => {
             <label htmlFor="role-select" className="text-sm font-medium">
               {t('settings.currentRole') || 'Current Role'}
             </label>
-            <Select value={user.currentRole} onValueChange={handleRoleChange}>
-              <SelectTrigger id="role-select" className="w-full">
-                <SelectValue placeholder={t('settings.selectRole') || 'Select role'} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="employee">
+            
+            {canChangeRoles ? (
+              // HR ONLY: Full role selection capabilities
+              <Select value={user.currentRole} onValueChange={handleRoleChange}>
+                <SelectTrigger id="role-select" className="w-full">
+                  <SelectValue placeholder={t('settings.selectRole') || 'Select role'} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="employee">
+                    <div className="flex items-center">
+                      <span className="material-icons text-sm mr-2">person</span>
+                      Medarbetare
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="manager">
+                    <div className="flex items-center">
+                      <span className="material-icons text-sm mr-2">supervisor_account</span>
+                      Chef
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="hr">
+                    <div className="flex items-center">
+                      <span className="material-icons text-sm mr-2">people</span>
+                      HR-specialist
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="payroll">
+                    <div className="flex items-center">
+                      <span className="material-icons text-sm mr-2">account_balance_wallet</span>
+                      Löneadministratör
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            ) : (
+              // SECURITY: Read-only view for non-HR users
+              <div className="space-y-3">
+                <div className="w-full p-3 bg-gray-50 border border-gray-200 rounded-md flex items-center justify-between">
                   <div className="flex items-center">
-                    <span className="material-icons text-sm mr-2">person</span>
-                    Medarbetare
+                    <span className="material-icons text-sm mr-2 text-gray-600">
+                      {user.currentRole === 'manager' ? 'supervisor_account' :
+                       user.currentRole === 'hr' ? 'people' :
+                       user.currentRole === 'payroll' ? 'account_balance_wallet' :
+                       'person'}
+                    </span>
+                    <span className="font-medium text-gray-700">
+                      {user.currentRole === 'manager' ? 'Chef' :
+                       user.currentRole === 'hr' ? 'HR-specialist' :
+                       user.currentRole === 'payroll' ? 'Löneadministratör' :
+                       'Medarbetare'}
+                    </span>
                   </div>
-                </SelectItem>
-                <SelectItem value="manager">
-                  <div className="flex items-center">
-                    <span className="material-icons text-sm mr-2">supervisor_account</span>
-                    Chef
+                  <span className="material-icons text-gray-400 cursor-not-allowed">lock</span>
+                </div>
+                
+                {/* Security explanation */}
+                <div className="p-3 bg-amber-50 border border-amber-200 rounded-md">
+                  <div className="flex items-start gap-2">
+                    <span className="material-icons text-amber-600 text-sm mt-0.5">security</span>
+                    <div className="text-xs text-amber-800">
+                      <p className="font-medium mb-1">Säkerhetsrestriktion</p>
+                      <p>Endast HR-administratörer kan ändra användarroller. Kontakta HR-avdelningen om du behöver ändra din rollbehörighet.</p>
+                    </div>
                   </div>
-                </SelectItem>
-                <SelectItem value="hr">
-                  <div className="flex items-center">
-                    <span className="material-icons text-sm mr-2">people</span>
-                    HR-specialist
-                  </div>
-                </SelectItem>
-                <SelectItem value="payroll">
-                  <div className="flex items-center">
-                    <span className="material-icons text-sm mr-2">account_balance_wallet</span>
-                    Löneadministratör
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
+                </div>
+              </div>
+            )}
           </div>
           
           <div className="pt-2 flex items-center gap-2">
