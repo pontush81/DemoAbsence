@@ -353,6 +353,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all employees
   app.get('/api/employees', async (req, res) => {
     try {
+      const { currentUser } = req.query;
+      
+      // 🚨 DEMO SECURITY: Only managers can access bulk employee data
+      if (!currentUser) {
+        return res.status(400).json({ 
+          error: 'currentUser parameter required',
+          message: 'Du måste ange vem du är för att se medarbetardata'
+        });
+      }
+      
+      // Check if currentUser is a manager (E005 is manager in our demo data)
+      const allowedManagerIds = ['E005']; // Mikael is the manager
+      if (!allowedManagerIds.includes(currentUser as string)) {
+        return res.status(403).json({ 
+          error: 'Access denied - Manager rights required',
+          message: 'Bara chefer kan se all medarbetardata'
+        });
+      }
+      
       const employees = await restStorage.getEmployees();
       
       // Map snake_case to camelCase for frontend compatibility - COMPREHENSIVE MAPPING
@@ -490,7 +509,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/schedules/:employeeId', async (req, res) => {
     try {
       const { employeeId } = req.params;
-      const { date } = req.query;
+      const { date, currentUser } = req.query;
+      
+      // 🚨 DEMO SECURITY: Prevent IDOR - can only view own schedules
+      if (!currentUser) {
+        return res.status(400).json({ 
+          error: 'currentUser parameter required',
+          message: 'Du måste ange vem du är för att se scheman'
+        });
+      }
+      
+      if (currentUser !== employeeId) {
+        return res.status(403).json({ 
+          error: 'Access denied',
+          message: 'Du kan bara se dina egna scheman'
+        });
+      }
       
       const filters: any = { employeeId };
       if (date) {
@@ -1072,6 +1106,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get time balance for employee
   app.get('/api/time-balances/:employeeId', async (req, res) => {
     try {
+      const { employeeId } = req.params;
+      const { currentUser } = req.query;
+      
+      // 🚨 DEMO SECURITY: Prevent IDOR - can only view own time balance
+      if (!currentUser) {
+        return res.status(400).json({ 
+          error: 'currentUser parameter required',
+          message: 'Du måste ange vem du är för att se arbetstidsbalans'
+        });
+      }
+      
+      if (currentUser !== employeeId) {
+        return res.status(403).json({ 
+          error: 'Access denied',
+          message: 'Du kan bara se din egen arbetstidsbalans'
+        });
+      }
+      
       let timeBalance;
       
       // Try restStorage first
@@ -1123,7 +1175,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get payslips for employee
   app.get('/api/payslips/:employeeId', async (req, res) => {
     try {
-      const employeePayslips = await restStorage.getPayslips(req.params.employeeId);
+      const { employeeId } = req.params;
+      const { currentUser } = req.query;
+      
+      // 🚨 DEMO SECURITY: Prevent IDOR - can only view own payslips
+      if (!currentUser) {
+        return res.status(400).json({ 
+          error: 'currentUser parameter required',
+          message: 'Du måste ange vem du är för att se lönebesked'
+        });
+      }
+      
+      if (currentUser !== employeeId) {
+        return res.status(403).json({ 
+          error: 'Access denied',
+          message: 'Du kan bara se dina egna lönebesked'
+        });
+      }
+      
+      const employeePayslips = await restStorage.getPayslips(employeeId);
       res.json(employeePayslips);
     } catch (error) {
       console.error('Error fetching payslips:', error);
