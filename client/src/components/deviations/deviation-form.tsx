@@ -453,20 +453,44 @@ const DeviationForm = ({ deviationId, onCancel }: DeviationFormProps) => {
               <p className="text-sm text-muted-foreground">Klicka för att registrera vanliga avvikelser direkt</p>
             </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-              {quickActions.map((action, index) => (
-                <Button
-                  key={index}
-                  variant="outline"
-                  size="lg"
-                  onClick={() => handleQuickAction(action)}
-                  className="h-16 flex flex-col items-center justify-center gap-1 text-sm font-medium hover:bg-accent/10 border-2 hover:border-accent"
-                  disabled={isLoading || isPending}
-                >
-                  <span className="text-xl">{action.icon}</span>
-                  <span className="text-center leading-none text-xs">{action.label}</span>
-                </Button>
-              ))}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              {quickActions.map((action, index) => {
+                // Match styling with Deviation Type Selector for consistency
+                const isSickOrVAB = action.timeCode === '300' || action.timeCode === '400';
+                const isOvertime = action.timeCode === '200';
+                
+                return (
+                  <Button
+                    key={index}
+                    variant={isSickOrVAB ? "default" : "outline"}
+                    size="lg"
+                    onClick={() => handleQuickAction(action)}
+                    className={`w-full py-6 sm:py-8 text-sm sm:text-base font-semibold shadow-md hover:shadow-lg transition-all duration-200 min-h-[80px] sm:min-h-[100px] ${
+                      isSickOrVAB 
+                        ? 'bg-blue-600 hover:bg-blue-700 text-white' 
+                        : isOvertime
+                        ? 'border-2 border-indigo-300 bg-white text-indigo-700 hover:bg-indigo-100 hover:border-indigo-400'
+                        : 'border-2 border-gray-300 bg-white text-gray-700 hover:bg-gray-100 hover:border-gray-400'
+                    }`}
+                    disabled={isLoading || isPending}
+                  >
+                    <div className="flex flex-col items-center justify-center space-y-2">
+                      <div className="text-xl sm:text-2xl">
+                        {/* Use consistent icons matching Deviation Type Selector */}
+                        {action.timeCode === '300' ? '🏥' :  // Sjuk - Hospital icon
+                         action.timeCode === '400' ? '🏥' :  // VAB - Same hospital icon for consistency  
+                         action.timeCode === '200' ? '⏰' :  // Övertid - Clock icon
+                         action.icon}                        // Fallback to original
+                      </div>
+                      <div className="text-center">
+                        <div className="font-bold text-sm sm:text-base leading-tight">
+                          {action.label}
+                        </div>
+                      </div>
+                    </div>
+                  </Button>
+                );
+              })}
             </div>
             
             <div className="mt-4 flex justify-center">
