@@ -8,6 +8,7 @@ import { useStore } from '@/lib/store';
 import { useI18n } from '@/lib/i18n';
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 import { getISOWeek } from 'date-fns';
+import { calculateVacationDeduction, isWorkingDay, getDateDescription } from '@/lib/vacation-calculator';
 
 interface LeaveRequest {
   id: number;
@@ -15,6 +16,8 @@ interface LeaveRequest {
   endDate: string;
   leaveType: string;
   status: string;
+  scope?: string;
+  employeeId?: string;
   totalDays: number;
 }
 
@@ -209,9 +212,11 @@ export default function LeaveCalendar() {
                   const isToday = day.toDateString() === new Date().toDateString();
                   const dayLeaves = getLeaveForDate(day);
                   
-                  // Add subtle background color for days with leave
+                  // Add subtle background color for days with leave and indicate working days
                   const hasApprovedLeave = dayLeaves.some(l => l.status === 'approved');
                   const hasPendingLeave = dayLeaves.some(l => l.status === 'pending');
+                  const isWorkingDayToday = isWorkingDay(day);
+                  const dateDesc = getDateDescription(day);
                   
                   let dayBackgroundClass = '';
                   if (hasApprovedLeave) {
@@ -219,7 +224,11 @@ export default function LeaveCalendar() {
                   } else if (hasPendingLeave) {
                     dayBackgroundClass = 'bg-yellow-50';
                   } else if (isCurrentMonth) {
-                    dayBackgroundClass = 'bg-white';
+                    if (isWorkingDayToday) {
+                      dayBackgroundClass = 'bg-white';
+                    } else {
+                      dayBackgroundClass = 'bg-gray-100'; // Different color for weekends/holidays
+                    }
                   } else {
                     dayBackgroundClass = 'bg-gray-50';
                   }
@@ -238,8 +247,15 @@ export default function LeaveCalendar() {
                         text-sm font-medium mb-1
                         ${isCurrentMonth ? 'text-gray-900' : 'text-gray-400'}
                         ${isToday ? 'text-blue-600 font-bold' : ''}
+                        ${!isWorkingDayToday && isCurrentMonth ? 'text-gray-500' : ''}
                       `}>
                         {day.getDate()}
+                        {/* Show indicator for non-working days */}
+                        {!isWorkingDayToday && isCurrentMonth && (
+                          <div className="text-xs text-gray-400 leading-none" title={dateDesc}>
+                            {dateDesc === 'Lördag' || dateDesc === 'Söndag' ? '⌛' : '🎉'}
+                          </div>
+                        )}
                       </div>
                       
                       {/* Leave indicators - Modern design following UX best practices */}
@@ -296,6 +312,26 @@ export default function LeaveCalendar() {
           </div>
         </div>
 
+        {/* Business Rules Explanation */}
+        <div className="mt-3 pt-3 border-t border-gray-100">
+          <div className="flex flex-wrap gap-4 text-sm">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-white border border-gray-200 rounded"></div>
+              <span className="text-gray-600">Arbetsdagar</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 bg-gray-100 border border-gray-200 rounded flex items-center justify-center">
+                <span className="text-xs">⌛</span>
+              </div>
+              <span className="text-gray-600">Helger & veckoslut</span>
+            </div>
+            <div className="flex items-center gap-2 text-blue-600 font-medium">
+              <span>ℹ️</span>
+              <span>Semesterdagar dras endast för arbetsdagar (mån-fre, exkl. helger)</span>
+            </div>
+          </div>
+        </div>
+
         {/* Summary */}
         <div className="mt-4 pt-4 border-t border-gray-200">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
@@ -317,14 +353,14 @@ export default function LeaveCalendar() {
                   if (l.status === 'approved' && l.startDate && l.endDate) {
                     const start = new Date(l.startDate);
                     const end = new Date(l.endDate);
-                    const timeDiff = end.getTime() - start.getTime();
-                    const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1; // +1 because both start and end days are included
-                    return sum + daysDiff;
+                    // 🎯 Use correct business logic: only count working days for vacation
+                    const vacationDaysUsed = calculateVacationDeduction(l.leaveType, start, end, l.scope || 'full-day');
+                    return sum + vacationDaysUsed;
                   }
                   return sum;
                 }, 0)}
               </div>
-              <div className="text-sm text-gray-500">Dagar använda</div>
+              <div className="text-sm text-gray-500">Arbetsdagar använda</div>
             </div>
           </div>
         </div>
