@@ -609,6 +609,34 @@ const translations: Translations = {
     sv: 'Fel vid uppdatering',
     en: 'Update error',
   },
+  'leave.leaveDetails': {
+    sv: 'Ledighetsdetaljer',
+    en: 'Leave Details',
+  },
+  'leave.viewLeaveDescription': {
+    sv: 'Visa information om din ledighetsansökan',
+    en: 'View information about your leave request',
+  },
+  'leave.rejectionReason': {
+    sv: 'Anledning till avslag',
+    en: 'Rejection Reason',
+  },
+  'leave.approvedBy': {
+    sv: 'Godkänd av',
+    en: 'Approved by',
+  },
+  'leave.rejectedBy': {
+    sv: 'Avvisad av',
+    en: 'Rejected by',
+  },
+  'leave.submittedAt': {
+    sv: 'Skickad',
+    en: 'Submitted',
+  },
+  'leave.decisionDate': {
+    sv: 'Beslutsdatum',
+    en: 'Decision Date',
+  },
   
   // Pagination
   'pagination.showing': {

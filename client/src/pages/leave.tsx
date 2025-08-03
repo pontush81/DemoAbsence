@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
 import LeaveList from "@/components/leave/leave-list";
 import LeaveForm from "@/components/leave/leave-form";
+import LeaveDetails from "@/components/leave/leave-details";
 import { apiService } from "@/lib/apiService";
 
 export default function Leave() {
@@ -90,16 +91,10 @@ export default function Leave() {
             <p className="text-muted-foreground">{t('leave.viewLeaveDescription')}</p>
           </div>
           
-          {/* TODO: Add LeaveRequestDetails component */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <p>Leave request details will be displayed here.</p>
-            <Button 
-              onClick={() => navigate('/leave')}
-              className="mt-4"
-            >
-              {t('action.back')}
-            </Button>
-          </div>
+          <LeaveDetails 
+            leaveId={leaveId}
+            onBack={() => navigate('/leave')}
+          />
         </>
       )}
     </section>

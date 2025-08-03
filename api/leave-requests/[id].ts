@@ -62,6 +62,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           startDate: leaveRequest.start_date || leaveRequest.startDate,
           endDate: leaveRequest.end_date || leaveRequest.endDate,
           leaveType: leaveRequest.leave_type || leaveRequest.leaveType,
+          managerComment: leaveRequest.manager_comment || leaveRequest.managerComment,
+          approvedBy: leaveRequest.approved_by || leaveRequest.approvedBy,
+          approvedAt: leaveRequest.approved_at || leaveRequest.approvedAt,
+          rejectedBy: leaveRequest.rejected_by || leaveRequest.rejectedBy,
+          rejectedAt: leaveRequest.rejected_at || leaveRequest.rejectedAt,
+          pausedBy: leaveRequest.paused_by || leaveRequest.pausedBy,
+          pausedAt: leaveRequest.paused_at || leaveRequest.pausedAt,
+          pauseReason: leaveRequest.pause_reason || leaveRequest.pauseReason,
         };
         
         res.json(mappedLeaveRequest);
