@@ -70,14 +70,15 @@ export default function LeaveCalendar() {
     calendarWeeks.push(currentWeek);
   }
 
-  // Check if a date has leave
+  // Check if a date has leave (exclude rejected requests)
   const getLeaveForDate = (date: Date) => {
     const dateStr = date.toISOString().split('T')[0];
     return leaveRequests.filter((leave: LeaveRequest) => {
       const start = new Date(leave.startDate);
       const end = new Date(leave.endDate);
       const checkDate = new Date(dateStr);
-      return checkDate >= start && checkDate <= end;
+      // Only show approved and pending requests in calendar
+      return (checkDate >= start && checkDate <= end) && leave.status !== 'rejected';
     });
   };
 
@@ -96,8 +97,6 @@ export default function LeaveCalendar() {
         return 'bg-green-100 border-green-300 text-green-800';
       case 'pending':
         return 'bg-yellow-100 border-yellow-300 text-yellow-800';
-      case 'rejected':
-        return 'bg-red-100 border-red-300 text-red-800';
       default:
         return 'bg-gray-100 border-gray-300 text-gray-800';
     }
@@ -245,10 +244,6 @@ export default function LeaveCalendar() {
             <span className="text-sm text-gray-600">Väntar på svar</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-red-100 border border-red-300 rounded"></div>
-            <span className="text-sm text-gray-600">Avslags</span>
-          </div>
-          <div className="flex items-center gap-2">
             <div className="w-4 h-4 ring-2 ring-blue-500 rounded"></div>
             <span className="text-sm text-gray-600">Idag</span>
           </div>
@@ -262,7 +257,7 @@ export default function LeaveCalendar() {
 
         {/* Summary */}
         <div className="mt-4 pt-4 border-t border-gray-200">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
             <div>
               <div className="text-2xl font-bold text-green-600">
                 {leaveRequests.filter((l: LeaveRequest) => l.status === 'approved').length}
@@ -273,7 +268,7 @@ export default function LeaveCalendar() {
               <div className="text-2xl font-bold text-yellow-600">
                 {leaveRequests.filter((l: LeaveRequest) => l.status === 'pending').length}
               </div>
-              <div className="text-sm text-gray-500">Väntar</div>
+              <div className="text-sm text-gray-500">Väntar på svar</div>
             </div>
             <div>
               <div className="text-2xl font-bold text-blue-600">
@@ -282,12 +277,6 @@ export default function LeaveCalendar() {
                 )}
               </div>
               <div className="text-sm text-gray-500">Dagar använda</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-gray-600">
-                {leaveRequests.length}
-              </div>
-              <div className="text-sm text-gray-500">Totalt ansökningar</div>
             </div>
           </div>
         </div>
