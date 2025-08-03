@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paxml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.paxml.se/2.2/paxml.xsd">
+	<header>
+		<format>LÖNIN</format>
+		<version>2.2</version>
+	</header>
+	<tidtransaktioner>
+		<tidtrans postid="1" anstid="E001" persnr="198505121234">
+			<tidkod>ÖT1</tidkod>
+			<datum>2025-08-24</datum>
+			<timmar>2.00</timmar>
+			<info>TEST: Endpoint test övertid</info>
+		</tidtrans>
+		<tidtrans postid="2" anstid="E001" persnr="198505121234">
+			<tidkod>ÖT1</tidkod>
+			<datum>2025-08-23</datum>
+			<timmar>2.00</timmar>
+			<info>TEST: Övertid som behöver godkännande</info>
+		</tidtrans>
+		<tidtrans postid="3" anstid="E001" persnr="198505121234">
+			<tidkod>SJK</tidkod>
+			<datum>2025-08-22</datum>
+			<timmar>8.00</timmar>
+			<info>TEST: Ny deviation för manager comment test</info>
+		</tidtrans>
+		<tidtrans postid="4" anstid="E001" persnr="198505121234">
+			<tidkod>SJK</tidkod>
+			<datum>2025-08-19</datum>
+			<timmar>4.00</timmar>
+			<info>Läkarbesök - återhämtning</info>
+		</tidtrans>
+		<tidtrans postid="5" anstid="E001" persnr="198505121234">
+			<tidkod>ÖT1</tidkod>
+			<datum>2025-08-12</datum>
+			<timmar>2.00</timmar>
+			<info>Deadline projektleverans</info>
+		</tidtrans>
+		<tidtrans postid="6" anstid="E001" persnr="198505121234">
+			<tidkod>ÖT2</tidkod>
+			<datum>2025-08-09</datum>
+			<timmar>4.00</timmar>
+			<info>Lagerarbete - inventering</info>
+		</tidtrans>
+		<tidtrans postid="7" anstid="E001" persnr="198505121234">
+			<tidkod>SJK</tidkod>
+			<datum>2025-08-06</datum>
+			<timmar>9.00</timmar>
+			<info>Influensa - hemma hela dagen</info>
+		</tidtrans>
+		<tidtrans postid="8" anstid="E001" persnr="198505121234">
+			<tidkod>VAB</tidkod>
+			<datum>2025-08-05</datum>
+			<timmar>9.00</timmar>
+			<info>Barn sjukt - Clara 6 år</info>
+		</tidtrans>
+		<tidtrans postid="9" anstid="E001" persnr="198505121234">
+			<tidkod>ÖT1</tidkod>
+			<datum>2025-08-04</datum>
+			<timmar>3.00</timmar>
+			<info>Extra projekt - månadsrapporter</info>
+		</tidtrans>
+		<tidtrans postid="10" anstid="E001" persnr="198505121234">
+			<tidkod>SJK</tidkod>
+			<datum>2025-08-03</datum>
+			<timmar>8.00</timmar>
+			<info>Debug test 2</info>
+		</tidtrans>
+		<tidtrans postid="11" anstid="E001" persnr="198505121234">
+			<tidkod>VAB</tidkod>
+			<datum>2025-08-03</datum>
+			<timmar>8.00</timmar>
+			<info>VAB test</info>
+		</tidtrans>
+		<tidtrans postid="12" anstid="E001" persnr="198505121234">
+			<tidkod>SJK</tidkod>
+			<datum>2025-08-03</datum>
+			<timmar>8.00</timmar>
+			<info>Test av automatisk godkännande</info>
+		</tidtrans>
+		<tidtrans postid="13" anstid="E001" persnr="198505121234">
+			<tidkod>SJK</tidkod>
+			<datum>2025-08-03</datum>
+			<timmar>8.00</timmar>
+			<info>Debug test</info>
+		</tidtrans>
+		<tidtrans postid="14" anstid="E001" persnr="198505121234">
+			<tidkod>ÖT1</tidkod>
+			<datum>2025-08-03</datum>
+			<timmar>2.00</timmar>
+			<info>Övertid test</info>
+		</tidtrans>
+		<tidtrans postid="15" anstid="E001" persnr="198505121234">
+			<tidkod>SJK</tidkod>
+			<datum>2025-08-03</datum>
+			<timmar>8.00</timmar>
+		</tidtrans>
+		<tidtrans postid="16" anstid="E001" persnr="198505121234">
+			<tidkod>SJK</tidkod>
+			<datum>2025-08-03</datum>
+			<timmar>8.00</timmar>
+		</tidtrans>
+		<tidtrans postid="17" anstid="E001" persnr="198505121234">
+			<tidkod>VAB</tidkod>
+			<datum>2025-08-02</datum>
+			<timmar>7.00</timmar>
+			<info>Test från UI-felsökning</info>
+		</tidtrans>
+		<tidtrans postid="18" anstid="E001" persnr="198505121234">
+			<tidkod>SJK</tidkod>
+			<datum>2025-08-02</datum>
+			<timmar>9.00</timmar>
+		</tidtrans>
+		<tidtrans postid="19" anstid="E001" persnr="198505121234">
+			<tidkod>SJK</tidkod>
+			<datum>2025-08-02</datum>
+			<timmar>8.00</timmar>
+		</tidtrans>
+		<tidtrans postid="20" anstid="E001" persnr="198505121234">
+			<tidkod>SJK</tidkod>
+			<datum>2025-08-02</datum>
+			<timmar>8.00</timmar>
+		</tidtrans>
+		<tidtrans postid="21" anstid="E001" persnr="198505121234">
+			<tidkod>SJK</tidkod>
+			<datum>2025-08-02</datum>
+			<timmar>8.00</timmar>
+		</tidtrans>
+		<tidtrans postid="22" anstid="E001" persnr="198505121234">
+			<tidkod>SJK</tidkod>
+			<datum>2025-08-01</datum>
+			<timmar>9.00</timmar>
+			<info>Test avvikelse från API</info>
+		</tidtrans>
+		<tidtrans postid="23" anstid="E001" persnr="198505121234">
+			<tidkod>SJK</tidkod>
+			<datum>2025-08-01</datum>
+			<timmar>8.00</timmar>
+		</tidtrans>
+		<tidtrans postid="24" anstid="E001" persnr="198505121234">
+			<tidkod>SJK</tidkod>
+			<datum>2025-08-01</datum>
+			<timmar>8.00</timmar>
+		</tidtrans>
+		<tidtrans postid="25" anstid="E001" persnr="198505121234">
+			<tidkod>SJK</tidkod>
+			<datum>2025-07-28</datum>
+			<timmar>8.00</timmar>
+		</tidtrans>
+		<tidtrans postid="26" anstid="E001" persnr="198505121234">
+			<tidkod>ÖT1</tidkod>
+			<datum>2023-04-14</datum>
+			<timmar>2.50</timmar>
+			<info>Akut projektleverans</info>
+		</tidtrans>
+		<tidtrans postid="27" anstid="E002" persnr="197608235678">
+			<tidkod>ÖT1</tidkod>
+			<datum>2023-04-14</datum>
+			<timmar>2.50</timmar>
+			<info>Akut projektleverans för Kund AB</info>
+		</tidtrans>
+		<tidtrans postid="28" anstid="E004" persnr="198204053456">
+			<tidkod>SJK</tidkod>
+			<datum>2023-04-10</datum>
+			<timmar>9.00</timmar>
+			<info>Förkylning</info>
+		</tidtrans>
+	</tidtransaktioner>
+</paxml>
