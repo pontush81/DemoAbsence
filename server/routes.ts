@@ -1078,9 +1078,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const updateData = {
         status: 'approved',
-        managerComment: req.body.comment || 'Approved',
-        approvedBy: 'E005', // Mock manager ID
-        approvedAt: new Date()
+        manager_comment: req.body.comment || 'Approved', // Use snake_case for database
+        approved_by: req.body.managerId || 'E005', // Mock manager ID if not provided
+        approved_at: new Date().toISOString()
       };
       
       let approvedLeaveRequest;
@@ -1127,7 +1127,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Continue with approval even if balance update fails
         }
         
-        res.json(approvedLeaveRequest);
+        // Map snake_case to camelCase for frontend compatibility
+        const mappedLeaveRequest = {
+          ...approvedLeaveRequest,
+          employeeId: approvedLeaveRequest.employee_id || approvedLeaveRequest.employeeId,
+          startDate: approvedLeaveRequest.start_date || approvedLeaveRequest.startDate,
+          endDate: approvedLeaveRequest.end_date || approvedLeaveRequest.endDate,
+          leaveType: approvedLeaveRequest.leave_type || approvedLeaveRequest.leaveType,
+          managerComment: approvedLeaveRequest.manager_comment || approvedLeaveRequest.managerComment,
+          approvedBy: approvedLeaveRequest.approved_by || approvedLeaveRequest.approvedBy,
+          approvedAt: approvedLeaveRequest.approved_at || approvedLeaveRequest.approvedAt,
+        };
+        
+        res.json(mappedLeaveRequest);
       } else {
         res.status(404).json({ message: 'Leave request not found' });
       }
@@ -1142,14 +1154,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const updateData = {
         status: 'rejected',
-        managerComment: req.body.comment || 'Rejected',
-        rejectedBy: 'E005', // Mock manager ID
-        rejectedAt: new Date()
+        manager_comment: req.body.comment || 'Rejected', // Use snake_case for database
+        rejected_by: req.body.managerId || 'E005', // Mock manager ID if not provided
+        rejected_at: new Date().toISOString()
       };
       
       const rejectedLeaveRequest = await restStorage.updateLeaveRequest(parseInt(req.params.id), updateData);
       if (rejectedLeaveRequest) {
-        res.json(rejectedLeaveRequest);
+        // Map snake_case to camelCase for frontend compatibility
+        const mappedLeaveRequest = {
+          ...rejectedLeaveRequest,
+          employeeId: rejectedLeaveRequest.employee_id || rejectedLeaveRequest.employeeId,
+          startDate: rejectedLeaveRequest.start_date || rejectedLeaveRequest.startDate,
+          endDate: rejectedLeaveRequest.end_date || rejectedLeaveRequest.endDate,
+          leaveType: rejectedLeaveRequest.leave_type || rejectedLeaveRequest.leaveType,
+          managerComment: rejectedLeaveRequest.manager_comment || rejectedLeaveRequest.managerComment,
+          rejectedBy: rejectedLeaveRequest.rejected_by || rejectedLeaveRequest.rejectedBy,
+          rejectedAt: rejectedLeaveRequest.rejected_at || rejectedLeaveRequest.rejectedAt,
+        };
+        
+        res.json(mappedLeaveRequest);
       } else {
         res.status(404).json({ message: 'Leave request not found' });
       }

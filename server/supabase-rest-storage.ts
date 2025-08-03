@@ -379,6 +379,24 @@ export class SupabaseRestStorage {
       if (updates.leaveType) updateData.leave_type = updates.leaveType;
       if (updates.lastUpdated) updateData.last_updated = updates.lastUpdated;
       
+      // Manager-related fields (CRITICAL: These were missing!)
+      if (updates.managerComment !== undefined) updateData.manager_comment = updates.managerComment;
+      if (updates.manager_comment !== undefined) updateData.manager_comment = updates.manager_comment;
+      if (updates.approvedBy !== undefined) updateData.approved_by = updates.approvedBy;
+      if (updates.approved_by !== undefined) updateData.approved_by = updates.approved_by;
+      if (updates.approvedAt !== undefined) updateData.approved_at = updates.approvedAt;
+      if (updates.approved_at !== undefined) updateData.approved_at = updates.approved_at;
+      if (updates.rejectedBy !== undefined) updateData.rejected_by = updates.rejectedBy;
+      if (updates.rejected_by !== undefined) updateData.rejected_by = updates.rejected_by;
+      if (updates.rejectedAt !== undefined) updateData.rejected_at = updates.rejectedAt;
+      if (updates.rejected_at !== undefined) updateData.rejected_at = updates.rejected_at;
+      if (updates.pausedBy !== undefined) updateData.paused_by = updates.pausedBy;
+      if (updates.paused_by !== undefined) updateData.paused_by = updates.paused_by;
+      if (updates.pausedAt !== undefined) updateData.paused_at = updates.pausedAt;
+      if (updates.paused_at !== undefined) updateData.paused_at = updates.paused_at;
+      if (updates.pauseReason !== undefined) updateData.pause_reason = updates.pauseReason;
+      if (updates.pause_reason !== undefined) updateData.pause_reason = updates.pause_reason;
+      
       // Direct mapping for these fields
       ['reason', 'status', 'submitted'].forEach(field => {
         if (updates[field] !== undefined) updateData[field] = updates[field];
