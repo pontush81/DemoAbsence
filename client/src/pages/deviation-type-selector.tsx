@@ -74,7 +74,7 @@ export default function DeviationTypeSelector() {
                   Ledighet
                 </div>
                 <div className="text-xs text-green-600 opacity-70 hidden sm:block mt-1">
-                  Semester, föräldra
+                  Semester
                 </div>
               </div>
             </div>
