@@ -256,6 +256,12 @@ const LeaveList = ({ onSelect }: LeaveListProps) => {
     return scopeMap[scope] || scope;
   };
   
+  // Sort leave requests by date (newest first) for better UX
+  const sortedLeaveRequests = leaveRequests?.slice().sort((a, b) => {
+    // Sort by startDate in descending order (newest first)
+    return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
+  }) || [];
+  
   return (
     <div>
       {renderFilters()}
@@ -274,7 +280,7 @@ const LeaveList = ({ onSelect }: LeaveListProps) => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {leaveRequests.map((leave) => (
+              {sortedLeaveRequests.map((leave) => (
                 <TableRow 
                   key={leave.id} 
                   className="hover:bg-background-dark transition-colors cursor-pointer"
@@ -331,7 +337,7 @@ const LeaveList = ({ onSelect }: LeaveListProps) => {
           <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
             <div>
               <p className="text-sm text-muted-foreground">
-                {t('pagination.showing')} <span className="font-medium">1</span> {t('pagination.to')} <span className="font-medium">{leaveRequests.length}</span> {t('pagination.of')} <span className="font-medium">{leaveRequests.length}</span> {t('pagination.results')}
+                {t('pagination.showing')} <span className="font-medium">1</span> {t('pagination.to')} <span className="font-medium">{sortedLeaveRequests.length}</span> {t('pagination.of')} <span className="font-medium">{sortedLeaveRequests.length}</span> {t('pagination.results')}
               </p>
             </div>
           </div>
