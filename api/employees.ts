@@ -18,13 +18,54 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     
     if (error) throw error;
     
-    // Map snake_case to camelCase for frontend compatibility
-    const mappedEmployees = employees.map((employee: any) => ({
-      ...employee,
-      employeeId: employee.employee_id || employee.employeeId,
-      firstName: employee.first_name || employee.firstName,
-      lastName: employee.last_name || employee.lastName,
-    }));
+    // Map snake_case to camelCase for frontend compatibility - COMPREHENSIVE MAPPING
+    const mappedEmployees = employees.map((employee: any) => {
+      const mapped = {
+        ...employee,
+        // Core fields
+        employeeId: employee.employee_id || employee.employeeId,
+        firstName: employee.first_name || employee.firstName,
+        lastName: employee.last_name || employee.lastName,
+        // Contact fields
+        phoneNumber: employee.phone_number || employee.phoneNumber,
+        workEmail: employee.work_email || employee.workEmail,
+        preferredEmail: employee.preferred_email || employee.preferredEmail,
+        // Address fields
+        careOfAddress: employee.care_of_address || employee.careOfAddress,
+        streetAddress: employee.street_address || employee.streetAddress,
+        postalCode: employee.postal_code || employee.postalCode,
+        // Banking fields
+        bankAccountNumber: employee.bank_account_number || employee.bankAccountNumber,
+        bankClearingNumber: employee.bank_clearing_number || employee.bankClearingNumber,
+        bankBIC: employee.bank_bic || employee.bankBIC,
+        bankCountryCode: employee.bank_country_code || employee.bankCountryCode,
+        bankIBAN: employee.bank_iban || employee.bankIBAN,
+        // Work fields
+        scheduleTemplate: employee.schedule_template || employee.scheduleTemplate,
+        // Timestamps
+        createdAt: employee.created_at || employee.createdAt,
+      };
+      
+      // Remove snake_case duplicates
+      delete mapped.employee_id;
+      delete mapped.first_name;
+      delete mapped.last_name;
+      delete mapped.phone_number;
+      delete mapped.work_email;
+      delete mapped.preferred_email;
+      delete mapped.care_of_address;
+      delete mapped.street_address;
+      delete mapped.postal_code;
+      delete mapped.bank_account_number;
+      delete mapped.bank_clearing_number;
+      delete mapped.bank_bic;
+      delete mapped.bank_country_code;
+      delete mapped.bank_iban;
+      delete mapped.schedule_template;
+      delete mapped.created_at;
+      
+      return mapped;
+    });
     
     res.status(200).json(mappedEmployees);
   } catch (error) {

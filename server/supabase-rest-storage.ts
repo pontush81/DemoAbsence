@@ -41,17 +41,70 @@ export class SupabaseRestStorage {
   
   // Employee operations
   async getEmployees() {
-    return await this.getDataFromSupabase('employees');
+    const employees = await this.getDataFromSupabase('employees');
+    return Array.isArray(employees) ? employees.map(this.mapEmployeeFields) : employees;
   }
 
   async getEmployee(employeeId: string) {
     const employees = await this.getDataFromSupabase('employees', { employee_id: employeeId });
-    return Array.isArray(employees) ? employees[0] : employees;
+    const employee = Array.isArray(employees) ? employees[0] : employees;
+    return employee ? this.mapEmployeeFields(employee) : employee;
+  }
+
+  // Helper: Map employee snake_case → camelCase
+  private mapEmployeeFields(employee: any) {
+    if (!employee) return employee;
+    
+    const mapped = {
+      ...employee,
+      // Core fields
+      employeeId: employee.employee_id || employee.employeeId,
+      firstName: employee.first_name || employee.firstName,
+      lastName: employee.last_name || employee.lastName,
+      // Contact fields
+      phoneNumber: employee.phone_number || employee.phoneNumber,
+      workEmail: employee.work_email || employee.workEmail,
+      preferredEmail: employee.preferred_email || employee.preferredEmail,
+      // Address fields
+      careOfAddress: employee.care_of_address || employee.careOfAddress,
+      streetAddress: employee.street_address || employee.streetAddress,
+      postalCode: employee.postal_code || employee.postalCode,
+      // Banking fields
+      bankAccountNumber: employee.bank_account_number || employee.bankAccountNumber,
+      bankClearingNumber: employee.bank_clearing_number || employee.bankClearingNumber,
+      bankBIC: employee.bank_bic || employee.bankBIC,
+      bankCountryCode: employee.bank_country_code || employee.bankCountryCode,
+      bankIBAN: employee.bank_iban || employee.bankIBAN,
+      // Work fields
+      scheduleTemplate: employee.schedule_template || employee.scheduleTemplate,
+      // Timestamps
+      createdAt: employee.created_at || employee.createdAt,
+    };
+    
+    // Remove snake_case duplicates
+    delete mapped.employee_id;
+    delete mapped.first_name;
+    delete mapped.last_name;
+    delete mapped.phone_number;
+    delete mapped.work_email;
+    delete mapped.preferred_email;
+    delete mapped.care_of_address;
+    delete mapped.street_address;
+    delete mapped.postal_code;
+    delete mapped.bank_account_number;
+    delete mapped.bank_clearing_number;
+    delete mapped.bank_bic;
+    delete mapped.bank_country_code;
+    delete mapped.bank_iban;
+    delete mapped.schedule_template;
+    delete mapped.created_at;
+    
+    return mapped;
   }
 
   // Deviations
   async getDeviations(filters: any = {}) {
-    const data = await this.getDataFromSupabase('deviations', 'deviations.json');
+    const data = await this.getDataFromSupabase('deviations');
     
     // Apply client-side filtering for JSON fallback
     let filteredData = Array.isArray(data) ? data : [];
@@ -102,17 +155,59 @@ export class SupabaseRestStorage {
       );
     }
     
-    return filteredData;
+    return filteredData.map(this.mapDeviationFields);
   }
 
   async getDeviation(id: number) {
-    const deviations = await this.getDataFromSupabase('deviations', 'deviations.json');
-    return Array.isArray(deviations) ? deviations.find((d: any) => d.id === id) : null;
+    const deviations = await this.getDataFromSupabase('deviations');
+    const deviation = Array.isArray(deviations) ? deviations.find((d: any) => d.id === id) : null;
+    return deviation ? this.mapDeviationFields(deviation) : deviation;
+  }
+
+  // Helper: Map deviation snake_case → camelCase
+  private mapDeviationFields(deviation: any) {
+    if (!deviation) return deviation;
+    
+    const mapped = {
+      ...deviation,
+      // Core fields
+      employeeId: deviation.employee_id || deviation.employeeId,
+      timeCode: deviation.time_code || deviation.timeCode,
+      periodId: deviation.period_id || deviation.periodId,
+      // Time fields
+      startTime: deviation.start_time || deviation.startTime,
+      endTime: deviation.end_time || deviation.endTime,
+      lastUpdated: deviation.last_updated || deviation.lastUpdated,
+      // Manager fields
+      managerComment: deviation.manager_comment || deviation.managerComment,
+      approvedBy: deviation.approved_by || deviation.approvedBy,
+      approvedAt: deviation.approved_at || deviation.approvedAt,
+      rejectedBy: deviation.rejected_by || deviation.rejectedBy,
+      rejectedAt: deviation.rejected_at || deviation.rejectedAt,
+      // Timestamps
+      createdAt: deviation.created_at || deviation.createdAt,
+    };
+    
+    // Remove snake_case duplicates
+    delete mapped.employee_id;
+    delete mapped.time_code;
+    delete mapped.period_id;
+    delete mapped.start_time;
+    delete mapped.end_time;
+    delete mapped.last_updated;
+    delete mapped.manager_comment;
+    delete mapped.approved_by;
+    delete mapped.approved_at;
+    delete mapped.rejected_by;
+    delete mapped.rejected_at;
+    delete mapped.created_at;
+    
+    return mapped;
   }
 
   // Leave requests
   async getLeaveRequests(filters: any = {}) {
-    const data = await this.getDataFromSupabase('leave_requests', 'leave-requests.json');
+    const data = await this.getDataFromSupabase('leave_requests');
     
     // Apply client-side filtering for JSON fallback
     let filteredData = Array.isArray(data) ? data : [];
@@ -134,17 +229,67 @@ export class SupabaseRestStorage {
       );
     }
     
-    return filteredData;
+    return filteredData.map(this.mapLeaveRequestFields);
   }
 
   async getLeaveRequest(id: number) {
-    const requests = await this.getDataFromSupabase('leave_requests', 'leave-requests.json');
-    return Array.isArray(requests) ? requests.find((lr: any) => lr.id === id) : null;
+    const requests = await this.getDataFromSupabase('leave_requests');
+    const request = Array.isArray(requests) ? requests.find((lr: any) => lr.id === id) : null;
+    return request ? this.mapLeaveRequestFields(request) : request;
+  }
+
+  // Helper: Map leave request snake_case → camelCase
+  private mapLeaveRequestFields(leave: any) {
+    if (!leave) return leave;
+    
+    const mapped = {
+      ...leave,
+      // Core fields
+      employeeId: leave.employee_id || leave.employeeId,
+      startDate: leave.start_date || leave.startDate,
+      endDate: leave.end_date || leave.endDate,
+      leaveType: leave.leave_type || leave.leaveType,
+      // Time fields
+      customStartTime: leave.custom_start_time || leave.customStartTime,
+      customEndTime: leave.custom_end_time || leave.customEndTime,
+      lastUpdated: leave.last_updated || leave.lastUpdated,
+      // Manager fields
+      managerComment: leave.manager_comment || leave.managerComment,
+      approvedBy: leave.approved_by || leave.approvedBy,
+      approvedAt: leave.approved_at || leave.approvedAt,
+      rejectedBy: leave.rejected_by || leave.rejectedBy,
+      rejectedAt: leave.rejected_at || leave.rejectedAt,
+      pausedBy: leave.paused_by || leave.pausedBy,
+      pausedAt: leave.paused_at || leave.pausedAt,
+      pauseReason: leave.pause_reason || leave.pauseReason,
+      // Timestamps
+      createdAt: leave.created_at || leave.createdAt,
+    };
+    
+    // Remove snake_case duplicates
+    delete mapped.employee_id;
+    delete mapped.start_date;
+    delete mapped.end_date;
+    delete mapped.leave_type;
+    delete mapped.custom_start_time;
+    delete mapped.custom_end_time;
+    delete mapped.last_updated;
+    delete mapped.manager_comment;
+    delete mapped.approved_by;
+    delete mapped.approved_at;
+    delete mapped.rejected_by;
+    delete mapped.rejected_at;
+    delete mapped.paused_by;
+    delete mapped.paused_at;
+    delete mapped.pause_reason;
+    delete mapped.created_at;
+    
+    return mapped;
   }
 
   // Schedules
   async getSchedules(filters: any = {}) {
-    const data = await this.getDataFromSupabase('schedules', 'schedules.json');
+    const data = await this.getDataFromSupabase('schedules');
     
     // Apply client-side filtering for JSON fallback
     let filteredData = Array.isArray(data) ? data : [];
@@ -172,15 +317,45 @@ export class SupabaseRestStorage {
 
   // Time balances
   async getTimeBalance(employeeId: string) {
-    const balances = await this.getDataFromSupabase('time_balances', 'timebalances.json');
-    return Array.isArray(balances) ? balances.find((tb: any) => 
+    const balances = await this.getDataFromSupabase('time_balances');
+    const balance = Array.isArray(balances) ? balances.find((tb: any) => 
       (tb.employeeId === employeeId) || (tb.employee_id === employeeId)
     ) : null;
+    return balance ? this.mapTimeBalanceFields(balance) : balance;
+  }
+
+  // Helper: Map time balance snake_case → camelCase
+  private mapTimeBalanceFields(balance: any) {
+    if (!balance) return balance;
+    
+    const mapped = {
+      ...balance,
+      employeeId: balance.employee_id || balance.employeeId,
+      timeBalance: balance.time_balance || balance.timeBalance,
+      vacationDays: balance.vacation_days || balance.vacationDays,
+      savedVacationDays: balance.saved_vacation_days || balance.savedVacationDays,
+      vacationUnit: balance.vacation_unit || balance.vacationUnit,
+      compensationTime: balance.compensation_time || balance.compensationTime,
+      lastUpdated: balance.last_updated || balance.lastUpdated,
+      createdAt: balance.created_at || balance.createdAt,
+    };
+    
+    // Remove snake_case duplicates
+    delete mapped.employee_id;
+    delete mapped.time_balance;
+    delete mapped.vacation_days;
+    delete mapped.saved_vacation_days;
+    delete mapped.vacation_unit;
+    delete mapped.compensation_time;
+    delete mapped.last_updated;
+    delete mapped.created_at;
+    
+    return mapped;
   }
 
   // Payslips
   async getPayslips(employeeId: string) {
-    const payslips = await this.getDataFromSupabase('payslips', 'payslips.json');
+    const payslips = await this.getDataFromSupabase('payslips');
     return Array.isArray(payslips) ? payslips.filter((p: any) => 
       (p.employeeId === employeeId) || (p.employee_id === employeeId)
     ) : [];
@@ -188,7 +363,7 @@ export class SupabaseRestStorage {
 
   // Time codes
   async getTimeCodes() {
-    return await this.getDataFromSupabase('time_codes', 'timecodes.json');
+    return await this.getDataFromSupabase('time_codes');
   }
 
   // === WRITE OPERATIONS ===

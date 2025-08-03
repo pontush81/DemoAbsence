@@ -462,180 +462,133 @@ export default function Dashboard() {
               </p>
             </div>
 
-            {/* Status alerts - Consolidated warning with role-appropriate action */}
-            {hasPendingItems && (
-              <Alert className="mb-4 border-orange-200 bg-orange-50">
-                <AlertDescription className="flex items-center justify-between">
+            {hasPendingItems ? (
+              /* COMPACT WAITING STATE - Perplexity's "reduce unnecessary whitespace" */
+              <div className="flex items-center justify-between p-6 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="flex items-center gap-4">
+                  {/* Subtle icon */}
+                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <span className="material-icons text-xl text-blue-600">schedule</span>
+                  </div>
+                  
+                  {/* Status message */}
                   <div>
-                    ⚠️ <strong>{currentMonthDeviations.filter(d => d.status === 'pending').length + currentMonthLeaveRequests.filter(lr => lr.status === 'pending').length} väntande godkännanden</strong> blockerar tidrapport
-                  </div>
-                  {isManager ? (
-                    <Link href="/manager" className="text-orange-600 hover:text-orange-800 text-sm font-medium underline">
-                      Hantera nu →
-                    </Link>
-                  ) : (
-                    <Link href="/new-deviation" className="text-orange-600 hover:text-orange-800 text-sm font-medium underline">
-                      Visa avvikelser →
-                    </Link>
-                  )}
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {/* Status summary */}
-            <div className="mb-6 p-4 bg-muted rounded-lg">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-sm text-muted-foreground mb-1">Månadens tidrapport</div>
-                  <div className="flex flex-col space-y-2">
-                    {currentMonthDeviations.length > 0 && (
-                      <Collapsible open={showDeviationDetails} onOpenChange={setShowDeviationDetails}>
-                        <CollapsibleTrigger className="text-sm hover:text-primary cursor-pointer flex items-center">
-                          <span className={`flex items-center gap-1 ${
-                            currentMonthDeviations.some(d => d.status === 'pending') 
-                              ? 'text-orange-600' 
-                              : 'text-green-600'
-                          }`}>
-                            📝 {currentMonthDeviations.length} avvikelser
-                            {currentMonthDeviations.some(d => d.status === 'pending') && <span className="w-2 h-2 bg-orange-500 rounded-full"></span>}
-                          </span>
-                          <span className="material-icons text-sm ml-auto">
-                            {showDeviationDetails ? 'expand_less' : 'expand_more'}
-                          </span>
+                    <div className="font-medium text-gray-900 mb-1">
+                      Väntar på chefens godkännande
+                    </div>
+                    {/* Collapsed details available */}
+                    {!isManager && (
+                      <Collapsible>
+                        <CollapsibleTrigger className="text-sm text-gray-600 hover:text-gray-800 underline decoration-1 underline-offset-2">
+                          Se status
                         </CollapsibleTrigger>
-                        <CollapsibleContent className="mt-2 pl-4 border-l-2 border-muted">
+                        <CollapsibleContent className="mt-2 text-xs text-gray-600">
                           <div className="space-y-1">
-                            {currentMonthDeviations.map(deviation => (
-                              <div key={deviation.id} className="text-xs text-muted-foreground flex justify-between">
-                                <span>
-                                  {format(new Date(deviation.date), 'MMM dd', { locale: sv })} - {getTimeCodeName(deviation.timeCode)}
-                                </span>
-                                <Badge variant={
-                                  deviation.status === 'pending' ? 'secondary' :
-                                  deviation.status === 'approved' ? 'default' : 'destructive'
-                                } className="text-xs px-1 py-0">
-                                  {deviation.status === 'pending' ? 'Väntande' :
-                                   deviation.status === 'approved' ? 'Godkänd' : 'Avvisad'}
-                                </Badge>
-                              </div>
-                            ))}
+                            {currentMonthDeviations.filter(d => d.status === 'pending').length > 0 && (
+                              <p>• {currentMonthDeviations.filter(d => d.status === 'pending').length} avvikelse{currentMonthDeviations.filter(d => d.status === 'pending').length > 1 ? 'r' : ''} väntar</p>
+                            )}
+                            {currentMonthLeaveRequests.filter(lr => lr.status === 'pending').length > 0 && (
+                              <p>• {currentMonthLeaveRequests.filter(lr => lr.status === 'pending').length} ledighetsansöka{currentMonthLeaveRequests.filter(lr => lr.status === 'pending').length > 1 ? 'n' : 'n'} väntar</p>
+                            )}
                           </div>
                         </CollapsibleContent>
                       </Collapsible>
                     )}
-                    
-                    {currentMonthLeaveRequests.length > 0 && (
-                      <Collapsible open={showLeaveDetails} onOpenChange={setShowLeaveDetails}>
-                        <CollapsibleTrigger className="text-sm hover:text-primary cursor-pointer flex items-center">
-                          <span className={`flex items-center gap-1 ${
-                            currentMonthLeaveRequests.some(lr => lr.status === 'pending') 
-                              ? 'text-orange-600' 
-                              : 'text-green-600'
-                          }`}>
-                            🏖️ {currentMonthLeaveRequests.length} ledigheter
-                            {currentMonthLeaveRequests.some(lr => lr.status === 'pending') && <span className="w-2 h-2 bg-orange-500 rounded-full"></span>}
-                          </span>
-                          <span className="material-icons text-sm ml-auto">
-                            {showLeaveDetails ? 'expand_less' : 'expand_more'}
-                          </span>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent className="mt-2 pl-4 border-l-2 border-muted">
-                          <div className="space-y-1">
-                            {currentMonthLeaveRequests.map(leave => (
-                              <div key={leave.id} className="text-xs text-muted-foreground flex justify-between">
-                                <span>
-                                  {format(new Date(leave.startDate), 'MMM dd', { locale: sv })} - 
-                                  {leave.startDate !== leave.endDate 
-                                    ? format(new Date(leave.endDate), 'MMM dd', { locale: sv })
-                                    : ''
-                                  } {leave.leaveType}
-                                </span>
-                                <Badge variant={
-                                  leave.status === 'pending' ? 'secondary' :
-                                  leave.status === 'approved' ? 'default' : 'destructive'
-                                } className="text-xs px-1 py-0">
-                                  {leave.status === 'pending' ? 'Väntande' :
-                                   leave.status === 'approved' ? 'Godkänd' : 'Avvisad'}
-                                </Badge>
-                              </div>
-                            ))}
-                          </div>
-                        </CollapsibleContent>
-                      </Collapsible>
-                    )}
-                    
-                    {!hasMonthlyDeviations && (
-                      <span className="text-sm text-green-600">✅ Enligt ordinarie schema</span>
-                    )}
                   </div>
                 </div>
-                <div className="text-right">
-                  <Badge variant={hasPendingItems ? "destructive" : hasMonthlyDeviations ? "secondary" : "default"}>
-                    {hasPendingItems ? "Väntande godkännanden" : hasMonthlyDeviations ? "Med avvikelser" : "Klar att skicka"}
-                  </Badge>
-                </div>
-              </div>
-            </div>
-
-            {/* Action buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 w-full">
-              {hasMonthlyDeviations ? (
-                // User already has deviations - just submit the report
-                <Button
-                  size="lg"
-                  variant={hasPendingItems ? "secondary" : "default"}
-                  onClick={() => handleSubmitTimeReport(true)}
-                  disabled={hasPendingItems || isLoadingMonthlyDeviations || isLoadingMonthlyLeaveRequests}
-                  className="flex-1 min-w-[120px]"
-                >
-                  <span className="material-icons mr-2">{hasPendingItems ? 'block' : 'send'}</span>
-                  <span className="hidden sm:inline">
-                    {hasPendingItems ? 'Väntande godkännanden först' : 'Skicka tidrapport'}
-                  </span>
-                  <span className="sm:hidden">
-                    {hasPendingItems ? 'Väntar' : 'Skicka'}
-                  </span>
-                </Button>
-              ) : (
-                // User has no deviations - give them options
-                <>
+                
+                {/* Right side actions */}
+                <div className="flex items-center gap-3">
+                  {/* Disabled button - compact version */}
                   <Button
-                    size="lg"
-                    variant={hasPendingItems ? "secondary" : "default"}
-                    onClick={() => handleSubmitTimeReport(false)}
-                    disabled={hasPendingItems || isLoadingMonthlyDeviations || isLoadingMonthlyLeaveRequests}
-                    className="flex-1 min-w-[120px]"
+                    size="default"
+                    variant="secondary"
+                    disabled={true}
+                    className="bg-gray-100 text-gray-500 cursor-not-allowed border-gray-200"
                   >
-                    <span className="material-icons mr-2">{hasPendingItems ? 'block' : 'check_circle'}</span>
-                    <span className="hidden sm:inline">
-                      {hasPendingItems ? 'Hantera godkännanden först' : 'Jag har inga avvikelser'}
-                    </span>
-                    <span className="sm:hidden">
-                      {hasPendingItems ? 'Hantera' : 'Inga'}
-                    </span>
+                    <span className="material-icons mr-2 text-sm">schedule</span>
+                    <span className="hidden sm:inline">Skicka tidrapport</span>
+                    <span className="sm:hidden">Skicka</span>
                   </Button>
                   
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    onClick={() => handleSubmitTimeReport(true)}
-                    disabled={isLoadingMonthlyDeviations || isLoadingMonthlyLeaveRequests}
-                    className="flex-1 min-w-[120px]"
-                  >
-                    <span className="material-icons mr-2">add</span>
-                    <span className="hidden sm:inline">Registrera avvikelser</span>
-                    <span className="sm:hidden">Avvikelser</span>
-                  </Button>
-                </>
-              )}
-            </div>
+                  {/* Manager action */}
+                  {isManager && (
+                    <Link href="/manager" className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm font-medium">
+                      Godkänn →
+                    </Link>
+                  )}
+                </div>
+              </div>
+            ) : (
+              /* COMPACT ACTIONABLE STATE - matching visual weight */
+              <div className="space-y-4">
+                {/* Status indicator - compact */}
+                <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg border border-green-200">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                      <span className="material-icons text-lg text-green-600">check_circle</span>
+                    </div>
+                    <div>
+                      <div className="font-medium text-green-900">Klar att skicka</div>
+                      <div className="text-sm text-green-700">
+                        {hasMonthlyDeviations ? "Med avvikelser" : "Inga avvikelser"}
+                      </div>
+                    </div>
+                  </div>
+                  <Badge variant="default" className="bg-green-100 text-green-800 border-green-200">
+                    Redo
+                  </Badge>
+                </div>
 
-            {/* Simplified helper text - only when no blocking issues */}
-            {!hasPendingItems && !hasMonthlyDeviations && (
-              <div className="mt-4 text-center">
-                <p className="text-sm text-muted-foreground">
-                  Välj första alternativet om du arbetat enligt schema, andra för att registrera avvikelser
-                </p>
+                {/* Action buttons - proportional to content importance */}
+                <div className="flex flex-col sm:flex-row gap-3 w-full">
+                  {hasMonthlyDeviations ? (
+                    <Button
+                      size="lg"
+                      onClick={() => handleSubmitTimeReport(true)}
+                      disabled={isLoadingMonthlyDeviations || isLoadingMonthlyLeaveRequests}
+                      className="flex-1 min-w-[120px]"
+                    >
+                      <span className="material-icons mr-2">send</span>
+                      <span className="hidden sm:inline">Skicka tidrapport</span>
+                      <span className="sm:hidden">Skicka</span>
+                    </Button>
+                  ) : (
+                    <>
+                      <Button
+                        size="lg"
+                        onClick={() => handleSubmitTimeReport(false)}
+                        disabled={isLoadingMonthlyDeviations || isLoadingMonthlyLeaveRequests}
+                        className="flex-1 min-w-[120px]"
+                      >
+                        <span className="material-icons mr-2">check_circle</span>
+                        <span className="hidden sm:inline">Jag har inga avvikelser</span>
+                        <span className="sm:hidden">Inga</span>
+                      </Button>
+                      
+                      <Button
+                        size="lg"
+                        variant="outline"
+                        onClick={() => handleSubmitTimeReport(true)}
+                        disabled={isLoadingMonthlyDeviations || isLoadingMonthlyLeaveRequests}
+                        className="flex-1 min-w-[120px]"
+                      >
+                        <span className="material-icons mr-2">add</span>
+                        <span className="hidden sm:inline">Registrera avvikelser</span>
+                        <span className="sm:hidden">Avvikelser</span>
+                      </Button>
+                    </>
+                  )}
+                </div>
+
+                {/* Helper text only when actionable - minimal */}
+                {!hasMonthlyDeviations && (
+                  <div className="text-center">
+                    <p className="text-xs text-muted-foreground">
+                      Välj första alternativet om du arbetat enligt schema
+                    </p>
+                  </div>
+                )}
               </div>
             )}
           </CardContent>

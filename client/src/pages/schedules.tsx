@@ -14,11 +14,14 @@ import { useStore } from '@/lib/store';
 import { Employee, Schedule, TimeBalance } from '@shared/schema';
 import { formatTime, formatDuration } from '@/lib/utils/date';
 import ScheduleImport from '@/components/paxml/schedule-import';
+import { InfoTooltip, BadgeWithTooltip } from '@/components/ui/mobile-tooltip';
+import { useIsMobile } from '@/hooks/use-is-mobile';
 
 export default function SchedulesPage() {
   const { t } = useI18n();
   const { user } = useStore();
   const employeeId = user.currentUser?.employeeId;
+  const isMobile = useIsMobile();
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>('');
@@ -301,13 +304,23 @@ export default function SchedulesPage() {
 
       {/* Balances Overview - Using real API data */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="border-blue-200">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
-              <span className="material-icons text-blue-600">beach_access</span>
-              Semestersaldo
-            </CardTitle>
-          </CardHeader>
+                 <Card className="border-blue-200">
+           <CardHeader className="pb-2">
+             <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+               <span className="material-icons text-blue-600">beach_access</span>
+               Semestersaldo
+               <InfoTooltip 
+                 content={
+                   <div>
+                     <p className="font-semibold mb-1">🏖️ Semestersaldo</p>
+                     <p className="text-xs">Antal tillgängliga semesterdagar du kan ansöka om som semester</p>
+                     <p className="text-xs mt-1">• Minskar när semester godkänns och tas ut</p>
+                   </div>
+                 }
+                 position="bottom"
+               />
+             </CardTitle>
+           </CardHeader>
           <CardContent>
             <div className="space-y-2">
               <div className="flex justify-between items-center">
@@ -333,13 +346,24 @@ export default function SchedulesPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-orange-200">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
-              <span className="material-icons text-orange-600">hourglass_top</span>
-              Tidssaldo
-            </CardTitle>
-          </CardHeader>
+                 <Card className="border-orange-200">
+           <CardHeader className="pb-2">
+             <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+               <span className="material-icons text-orange-600">hourglass_top</span>
+               Tidssaldo
+               <InfoTooltip 
+                 content={
+                   <div>
+                     <p className="font-semibold mb-1">⏰ Tidssaldo (Flextid)</p>
+                     <p className="text-xs">Din ackumulerade flex-balans från över- och undertid</p>
+                     <p className="text-xs mt-1">• <span className="text-green-600">Positivt:</span> Du har jobbat mer än ordinarie tid</p>
+                     <p className="text-xs">• <span className="text-red-600">Negativt:</span> Du har en skuld att jobba ikapp</p>
+                   </div>
+                 }
+                 position="bottom"
+               />
+             </CardTitle>
+           </CardHeader>
           <CardContent>
             <div className="space-y-2">
               <div className="flex justify-between items-center">
@@ -360,13 +384,24 @@ export default function SchedulesPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-purple-200">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
-              <span className="material-icons text-purple-600">trending_up</span>
-              Kompensationstid
-            </CardTitle>
-          </CardHeader>
+                 <Card className="border-purple-200">
+           <CardHeader className="pb-2">
+             <CardTitle className="text-sm font-medium text-gray-600 flex items-center gap-2">
+               <span className="material-icons text-purple-600">trending_up</span>
+               Kompensationstid
+               <InfoTooltip 
+                 content={
+                   <div>
+                     <p className="font-semibold mb-1">💪 Kompensationstid</p>
+                     <p className="text-xs">Övertid som ännu inte kompenserats med ledighet</p>
+                     <p className="text-xs mt-1">• Uppstår vid övertidsarbete utöver ordinarie arbetstid</p>
+                     <p className="text-xs">• Kan tas ut som kompledighet eller betalas ut</p>
+                   </div>
+                 }
+                 position="bottom"
+               />
+             </CardTitle>
+           </CardHeader>
           <CardContent>
             <div className="space-y-2">
               <div className="flex justify-between items-center">
@@ -404,9 +439,20 @@ export default function SchedulesPage() {
                   <p className="text-sm text-gray-600">5-9 augusti (5 dagar)</p>
                 </div>
               </div>
-              <Badge variant="secondary" className="bg-green-100 text-green-800">
-                Godkänd
-              </Badge>
+                             <BadgeWithTooltip
+                 badge={
+                   <Badge variant="secondary" className="bg-green-100 text-green-800">
+                     Godkänd
+                   </Badge>
+                 }
+                 tooltipContent={
+                   <div>
+                     <p className="font-semibold mb-1">✅ Godkänd</p>
+                     <p className="text-xs">Denna ansökan har godkänts av din chef och kommer att påverka din lön/arbetstid</p>
+                   </div>
+                 }
+                 position="top"
+               />
             </div>
             
             <div className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg">
@@ -419,9 +465,22 @@ export default function SchedulesPage() {
                   <p className="text-sm text-gray-600">15 augusti 14:00-15:00</p>
                 </div>
               </div>
-              <Badge variant="outline" className="border-orange-300 text-orange-700">
-                Väntar på godkännande
-              </Badge>
+                             <BadgeWithTooltip
+                 badge={
+                   <Badge variant="outline" className="border-orange-300 text-orange-700">
+                     Väntar på godkännande
+                   </Badge>
+                 }
+                 tooltipContent={
+                   <div>
+                     <p className="font-semibold mb-1">⏳ Väntar på godkännande</p>
+                     <p className="text-xs">Din chef har ännu inte behandlat denna ansökan</p>
+                     <p className="text-xs mt-1">• Du får en notifikation när den behandlas</p>
+                     <p className="text-xs">• Du kan fortfarande redigera eller ta bort ansökan</p>
+                   </div>
+                 }
+                 position="top"
+               />
             </div>
 
             <div className="text-center py-4">

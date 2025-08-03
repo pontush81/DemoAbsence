@@ -327,13 +327,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const employees = await restStorage.getEmployees();
       
-      // Map snake_case to camelCase for frontend compatibility
-      const mappedEmployees = employees.map((employee: any) => ({
-        ...employee,
-        employeeId: employee.employee_id || employee.employeeId,
-        firstName: employee.first_name || employee.firstName,
-        lastName: employee.last_name || employee.lastName,
-      }));
+      // Map snake_case to camelCase for frontend compatibility - COMPREHENSIVE MAPPING
+      const mappedEmployees = employees.map((employee: any) => {
+        const mapped = {
+          ...employee,
+          // Core fields
+          employeeId: employee.employee_id || employee.employeeId,
+          firstName: employee.first_name || employee.firstName,
+          lastName: employee.last_name || employee.lastName,
+          // Contact fields
+          phoneNumber: employee.phone_number || employee.phoneNumber,
+          workEmail: employee.work_email || employee.workEmail,
+          preferredEmail: employee.preferred_email || employee.preferredEmail,
+          // Address fields
+          careOfAddress: employee.care_of_address || employee.careOfAddress,
+          streetAddress: employee.street_address || employee.streetAddress,
+          postalCode: employee.postal_code || employee.postalCode,
+          // Banking fields
+          bankAccountNumber: employee.bank_account_number || employee.bankAccountNumber,
+          bankClearingNumber: employee.bank_clearing_number || employee.bankClearingNumber,
+          bankBIC: employee.bank_bic || employee.bankBIC,
+          bankCountryCode: employee.bank_country_code || employee.bankCountryCode,
+          bankIBAN: employee.bank_iban || employee.bankIBAN,
+          // Work fields
+          scheduleTemplate: employee.schedule_template || employee.scheduleTemplate,
+          // Timestamps
+          createdAt: employee.created_at || employee.createdAt,
+        };
+        
+        // Remove snake_case duplicates
+        delete mapped.employee_id;
+        delete mapped.first_name;
+        delete mapped.last_name;
+        delete mapped.phone_number;
+        delete mapped.work_email;
+        delete mapped.preferred_email;
+        delete mapped.care_of_address;
+        delete mapped.street_address;
+        delete mapped.postal_code;
+        delete mapped.bank_account_number;
+        delete mapped.bank_clearing_number;
+        delete mapped.bank_bic;
+        delete mapped.bank_country_code;
+        delete mapped.bank_iban;
+        delete mapped.schedule_template;
+        delete mapped.created_at;
+        
+        return mapped;
+      });
       
       res.json(mappedEmployees);
     } catch (error) {
@@ -347,13 +388,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const employee = await restStorage.getEmployee(req.params.id);
       if (employee) {
-        // Map snake_case to camelCase for frontend compatibility
+        // Map snake_case to camelCase for frontend compatibility - COMPREHENSIVE MAPPING
         const mappedEmployee = {
           ...employee,
+          // Core fields
           employeeId: employee.employee_id || employee.employeeId,
           firstName: employee.first_name || employee.firstName,
           lastName: employee.last_name || employee.lastName,
+          // Contact fields
+          phoneNumber: employee.phone_number || employee.phoneNumber,
+          workEmail: employee.work_email || employee.workEmail,
+          preferredEmail: employee.preferred_email || employee.preferredEmail,
+          // Address fields
+          careOfAddress: employee.care_of_address || employee.careOfAddress,
+          streetAddress: employee.street_address || employee.streetAddress,
+          postalCode: employee.postal_code || employee.postalCode,
+          // Banking fields
+          bankAccountNumber: employee.bank_account_number || employee.bankAccountNumber,
+          bankClearingNumber: employee.bank_clearing_number || employee.bankClearingNumber,
+          bankBIC: employee.bank_bic || employee.bankBIC,
+          bankCountryCode: employee.bank_country_code || employee.bankCountryCode,
+          bankIBAN: employee.bank_iban || employee.bankIBAN,
+          // Work fields
+          scheduleTemplate: employee.schedule_template || employee.scheduleTemplate,
+          // Timestamps
+          createdAt: employee.created_at || employee.createdAt,
         };
+        
+        // Remove snake_case duplicates
+        delete mappedEmployee.employee_id;
+        delete mappedEmployee.first_name;
+        delete mappedEmployee.last_name;
+        delete mappedEmployee.phone_number;
+        delete mappedEmployee.work_email;
+        delete mappedEmployee.preferred_email;
+        delete mappedEmployee.care_of_address;
+        delete mappedEmployee.street_address;
+        delete mappedEmployee.postal_code;
+        delete mappedEmployee.bank_account_number;
+        delete mappedEmployee.bank_clearing_number;
+        delete mappedEmployee.bank_bic;
+        delete mappedEmployee.bank_country_code;
+        delete mappedEmployee.bank_iban;
+        delete mappedEmployee.schedule_template;
+        delete mappedEmployee.created_at;
         
         res.json(mappedEmployee);
       } else {
@@ -506,14 +584,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
         );
       }
       
-      // Map snake_case to camelCase for frontend compatibility
-      const mappedDeviations = deviations.map((deviation: any) => ({
-        ...deviation,
-        employeeId: deviation.employee_id || deviation.employeeId,
-        timeCode: deviation.time_code || deviation.timeCode,
-        startTime: deviation.start_time || deviation.startTime,
-        endTime: deviation.end_time || deviation.endTime,
-      }));
+      // Map snake_case to camelCase for frontend compatibility - COMPREHENSIVE MAPPING
+      const mappedDeviations = deviations.map((deviation: any) => {
+        const mapped = {
+          ...deviation,
+          // Core fields
+          employeeId: deviation.employee_id || deviation.employeeId,
+          timeCode: deviation.time_code || deviation.timeCode,
+          periodId: deviation.period_id || deviation.periodId,
+          // Time fields
+          startTime: deviation.start_time || deviation.startTime,
+          endTime: deviation.end_time || deviation.endTime,
+          lastUpdated: deviation.last_updated || deviation.lastUpdated,
+          // Manager fields
+          managerComment: deviation.manager_comment || deviation.managerComment,
+          approvedBy: deviation.approved_by || deviation.approvedBy,
+          approvedAt: deviation.approved_at || deviation.approvedAt,
+          rejectedBy: deviation.rejected_by || deviation.rejectedBy,
+          rejectedAt: deviation.rejected_at || deviation.rejectedAt,
+          // Timestamps
+          createdAt: deviation.created_at || deviation.createdAt,
+        };
+        
+        // Remove snake_case duplicates
+        delete mapped.employee_id;
+        delete mapped.time_code;
+        delete mapped.period_id;
+        delete mapped.start_time;
+        delete mapped.end_time;
+        delete mapped.last_updated;
+        delete mapped.manager_comment;
+        delete mapped.approved_by;
+        delete mapped.approved_at;
+        delete mapped.rejected_by;
+        delete mapped.rejected_at;
+        delete mapped.created_at;
+        
+        return mapped;
+      });
       
       res.json(mappedDeviations);
     } catch (error) {
@@ -527,7 +635,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const deviation = await restStorage.getDeviation(parseInt(req.params.id));
       if (deviation) {
-        res.json(deviation);
+        // Map snake_case to camelCase for frontend compatibility
+        const mappedDeviation = {
+          ...deviation,
+          employeeId: deviation.employee_id || deviation.employeeId,
+          timeCode: deviation.time_code || deviation.timeCode,
+          startTime: deviation.start_time || deviation.startTime,
+          endTime: deviation.end_time || deviation.endTime,
+          managerComment: deviation.manager_comment || deviation.managerComment,
+          approvedBy: deviation.approved_by || deviation.approvedBy,
+          approvedAt: deviation.approved_at || deviation.approvedAt,
+          rejectedBy: deviation.rejected_by || deviation.rejectedBy,
+          rejectedAt: deviation.rejected_at || deviation.rejectedAt,
+        };
+        
+        res.json(mappedDeviation);
       } else {
         res.status(404).json({ message: 'Deviation not found' });
       }
@@ -647,6 +769,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/leave-requests', async (req, res) => {
     try {
       const { employeeId, period, status, leaveType } = req.query;
+      console.log('🔍 DEBUG: Leave requests query:', { employeeId, period, status, leaveType });
       
       const filters: any = {};
       if (employeeId) filters.employeeId = employeeId;
@@ -686,15 +809,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
         leaveRequests = leaveRequests.filter((l: any) => l.leaveType === leaveType);
       }
       
-      // Map snake_case to camelCase for frontend compatibility
-      const mappedLeaveRequests = leaveRequests.map((leave: any) => ({
-        ...leave,
-        employeeId: leave.employee_id || leave.employeeId,
-        startDate: leave.start_date || leave.startDate,
-        endDate: leave.end_date || leave.endDate,
-        leaveType: leave.leave_type || leave.leaveType,
-      }));
+      // Map snake_case to camelCase for frontend compatibility - COMPREHENSIVE MAPPING
+      const mappedLeaveRequests = leaveRequests.map((leave: any) => {
+        const mapped = {
+          ...leave,
+          // Core fields
+          employeeId: leave.employee_id || leave.employeeId,
+          startDate: leave.start_date || leave.startDate,
+          endDate: leave.end_date || leave.endDate,
+          leaveType: leave.leave_type || leave.leaveType,
+          // Time fields
+          customStartTime: leave.custom_start_time || leave.customStartTime,
+          customEndTime: leave.custom_end_time || leave.customEndTime,
+          lastUpdated: leave.last_updated || leave.lastUpdated,
+          // Manager fields
+          managerComment: leave.manager_comment || leave.managerComment,
+          approvedBy: leave.approved_by || leave.approvedBy,
+          approvedAt: leave.approved_at || leave.approvedAt,
+          rejectedBy: leave.rejected_by || leave.rejectedBy,
+          rejectedAt: leave.rejected_at || leave.rejectedAt,
+          pausedBy: leave.paused_by || leave.pausedBy,
+          pausedAt: leave.paused_at || leave.pausedAt,
+          pauseReason: leave.pause_reason || leave.pauseReason,
+          // Timestamps
+          createdAt: leave.created_at || leave.createdAt,
+        };
+        
+        // Remove snake_case duplicates
+        delete mapped.employee_id;
+        delete mapped.start_date;
+        delete mapped.end_date;
+        delete mapped.leave_type;
+        delete mapped.custom_start_time;
+        delete mapped.custom_end_time;
+        delete mapped.last_updated;
+        delete mapped.manager_comment;
+        delete mapped.approved_by;
+        delete mapped.approved_at;
+        delete mapped.rejected_by;
+        delete mapped.rejected_at;
+        delete mapped.paused_by;
+        delete mapped.paused_at;
+        delete mapped.pause_reason;
+        delete mapped.created_at;
+        
+        return mapped;
+      });
       
+      console.log('🔍 DEBUG: Returning', mappedLeaveRequests.length, 'leave requests');
       res.json(mappedLeaveRequests);
     } catch (error) {
       console.error('Error fetching leave requests:', error);
@@ -829,7 +991,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       if (timeBalance) {
-        // Map snake_case to camelCase for frontend compatibility
+        // Map snake_case to camelCase for frontend compatibility - COMPREHENSIVE MAPPING
         const mappedTimeBalance = {
           ...timeBalance,
           employeeId: timeBalance.employee_id || timeBalance.employeeId,
@@ -840,6 +1002,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           compensationTime: timeBalance.compensation_time || timeBalance.compensationTime,
           lastUpdated: timeBalance.last_updated || timeBalance.lastUpdated,
         };
+        
+        // Remove snake_case duplicates
+        delete mappedTimeBalance.employee_id;
+        delete mappedTimeBalance.time_balance;
+        delete mappedTimeBalance.vacation_days;
+        delete mappedTimeBalance.saved_vacation_days;
+        delete mappedTimeBalance.vacation_unit;
+        delete mappedTimeBalance.compensation_time;
+        delete mappedTimeBalance.last_updated;
+        delete mappedTimeBalance.created_at; // SISTA SNAKE_CASE FÄLTET!
         
         res.json(mappedTimeBalance);
       } else {
@@ -945,7 +1117,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       if (approvedDeviation) {
-        res.json(approvedDeviation);
+        // Map snake_case to camelCase for frontend compatibility
+        const mappedDeviation = {
+          ...approvedDeviation,
+          employeeId: approvedDeviation.employee_id || approvedDeviation.employeeId,
+          timeCode: approvedDeviation.time_code || approvedDeviation.timeCode,
+          startTime: approvedDeviation.start_time || approvedDeviation.startTime,
+          endTime: approvedDeviation.end_time || approvedDeviation.endTime,
+          managerComment: approvedDeviation.manager_comment || approvedDeviation.managerComment,
+          approvedBy: approvedDeviation.approved_by || approvedDeviation.approvedBy,
+          approvedAt: approvedDeviation.approved_at || approvedDeviation.approvedAt,
+          rejectedBy: approvedDeviation.rejected_by || approvedDeviation.rejectedBy,
+          rejectedAt: approvedDeviation.rejected_at || approvedDeviation.rejectedAt,
+        };
+        
+        res.json(mappedDeviation);
       } else {
         res.status(404).json({ message: 'Deviation not found' });
       }
@@ -987,7 +1173,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       if (rejectedDeviation) {
-        res.json(rejectedDeviation);
+        // Map snake_case to camelCase for frontend compatibility
+        const mappedDeviation = {
+          ...rejectedDeviation,
+          employeeId: rejectedDeviation.employee_id || rejectedDeviation.employeeId,
+          timeCode: rejectedDeviation.time_code || rejectedDeviation.timeCode,
+          startTime: rejectedDeviation.start_time || rejectedDeviation.startTime,
+          endTime: rejectedDeviation.end_time || rejectedDeviation.endTime,
+          managerComment: rejectedDeviation.manager_comment || rejectedDeviation.managerComment,
+          approvedBy: rejectedDeviation.approved_by || rejectedDeviation.approvedBy,
+          approvedAt: rejectedDeviation.approved_at || rejectedDeviation.approvedAt,
+          rejectedBy: rejectedDeviation.rejected_by || rejectedDeviation.rejectedBy,
+          rejectedAt: rejectedDeviation.rejected_at || rejectedDeviation.rejectedAt,
+        };
+        
+        res.json(mappedDeviation);
       } else {
         res.status(404).json({ message: 'Deviation not found' });
       }
@@ -1027,7 +1227,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       if (returnedDeviation) {
-        res.json(returnedDeviation);
+        // Map snake_case to camelCase for frontend compatibility
+        const mappedDeviation = {
+          ...returnedDeviation,
+          employeeId: returnedDeviation.employee_id || returnedDeviation.employeeId,
+          timeCode: returnedDeviation.time_code || returnedDeviation.timeCode,
+          startTime: returnedDeviation.start_time || returnedDeviation.startTime,
+          endTime: returnedDeviation.end_time || returnedDeviation.endTime,
+          managerComment: returnedDeviation.manager_comment || returnedDeviation.managerComment,
+          approvedBy: returnedDeviation.approved_by || returnedDeviation.approvedBy,
+          approvedAt: returnedDeviation.approved_at || returnedDeviation.approvedAt,
+          rejectedBy: returnedDeviation.rejected_by || returnedDeviation.rejectedBy,
+          rejectedAt: returnedDeviation.rejected_at || returnedDeviation.rejectedAt,
+        };
+        
+        res.json(mappedDeviation);
       } else {
         res.status(404).json({ message: 'Deviation not found' });
       }
@@ -1290,7 +1504,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (endDate) filters.endDate = endDate;
       
       const schedules = await restStorage.getSchedules(filters);
-      res.json(schedules);
+      
+      // Map snake_case to camelCase for consistency
+      const mappedSchedules = Array.isArray(schedules) ? schedules.map((schedule: any) => {
+        const mapped = {
+          ...schedule,
+          employeeId: schedule.employee_id || schedule.employeeId,
+          startTime: schedule.start_time || schedule.startTime,
+          endTime: schedule.end_time || schedule.endTime,
+          breakStart: schedule.break_start || schedule.breakStart,
+          breakEnd: schedule.break_end || schedule.breakEnd,
+          createdAt: schedule.created_at || schedule.createdAt,
+        };
+        
+        // Remove snake_case duplicates
+        delete mapped.employee_id;
+        delete mapped.start_time;
+        delete mapped.end_time;
+        delete mapped.break_start;
+        delete mapped.break_end;
+        delete mapped.created_at;
+        
+        return mapped;
+      }) : schedules;
+      
+      res.json(mappedSchedules);
     } catch (error) {
       console.error('Error fetching schedules:', error);
       res.status(500).json({ error: (error as Error).message });
