@@ -540,6 +540,120 @@ export default function Dashboard() {
                   </Badge>
                 </div>
 
+                {/* Show deviation details when user wants to see what will be submitted */}
+                {hasMonthlyDeviations && (
+                  <div className="mt-4">
+                    <Collapsible>
+                      <CollapsibleTrigger className="text-sm text-blue-600 hover:text-blue-700 underline decoration-1 underline-offset-2 flex items-center gap-1">
+                        <span className="material-icons text-sm">list</span>
+                        Visa avvikelser som skickas in ({currentMonthDeviations.length + currentMonthLeaveRequests.length} st)
+                      </CollapsibleTrigger>
+                      <CollapsibleContent className="mt-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                        <div className="space-y-3">
+                          {/* Deviations */}
+                          {currentMonthDeviations.length > 0 && (
+                            <div>
+                              <h4 className="font-medium text-blue-900 mb-2 flex items-center gap-1">
+                                <span className="material-icons text-sm">schedule</span>
+                                Avvikelser ({currentMonthDeviations.length} st)
+                              </h4>
+                              <div className="space-y-2">
+                                {currentMonthDeviations.map((deviation, index) => (
+                                  <div key={index} className="flex items-center justify-between text-sm bg-white p-2 rounded border">
+                                    <div className="flex items-center gap-2">
+                                      <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                                      <span className="font-medium">{format(new Date(deviation.date), 'dd MMM', { locale: sv })}</span>
+                                      <span>{getTimeCodeName(deviation.timeCode)}</span>
+                                      {deviation.description && (
+                                        <span className="text-gray-600">- {deviation.description}</span>
+                                      )}
+                                    </div>
+                                    <div className="flex items-center gap-2 text-xs">
+                                      {deviation.duration && <span>{deviation.duration}h</span>}
+                                      <Badge 
+                                        variant={deviation.status === 'approved' ? 'default' : 'secondary'}
+                                        className={
+                                          deviation.status === 'approved' 
+                                            ? 'bg-green-100 text-green-800 border-green-200' 
+                                            : deviation.status === 'pending'
+                                            ? 'bg-yellow-100 text-yellow-800 border-yellow-200'
+                                            : 'bg-gray-100 text-gray-800 border-gray-200'
+                                        }
+                                      >
+                                        {deviation.status === 'approved' ? 'Godkänd' : 
+                                         deviation.status === 'pending' ? 'Väntar' : 
+                                         deviation.status}
+                                      </Badge>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Leave Requests */}
+                          {currentMonthLeaveRequests.length > 0 && (
+                            <div>
+                              <h4 className="font-medium text-blue-900 mb-2 flex items-center gap-1">
+                                <span className="material-icons text-sm">event</span>
+                                Ledighet ({currentMonthLeaveRequests.length} st)
+                              </h4>
+                              <div className="space-y-2">
+                                {currentMonthLeaveRequests.map((leave, index) => (
+                                  <div key={index} className="flex items-center justify-between text-sm bg-white p-2 rounded border">
+                                    <div className="flex items-center gap-2">
+                                      <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                                      <span className="font-medium">
+                                        {format(new Date(leave.startDate), 'dd MMM', { locale: sv })}
+                                        {leave.startDate !== leave.endDate && (
+                                          <span> - {format(new Date(leave.endDate), 'dd MMM', { locale: sv })}</span>
+                                        )}
+                                      </span>
+                                      <span>{leave.leaveType}</span>
+                                      {leave.description && (
+                                        <span className="text-gray-600">- {leave.description}</span>
+                                      )}
+                                    </div>
+                                    <div className="flex items-center gap-2 text-xs">
+                                      <span>
+                                        {leave.scope === 'full-day' ? 'Heldag' : 
+                                         leave.scope === 'morning' ? 'Förmiddag' :
+                                         leave.scope === 'afternoon' ? 'Eftermiddag' : 
+                                         'Anpassad'}
+                                      </span>
+                                      <Badge 
+                                        variant={leave.status === 'approved' ? 'default' : 'secondary'}
+                                        className={
+                                          leave.status === 'approved' 
+                                            ? 'bg-green-100 text-green-800 border-green-200' 
+                                            : leave.status === 'pending'
+                                            ? 'bg-yellow-100 text-yellow-800 border-yellow-200'
+                                            : 'bg-gray-100 text-gray-800 border-gray-200'
+                                        }
+                                      >
+                                        {leave.status === 'approved' ? 'Godkänd' : 
+                                         leave.status === 'pending' ? 'Väntar' : 
+                                         leave.status}
+                                      </Badge>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          
+                          {/* Summary */}
+                          <div className="pt-2 border-t border-blue-200">
+                            <p className="text-xs text-blue-700">
+                              💡 Alla dessa avvikelser och ledigheter kommer att inkluderas i din tidrapport för {format(monthStart, 'MMMM yyyy', { locale: sv })}.
+                            </p>
+                          </div>
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  </div>
+                )}
+
                 {/* Action buttons - proportional to content importance */}
                 <div className="flex flex-col sm:flex-row gap-3 w-full">
                   {hasMonthlyDeviations ? (

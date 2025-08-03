@@ -17,15 +17,36 @@ const RoleSwitcher = () => {
   };
   
   const goToManagerArea = () => {
-    setLocation('/manager');
+    try {
+      console.log('🔍 RoleSwitcher: Navigating to manager area');
+      setLocation('/manager');
+    } catch (error) {
+      console.error('❌ RoleSwitcher: Error navigating to manager area:', error);
+      // Fallback: Use browser navigation
+      window.location.href = '/manager';
+    }
   };
   
   const goToHRArea = () => {
-    setLocation('/manager'); // HR also uses manager page for now
+    try {
+      console.log('🔍 RoleSwitcher: Navigating to HR area');
+      setLocation('/manager'); // HR also uses manager page for now
+    } catch (error) {
+      console.error('❌ RoleSwitcher: Error navigating to HR area:', error);
+      // Fallback: Use browser navigation
+      window.location.href = '/manager';
+    }
   };
   
   const goToPayrollArea = () => {
-    setLocation('/payroll-dashboard'); // Payroll goes to payroll dashboard
+    try {
+      console.log('🔍 RoleSwitcher: Navigating to payroll dashboard');
+      setLocation('/payroll-dashboard'); // Payroll goes to payroll dashboard
+    } catch (error) {
+      console.error('❌ RoleSwitcher: Error navigating to payroll dashboard:', error);
+      // Fallback: Use browser navigation
+      window.location.href = '/payroll-dashboard';
+    }
   };
   
   return (
@@ -123,8 +144,14 @@ const RoleSwitcher = () => {
           
           {user.currentRole === 'manager' && (
             <Button 
-              className="w-full mt-4 bg-blue-600 hover:bg-blue-700" 
-              onClick={goToManagerArea}
+              type="button"
+              className="w-full mt-4 bg-blue-600 hover:bg-blue-700 relative z-10" 
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('🖱️ Manager button clicked');
+                goToManagerArea();
+              }}
             >
               <span className="material-icons mr-2">supervisor_account</span>
               Gå till Chefsområde
@@ -132,8 +159,14 @@ const RoleSwitcher = () => {
           )}
           {user.currentRole === 'hr' && (
             <Button 
-              className="w-full mt-4 bg-purple-600 hover:bg-purple-700" 
-              onClick={goToHRArea}
+              type="button"
+              className="w-full mt-4 bg-purple-600 hover:bg-purple-700 relative z-10" 
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('🖱️ HR button clicked');
+                goToHRArea();
+              }}
             >
               <span className="material-icons mr-2">people</span>
               Gå till HR-område
@@ -141,8 +174,14 @@ const RoleSwitcher = () => {
           )}
           {user.currentRole === 'payroll' && (
             <Button 
-              className="w-full mt-4 bg-orange-600 hover:bg-orange-700" 
-              onClick={goToPayrollArea}
+              type="button"
+              className="w-full mt-4 bg-orange-600 hover:bg-orange-700 relative z-10" 
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('🖱️ Payroll button clicked');
+                goToPayrollArea();
+              }}
             >
               <span className="material-icons mr-2">account_balance_wallet</span>
               Gå till Löneområde
