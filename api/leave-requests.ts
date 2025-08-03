@@ -137,6 +137,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           
           if (error) throw error;
           existingRequests = data || [];
+          console.log('🔍 VALIDATION DEBUG - Found existing requests:', existingRequests.length);
+          console.log('🔍 VALIDATION DEBUG - Existing requests:', JSON.stringify(existingRequests, null, 2));
         } catch (error) {
           console.log('Supabase validation check failed, using mock data:', error);
           const mockData = await getMockData('leave-requests.json');
@@ -157,13 +159,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const newStart = new Date(startDate);
       const newEnd = new Date(endDate);
       
+      console.log('🔍 VALIDATION DEBUG - New request dates:', { startDate, endDate, newStart, newEnd });
+      
       const hasOverlap = existingRequests.some((existing: any) => {
         const existingStart = new Date(existing.start_date || existing.startDate);
         const existingEnd = new Date(existing.end_date || existing.endDate);
         
+        console.log('🔍 VALIDATION DEBUG - Checking existing request:', {
+          id: existing.id,
+          start_date: existing.start_date,
+          end_date: existing.end_date, 
+          existingStart,
+          existingEnd,
+          overlaps: newStart <= existingEnd && existingStart <= newEnd
+        });
+        
         // Two ranges overlap if: start1 <= end2 AND start2 <= end1
         return newStart <= existingEnd && existingStart <= newEnd;
       });
+      
+      console.log('🔍 VALIDATION DEBUG - Overall overlap result:', hasOverlap);
       
       if (hasOverlap) {
         const conflictingRequest = existingRequests.find((existing: any) => {

@@ -936,6 +936,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
         lastUpdated: now
       };
       
+      // VALIDATION: Check for overlapping leave requests
+      const { startDate, endDate, employeeId } = leaveRequestData;
+      if (!startDate || !endDate || !employeeId) {
+        return res.status(400).json({ error: 'startDate, endDate, and employeeId are required' });
+      }
+      
+      console.log('🔍 EXPRESS VALIDATION - Checking overlaps for:', { employeeId, startDate, endDate });
+      
+      // Get existing leave requests for this employee
+      let existingRequests = [];
+      try {
+        existingRequests = await restStorage.getLeaveRequests(employeeId, { status: 'all' });
+        const activeRequests = existingRequests.filter((lr: any) => 
+          ['approved', 'pending'].includes(lr.status)
+        );
+        console.log('🔍 EXPRESS VALIDATION - Found active requests:', activeRequests.length);
+        
+        // Check for date overlaps
+        const newStart = new Date(startDate);
+        const newEnd = new Date(endDate);
+        
+        const hasOverlap = activeRequests.some((existing: any) => {
+          const existingStart = new Date(existing.startDate);
+          const existingEnd = new Date(existing.endDate);
+          
+          console.log('🔍 EXPRESS VALIDATION - Checking:', {
+            existing: { id: existing.id, start: existing.startDate, end: existing.endDate },
+            overlap: newStart <= existingEnd && existingStart <= newEnd
+          });
+          
+          // Two ranges overlap if: start1 <= end2 AND start2 <= end1
+          return newStart <= existingEnd && existingStart <= newEnd;
+        });
+        
+        console.log('🔍 EXPRESS VALIDATION - Overlap result:', hasOverlap);
+        
+        if (hasOverlap) {
+          const conflictingRequest = activeRequests.find((existing: any) => {
+            const existingStart = new Date(existing.startDate);
+            const existingEnd = new Date(existing.endDate);
+            return newStart <= existingEnd && existingStart <= newEnd;
+          });
+          
+          const conflictStart = new Date(conflictingRequest.startDate).toLocaleDateString('sv-SE');
+          const conflictEnd = new Date(conflictingRequest.endDate).toLocaleDateString('sv-SE');
+          const conflictDates = conflictStart === conflictEnd ? conflictStart : `${conflictStart} - ${conflictEnd}`;
+          
+          return res.status(409).json({ 
+            error: 'Överlappande ledighet',
+            message: `Du har redan ansökt om ledighet som överlappar med dessa datum. Befintlig ledighet: ${conflictDates}`,
+            conflictingDates: { start: conflictStart, end: conflictEnd }
+          });
+        }
+      } catch (validationError) {
+        console.log('🔍 EXPRESS VALIDATION - Error during validation:', validationError);
+        // Continue with creation if validation fails - don't block user
+      }
+      
       let newLeaveRequest;
       
       // Try storage first, fallback to mock data
