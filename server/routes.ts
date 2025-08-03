@@ -670,12 +670,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         if (period === 'upcoming') {
           leaveRequests = leaveRequests.filter((l: any) => {
-            const endDate = new Date(l.endDate);
+            const endDate = new Date(l.endDate || l.end_date);
             return endDate >= today;
           });
         } else if (period === 'past') {
           leaveRequests = leaveRequests.filter((l: any) => {
-            const endDate = new Date(l.endDate);
+            const endDate = new Date(l.endDate || l.end_date);
             return endDate < today;
           });
         }
@@ -707,8 +707,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const leaveRequest = await restStorage.getLeaveRequest(parseInt(req.params.id));
       
-      console.log('🔍 GET DEBUG - Raw leave request from storage:', JSON.stringify(leaveRequest, null, 2));
-      
       if (leaveRequest) {
         // 🎯 CRITICAL FIX: Map snake_case to camelCase for frontend compatibility  
         const mappedLeaveRequest = {
@@ -726,8 +724,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           pausedAt: leaveRequest.paused_at || leaveRequest.pausedAt,
           pauseReason: leaveRequest.pause_reason || leaveRequest.pauseReason,
         };
-        
-        console.log('🔍 GET DEBUG - Mapped leave request:', JSON.stringify(mappedLeaveRequest, null, 2));
         
         res.json(mappedLeaveRequest);
       } else {
@@ -1183,12 +1179,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         rejectedAt: new Date().toISOString() // camelCase for mock data
       };
       
-      console.log('🔧 REJECT DEBUG - Update data:', updateData);
-      console.log('🔧 REJECT DEBUG - Request body:', req.body);
-      
       const rejectedLeaveRequest = await restStorage.updateLeaveRequest(parseInt(req.params.id), updateData);
-      
-      console.log('🔧 REJECT DEBUG - Result from storage:', rejectedLeaveRequest);
       if (rejectedLeaveRequest) {
         // Mock data is already in camelCase, but handle both formats for robustness
         const mappedLeaveRequest = {
@@ -1202,7 +1193,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           rejectedAt: rejectedLeaveRequest.rejected_at || rejectedLeaveRequest.rejectedAt,
         };
         
-        console.log('🔧 REJECT DEBUG - Final mapped response:', mappedLeaveRequest);
         res.json(mappedLeaveRequest);
       } else {
         res.status(404).json({ message: 'Leave request not found' });

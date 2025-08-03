@@ -347,11 +347,7 @@ export class SupabaseRestStorage {
 
   // Update leave request
   async updateLeaveRequest(id: number, updates: any) {
-    console.log('🏪 STORAGE DEBUG - updateLeaveRequest called with:', { id, updates });
-    console.log('🏪 STORAGE DEBUG - Supabase available?', this.isSupabaseAvailable());
-    
     if (!this.isSupabaseAvailable()) {
-      console.log('🏪 STORAGE DEBUG - Using MOCK DATA fallback');
       // Fallback to mock data update when Supabase not available
       const leaveRequests = await getMockData('leave-requests.json');
       const index = leaveRequests.findIndex((lr: any) => lr.id === id);
@@ -360,16 +356,12 @@ export class SupabaseRestStorage {
         throw new Error(`Leave request with id ${id} not found`);
       }
       
-      console.log('🏪 STORAGE DEBUG - Found leave request in mock data:', leaveRequests[index]);
-      
       // Update the leave request in mock data
       const updatedLeaveRequest = {
         ...leaveRequests[index],
         ...updates,
         lastUpdated: new Date().toISOString()
       };
-      
-      console.log('🏪 STORAGE DEBUG - Updated leave request:', updatedLeaveRequest);
       
       leaveRequests[index] = updatedLeaveRequest;
       await saveMockData('leave-requests.json', leaveRequests);

@@ -21,6 +21,18 @@ async function getMockData(filename: string) {
   }
 }
 
+// Helper to save mock data back to file (CRITICAL: This was missing!)
+async function saveMockData(filename: string, data: any) {
+  try {
+    const filePath = path.join(process.cwd(), 'mock-data', filename);
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
+    console.log(`✅ Successfully saved mock data to ${filename}`);
+  } catch (error) {
+    console.error(`❌ Error saving mock data ${filename}:`, error);
+    throw error;
+  }
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === 'POST') {
     try {
@@ -59,11 +71,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const index = leaveRequests.findIndex((lr: any) => lr.id === leaveRequestId);
         
         if (index !== -1) {
+          // 🎯 CRITICAL FIX: Update the object in the array AND save back to file
           rejectedLeaveRequest = {
             ...leaveRequests[index],
             ...updateData,
             lastUpdated: new Date().toISOString()
           };
+          
+          // Update the array with the rejected request
+          leaveRequests[index] = rejectedLeaveRequest;
+          
+          // Save the updated array back to the file (THIS WAS MISSING!)
+          await saveMockData('leave-requests.json', leaveRequests);
+          
+          console.log(`✅ Successfully rejected leave request ${leaveRequestId} in mock data`);
         }
       }
       
