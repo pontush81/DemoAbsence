@@ -182,13 +182,29 @@ export default function LeaveCalendar() {
                   const isToday = day.toDateString() === new Date().toDateString();
                   const dayLeaves = getLeaveForDate(day);
                   
+                  // Add subtle background color for days with leave
+                  const hasApprovedLeave = dayLeaves.some(l => l.status === 'approved');
+                  const hasPendingLeave = dayLeaves.some(l => l.status === 'pending');
+                  
+                  let dayBackgroundClass = '';
+                  if (hasApprovedLeave) {
+                    dayBackgroundClass = 'bg-green-50';
+                  } else if (hasPendingLeave) {
+                    dayBackgroundClass = 'bg-yellow-50';
+                  } else if (isCurrentMonth) {
+                    dayBackgroundClass = 'bg-white';
+                  } else {
+                    dayBackgroundClass = 'bg-gray-50';
+                  }
+                  
                   return (
                     <div
                       key={dayIndex}
                       className={`
                         min-h-[80px] p-1 border border-gray-200 relative
-                        ${isCurrentMonth ? 'bg-white' : 'bg-gray-50'}
+                        ${dayBackgroundClass}
                         ${isToday ? 'ring-2 ring-blue-500' : ''}
+                        hover:bg-gray-100 transition-colors duration-150
                       `}
                     >
                       <div className={`
@@ -199,29 +215,26 @@ export default function LeaveCalendar() {
                         {day.getDate()}
                       </div>
                       
-                      {/* Leave indicators */}
-                      <div className="space-y-1">
-                        {dayLeaves.slice(0, 2).map((leave: LeaveRequest, idx) => (
-                          <div
-                            key={idx}
-                            className={`
-                              text-xs px-1 py-0.5 rounded text-center
-                              ${getStatusColor(leave.status)}
-                            `}
-                            title={`${leave.leaveType} - ${leave.status}`}
-                          >
-                            <span className="mr-1">{getLeaveTypeIcon(leave.leaveType)}</span>
-                            {leave.leaveType === 'vacation' || leave.leaveType === 'semester' ? 'Semester' : 
-                             leave.leaveType === 'sick' || leave.leaveType === 'sjuk' ? 'Sjuk' :
-                             leave.leaveType}
+                      {/* Leave indicators - Modern design following UX best practices */}
+                      {dayLeaves.length > 0 && (
+                        <div className="absolute inset-0 flex items-end p-1">
+                          <div className="flex gap-1">
+                            {dayLeaves.slice(0, 3).map((leave: LeaveRequest, idx) => (
+                              <div
+                                key={idx}
+                                className="w-2 h-2 rounded-full"
+                                style={{
+                                  backgroundColor: leave.status === 'approved' ? '#22c55e' : '#eab308'
+                                }}
+                                title={`${leave.leaveType} - ${leave.status}`}
+                              />
+                            ))}
+                            {dayLeaves.length > 3 && (
+                              <div className="w-2 h-2 rounded-full bg-gray-400" title={`+${dayLeaves.length - 3} mer`} />
+                            )}
                           </div>
-                        ))}
-                        {dayLeaves.length > 2 && (
-                          <div className="text-xs text-gray-500 text-center">
-                            +{dayLeaves.length - 2} mer
-                          </div>
-                        )}
-                      </div>
+                        </div>
+                      )}
                     </div>
                   );
                 })}
@@ -230,14 +243,18 @@ export default function LeaveCalendar() {
           })}
         </div>
 
-        {/* Legend */}
+        {/* Legend - Updated for modern dot design */}
         <div className="flex flex-wrap gap-4 pt-4 border-t border-gray-200">
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-green-100 border border-green-300 rounded"></div>
-            <span className="text-sm text-gray-600">Godkänd</span>
+            <div className="w-4 h-4 bg-green-50 border border-green-200 rounded flex items-center justify-center">
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+            </div>
+            <span className="text-sm text-gray-600">Godkänd ledighet</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-yellow-100 border border-yellow-300 rounded"></div>
+            <div className="w-4 h-4 bg-yellow-50 border border-yellow-200 rounded flex items-center justify-center">
+              <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+            </div>
             <span className="text-sm text-gray-600">Väntar på svar</span>
           </div>
           <div className="flex items-center gap-2">
@@ -269,9 +286,16 @@ export default function LeaveCalendar() {
             </div>
             <div>
               <div className="text-2xl font-bold text-blue-600">
-                {leaveRequests.reduce((sum: number, l: LeaveRequest) => 
-                  l.status === 'approved' ? sum + (l.totalDays || 0) : sum, 0
-                )}
+                {leaveRequests.reduce((sum: number, l: LeaveRequest) => {
+                  if (l.status === 'approved' && l.startDate && l.endDate) {
+                    const start = new Date(l.startDate);
+                    const end = new Date(l.endDate);
+                    const timeDiff = end.getTime() - start.getTime();
+                    const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1; // +1 because both start and end days are included
+                    return sum + daysDiff;
+                  }
+                  return sum;
+                }, 0)}
               </div>
               <div className="text-sm text-gray-500">Dagar använda</div>
             </div>
