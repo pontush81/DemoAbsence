@@ -250,15 +250,44 @@ const LeaveList = ({ onSelect }: LeaveListProps) => {
     return typeMap[type] || type;
   };
   
-  // Function to get translated scope
-  const getScopeLabel = (scope: string) => {
-    const scopeMap: Record<string, string> = {
-      'full-day': t('leave.fullDay'),
-      'morning': t('leave.morning'),
-      'afternoon': t('leave.afternoon'),
-      'custom': t('leave.customTime')
-    };
-    return scopeMap[scope] || scope;
+  // Function to get smart duration label instead of just "Heldag"
+  const getDurationLabel = (leave: any) => {
+    const scope = leave.scope || 'full-day';
+    
+    // For non-full-day leaves, show the traditional scope
+    if (scope !== 'full-day') {
+      const scopeMap: Record<string, string> = {
+        'morning': t('leave.morning'),
+        'afternoon': t('leave.afternoon'),
+        'custom': t('leave.customTime')
+      };
+      return scopeMap[scope] || scope;
+    }
+    
+    // For full-day leaves, calculate and show duration intelligently
+    const startDate = new Date(leave.startDate);
+    const endDate = new Date(leave.endDate);
+    const timeDiff = endDate.getTime() - startDate.getTime();
+    const daysDiff = Math.floor(timeDiff / (1000 * 3600 * 24)) + 1; // +1 to include both start and end day
+    
+    if (daysDiff === 1) {
+      return '1 dag';
+    } else if (daysDiff === 5) {
+      return '1 vecka (5 dagar)';
+    } else if (daysDiff === 10) {
+      return '2 veckor (10 dagar)';
+    } else if (daysDiff === 15) {
+      return '3 veckor (15 dagar)';
+    } else if (daysDiff === 20) {
+      return '4 veckor (20 dagar)';
+    } else if (daysDiff === 25) {
+      return '5 veckor (25 dagar)';
+    } else if (daysDiff > 20) {
+      const weeks = Math.floor(daysDiff / 5);
+      return `${weeks} veckor (${daysDiff} dagar)`;
+    } else {
+      return `${daysDiff} dagar`;
+    }
   };
   
   // Sort leave requests by date (newest first) for better UX
@@ -369,9 +398,9 @@ const LeaveList = ({ onSelect }: LeaveListProps) => {
                             </div>
                           </div>
 
-                          {/* Scope and Comment */}
+                          {/* Duration and Comment */}
                           <div className="flex items-center gap-4 text-sm text-gray-600">
-                            <span>📋 {getScopeLabel(leave.scope || 'full-day')}</span>
+                            <span>⏱️ {getDurationLabel(leave)}</span>
                             {leave.comment && (
                               <span className="truncate max-w-xs">💬 {leave.comment}</span>
                             )}

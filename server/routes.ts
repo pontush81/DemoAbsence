@@ -707,7 +707,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const leaveRequest = await restStorage.getLeaveRequest(parseInt(req.params.id));
       if (leaveRequest) {
-        res.json(leaveRequest);
+        // 🎯 CRITICAL FIX: Map snake_case to camelCase for frontend compatibility  
+        const mappedLeaveRequest = {
+          ...leaveRequest,
+          employeeId: leaveRequest.employee_id || leaveRequest.employeeId,
+          startDate: leaveRequest.start_date || leaveRequest.startDate,
+          endDate: leaveRequest.end_date || leaveRequest.endDate,
+          leaveType: leaveRequest.leave_type || leaveRequest.leaveType,
+          managerComment: leaveRequest.manager_comment || leaveRequest.managerComment,
+          approvedBy: leaveRequest.approved_by || leaveRequest.approvedBy,
+          approvedAt: leaveRequest.approved_at || leaveRequest.approvedAt,
+          rejectedBy: leaveRequest.rejected_by || leaveRequest.rejectedBy,
+          rejectedAt: leaveRequest.rejected_at || leaveRequest.rejectedAt,
+          pausedBy: leaveRequest.paused_by || leaveRequest.pausedBy,
+          pausedAt: leaveRequest.paused_at || leaveRequest.pausedAt,
+          pauseReason: leaveRequest.pause_reason || leaveRequest.pauseReason,
+        };
+        
+        res.json(mappedLeaveRequest);
       } else {
         res.status(404).json({ message: 'Leave request not found' });
       }
@@ -1076,11 +1093,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Approve leave request
   app.post('/api/manager/leave-requests/:id/approve', async (req, res) => {
     try {
+      // 🎯 CRITICAL FIX: Use camelCase for mock data compatibility
       const updateData = {
         status: 'approved',
-        manager_comment: req.body.comment || 'Approved', // Use snake_case for database
-        approved_by: req.body.managerId || 'E005', // Mock manager ID if not provided
-        approved_at: new Date().toISOString()
+        managerComment: req.body.comment || 'Approved', // camelCase for mock data
+        approvedBy: req.body.managerId || 'E005', // camelCase for mock data
+        approvedAt: new Date().toISOString() // camelCase for mock data
       };
       
       let approvedLeaveRequest;
@@ -1152,20 +1170,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Reject leave request
   app.post('/api/manager/leave-requests/:id/reject', async (req, res) => {
     try {
+      // 🎯 CRITICAL FIX: Use camelCase for mock data compatibility
       const updateData = {
         status: 'rejected',
-        manager_comment: req.body.comment || 'Rejected', // Use snake_case for database
-        rejected_by: req.body.managerId || 'E005', // Mock manager ID if not provided
-        rejected_at: new Date().toISOString()
+        managerComment: req.body.comment || 'Rejected', // camelCase for mock data
+        rejectedBy: req.body.managerId || 'E005', // camelCase for mock data  
+        rejectedAt: new Date().toISOString() // camelCase for mock data
       };
       
+      console.log('🔧 REJECT DEBUG - Update data:', updateData);
+      console.log('🔧 REJECT DEBUG - Request body:', req.body);
+      
       const rejectedLeaveRequest = await restStorage.updateLeaveRequest(parseInt(req.params.id), updateData);
+      
+      console.log('🔧 REJECT DEBUG - Result from storage:', rejectedLeaveRequest);
       if (rejectedLeaveRequest) {
-        // Map snake_case to camelCase for frontend compatibility
+        // Mock data is already in camelCase, but handle both formats for robustness
         const mappedLeaveRequest = {
           ...rejectedLeaveRequest,
           employeeId: rejectedLeaveRequest.employee_id || rejectedLeaveRequest.employeeId,
-          startDate: rejectedLeaveRequest.start_date || rejectedLeaveRequest.startDate,
+          startDate: rejectedLeaveRequest.start_date || rejectedLeaveRequest.startDate, 
           endDate: rejectedLeaveRequest.end_date || rejectedLeaveRequest.endDate,
           leaveType: rejectedLeaveRequest.leave_type || rejectedLeaveRequest.leaveType,
           managerComment: rejectedLeaveRequest.manager_comment || rejectedLeaveRequest.managerComment,
@@ -1173,6 +1197,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           rejectedAt: rejectedLeaveRequest.rejected_at || rejectedLeaveRequest.rejectedAt,
         };
         
+        console.log('🔧 REJECT DEBUG - Final mapped response:', mappedLeaveRequest);
         res.json(mappedLeaveRequest);
       } else {
         res.status(404).json({ message: 'Leave request not found' });

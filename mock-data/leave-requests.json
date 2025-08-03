@@ -66,14 +66,14 @@
     "customStartTime": null,
     "customEndTime": null,
     "comment": "Läkarbesök",
-    "status": "pending",
-    "managerComment": null,
-    "lastUpdated": "2023-04-12T08:30:00.000Z",
+    "status": "rejected",
+    "managerComment": "TEST: Kan inte godkänna pga personalstress - för hög arbetsbelastning just nu",
+    "lastUpdated": "2025-08-03T15:30:00.000Z",
     "submitted": "2023-04-12T08:30:00.000Z",
     "approvedBy": null,
     "approvedAt": null,
-    "rejectedBy": null,
-    "rejectedAt": null
+    "rejectedBy": "E005",
+    "rejectedAt": "2025-08-03T15:30:00.000Z"
   },
   {
     "id": 5,
