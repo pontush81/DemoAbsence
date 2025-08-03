@@ -1033,7 +1033,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         pendingLeaveRequests = allLeaveRequests.filter((lr: any) => lr.status === 'pending');
       }
       
-      res.json(pendingLeaveRequests);
+      // Map snake_case to camelCase for frontend compatibility
+      const mappedLeaveRequests = pendingLeaveRequests.map((leave: any) => ({
+        ...leave,
+        employeeId: leave.employee_id || leave.employeeId,
+        startDate: leave.start_date || leave.startDate,
+        endDate: leave.end_date || leave.endDate,
+        leaveType: leave.leave_type || leave.leaveType,
+      }));
+      
+      res.json(mappedLeaveRequests);
     } catch (error) {
       console.error('Error fetching pending leave requests:', error);
       res.status(500).json({ error: (error as Error).message });

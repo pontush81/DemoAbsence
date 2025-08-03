@@ -560,7 +560,16 @@ class ApiService {
         throw new ApiError(`Failed to fetch pending leave requests: ${response.statusText}`, response.status);
       }
       
-      return await response.json();
+      const rawData = await response.json();
+      
+      // Map snake_case fields to camelCase for TypeScript compatibility (same as other leave methods)
+      return rawData.map((leave: any) => ({
+        ...leave,
+        employeeId: leave.employee_id || leave.employeeId,
+        leaveType: leave.leave_type || leave.leaveType,
+        startDate: leave.start_date || leave.startDate,
+        endDate: leave.end_date || leave.endDate,
+      }));
     } catch (error) {
       console.error('Error fetching pending leave requests:', error);
       throw error;
