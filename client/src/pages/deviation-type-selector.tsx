@@ -31,9 +31,6 @@ export default function DeviationTypeSelector() {
                 <div className="font-bold text-sm sm:text-base leading-tight">
                   Sjuk/VAB
                 </div>
-                <div className="text-xs text-red-100 opacity-80 hidden sm:block mt-1">
-                  Auto-godkänt
-                </div>
               </div>
             </div>
           </Button>
@@ -52,9 +49,6 @@ export default function DeviationTypeSelector() {
                 <div className="font-bold text-sm sm:text-base leading-tight">
                   Övertid
                 </div>
-                <div className="text-xs text-blue-600 opacity-70 hidden sm:block mt-1">
-                  Kräver godkännande
-                </div>
               </div>
             </div>
           </Button>
@@ -72,9 +66,6 @@ export default function DeviationTypeSelector() {
               <div className="text-center">
                 <div className="font-bold text-sm sm:text-base leading-tight">
                   Ledighet
-                </div>
-                <div className="text-xs text-green-600 opacity-70 hidden sm:block mt-1">
-                  Semester
                 </div>
               </div>
             </div>
