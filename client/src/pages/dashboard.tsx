@@ -589,7 +589,12 @@ export default function Dashboard() {
                   className="flex-1"
                 >
                   <span className="material-icons mr-2">{hasPendingItems ? 'block' : 'send'}</span>
-                  {hasPendingItems ? 'Väntande godkännanden först' : 'Skicka tidrapport'}
+                  <span className="hidden sm:inline">
+                    {hasPendingItems ? 'Väntande godkännanden först' : 'Skicka tidrapport'}
+                  </span>
+                  <span className="sm:hidden">
+                    {hasPendingItems ? 'Väntande' : 'Skicka'}
+                  </span>
                 </Button>
               ) : (
                 // User has no deviations - give them options
@@ -602,7 +607,12 @@ export default function Dashboard() {
                     className="flex-1"
                   >
                     <span className="material-icons mr-2">{hasPendingItems ? 'block' : 'check_circle'}</span>
-                    {hasPendingItems ? 'Hantera godkännanden först' : 'Jag har inga avvikelser'}
+                    <span className="hidden sm:inline">
+                      {hasPendingItems ? 'Hantera godkännanden först' : 'Jag har inga avvikelser'}
+                    </span>
+                    <span className="sm:hidden">
+                      {hasPendingItems ? 'Hantera' : 'Inga avvikelser'}
+                    </span>
                   </Button>
                   
                   <Button
@@ -613,7 +623,8 @@ export default function Dashboard() {
                     className="flex-1"
                   >
                     <span className="material-icons mr-2">add</span>
-                    Registrera avvikelser
+                    <span className="hidden sm:inline">Registrera avvikelser</span>
+                    <span className="sm:hidden">Avvikelser</span>
                   </Button>
                 </>
               )}

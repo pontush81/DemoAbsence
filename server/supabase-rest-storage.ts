@@ -10,55 +10,48 @@ export class SupabaseRestStorage {
     return supabase !== null;
   }
   
-  // Helper method to get data with fallback to JSON
-  private async getDataWithFallback<T>(
-    tableName: string, 
-    fallbackFile: string,
+  // Helper method to get data from Supabase (NO FALLBACK - real data only!)
+  private async getDataFromSupabase<T>(
+    tableName: string,
     filters?: any
   ): Promise<T> {
     if (!this.isSupabaseAvailable()) {
-      console.log(`Supabase not available, falling back to ${fallbackFile}`);
-      return await getMockData(fallbackFile) as T;
+      throw new Error(`🚨 CRITICAL: Supabase not available for ${tableName}. Check your environment variables: DATABASE_URL, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY`);
     }
     
-    try {
-      let query = supabase!.from(tableName).select('*');
-      
-      // Apply filters if provided
-      if (filters) {
-        Object.entries(filters).forEach(([key, value]) => {
-          if (value !== undefined && value !== null) {
-            query = query.eq(key, value);
-          }
-        });
-      }
-      
-      const { data, error } = await query;
-      
-      if (error) {
-        throw error;
-      }
-      
-      return data as T;
-    } catch (error) {
-      console.error(`Supabase REST API error for ${tableName}, falling back to ${fallbackFile}:`, error);
-      return await getMockData(fallbackFile) as T;
+    let query = supabase!.from(tableName).select('*');
+    
+    // Apply filters if provided
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          query = query.eq(key, value);
+        }
+      });
     }
+    
+    const { data, error } = await query;
+    
+    if (error) {
+      throw new Error(`❌ Supabase query failed for ${tableName}: ${error.message}`);
+    }
+    
+    return data as T;
   }
   
   // Employee operations
   async getEmployees() {
-    return await this.getDataWithFallback('employees', 'employees.json');
+    return await this.getDataFromSupabase('employees');
   }
 
   async getEmployee(employeeId: string) {
-    const employees = await this.getDataWithFallback('employees', 'employees.json', { employee_id: employeeId });
+    const employees = await this.getDataFromSupabase('employees', { employee_id: employeeId });
     return Array.isArray(employees) ? employees[0] : employees;
   }
 
   // Deviations
   async getDeviations(filters: any = {}) {
-    const data = await this.getDataWithFallback('deviations', 'deviations.json');
+    const data = await this.getDataFromSupabase('deviations', 'deviations.json');
     
     // Apply client-side filtering for JSON fallback
     let filteredData = Array.isArray(data) ? data : [];
@@ -113,13 +106,13 @@ export class SupabaseRestStorage {
   }
 
   async getDeviation(id: number) {
-    const deviations = await this.getDataWithFallback('deviations', 'deviations.json');
+    const deviations = await this.getDataFromSupabase('deviations', 'deviations.json');
     return Array.isArray(deviations) ? deviations.find((d: any) => d.id === id) : null;
   }
 
   // Leave requests
   async getLeaveRequests(filters: any = {}) {
-    const data = await this.getDataWithFallback('leave_requests', 'leave-requests.json');
+    const data = await this.getDataFromSupabase('leave_requests', 'leave-requests.json');
     
     // Apply client-side filtering for JSON fallback
     let filteredData = Array.isArray(data) ? data : [];
@@ -145,13 +138,13 @@ export class SupabaseRestStorage {
   }
 
   async getLeaveRequest(id: number) {
-    const requests = await this.getDataWithFallback('leave_requests', 'leave-requests.json');
+    const requests = await this.getDataFromSupabase('leave_requests', 'leave-requests.json');
     return Array.isArray(requests) ? requests.find((lr: any) => lr.id === id) : null;
   }
 
   // Schedules
   async getSchedules(filters: any = {}) {
-    const data = await this.getDataWithFallback('schedules', 'schedules.json');
+    const data = await this.getDataFromSupabase('schedules', 'schedules.json');
     
     // Apply client-side filtering for JSON fallback
     let filteredData = Array.isArray(data) ? data : [];
@@ -179,7 +172,7 @@ export class SupabaseRestStorage {
 
   // Time balances
   async getTimeBalance(employeeId: string) {
-    const balances = await this.getDataWithFallback('time_balances', 'timebalances.json');
+    const balances = await this.getDataFromSupabase('time_balances', 'timebalances.json');
     return Array.isArray(balances) ? balances.find((tb: any) => 
       (tb.employeeId === employeeId) || (tb.employee_id === employeeId)
     ) : null;
@@ -187,7 +180,7 @@ export class SupabaseRestStorage {
 
   // Payslips
   async getPayslips(employeeId: string) {
-    const payslips = await this.getDataWithFallback('payslips', 'payslips.json');
+    const payslips = await this.getDataFromSupabase('payslips', 'payslips.json');
     return Array.isArray(payslips) ? payslips.filter((p: any) => 
       (p.employeeId === employeeId) || (p.employee_id === employeeId)
     ) : [];
@@ -195,7 +188,7 @@ export class SupabaseRestStorage {
 
   // Time codes
   async getTimeCodes() {
-    return await this.getDataWithFallback('time_codes', 'timecodes.json');
+    return await this.getDataFromSupabase('time_codes', 'timecodes.json');
   }
 
   // === WRITE OPERATIONS ===
