@@ -455,7 +455,6 @@ const DeviationForm = ({ deviationId, onCancel }: DeviationFormProps) => {
             
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {quickActions.map((action, index) => {
-                // Match styling with Deviation Type Selector for consistency
                 const isSickOrVAB = action.timeCode === '300' || action.timeCode === '400';
                 const isOvertime = action.timeCode === '200';
                 
@@ -476,11 +475,14 @@ const DeviationForm = ({ deviationId, onCancel }: DeviationFormProps) => {
                   >
                     <div className="flex flex-col items-center justify-center space-y-2">
                       <div className="text-xl sm:text-2xl">
-                        {/* Use consistent icons matching Deviation Type Selector */}
-                        {action.timeCode === '300' ? '🏥' :  // Sjuk - Hospital icon
-                         action.timeCode === '400' ? '🏥' :  // VAB - Same hospital icon for consistency  
-                         action.timeCode === '200' ? '⏰' :  // Övertid - Clock icon
-                         action.icon}                        // Fallback to original
+                        {action.timeCode === '300' || action.timeCode === '400' ? (
+                          /* High contrast white medical icon on blue background */
+                          <span className="material-icons text-white text-2xl">medical_services</span>
+                        ) : action.timeCode === '200' ? (
+                          <span className="material-icons text-indigo-700 text-2xl">schedule</span>
+                        ) : (
+                          action.icon
+                        )}
                       </div>
                       <div className="text-center">
                         <div className="font-bold text-sm sm:text-base leading-tight">

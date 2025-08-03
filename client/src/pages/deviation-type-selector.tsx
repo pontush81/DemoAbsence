@@ -26,7 +26,7 @@ export default function DeviationTypeSelector() {
             className="w-full bg-blue-600 hover:bg-blue-700 text-white py-6 sm:py-8 text-sm sm:text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-200 min-h-[80px] sm:min-h-[100px]"
           >
             <div className="flex flex-col items-center justify-center space-y-2">
-              <div className="text-xl sm:text-2xl">🏥</div>
+              <span className="material-icons text-white text-2xl sm:text-3xl">medical_services</span>
               <div className="text-center">
                 <div className="font-bold text-sm sm:text-base leading-tight">
                   Sjuk/VAB
@@ -44,7 +44,7 @@ export default function DeviationTypeSelector() {
             className="w-full border-2 border-indigo-300 bg-white text-indigo-700 hover:bg-indigo-100 hover:border-indigo-400 py-6 sm:py-8 text-sm sm:text-base font-semibold shadow-md hover:shadow-lg transition-all duration-200 min-h-[80px] sm:min-h-[100px]"
           >
             <div className="flex flex-col items-center justify-center space-y-2">
-              <div className="text-xl sm:text-2xl">⏰</div>
+              <span className="material-icons text-indigo-700 text-2xl sm:text-3xl">schedule</span>
               <div className="text-center">
                 <div className="font-bold text-sm sm:text-base leading-tight">
                   Övertid
