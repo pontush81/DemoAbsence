@@ -1,25 +1,13 @@
 import 'dotenv/config';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
-import fs from 'fs';
-import path from 'path';
 
 // Initialize Supabase client
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_ANON_KEY;
 const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
 
-// Helper to read mock data
-async function getMockData(filename: string) {
-  try {
-    const filePath = path.join(process.cwd(), 'mock-data', filename);
-    const fileContent = fs.readFileSync(filePath, 'utf8');
-    return JSON.parse(fileContent);
-  } catch (error) {
-    console.error(`Error reading mock data ${filename}:`, error);
-    return [];
-  }
-}
+// 🚫 MOCK DATA REMOVED - All endpoints must use real database data only
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'GET') {
@@ -27,21 +15,36 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    let employees;
+    // 🔒 DATABASE REQUIRED: Current employee must be from real database only
+    if (!supabase) {
+      console.error('🚫 Database connection required for employee access');
+      return res.status(500).json({ 
+        error: 'Database connection required',
+        message: 'Medarbetarupplysningar kräver databasanslutning.',
+        code: 'EMPLOYEE_DB_REQUIRED'
+      });
+    }
     
-    // Try Supabase first, fallback to mock data
-    if (supabase) {
-      try {
-        const { data, error } = await supabase.from('employees').select('*');
-        if (error) throw error;
-        employees = data || [];
-      } catch (error) {
-        console.log('Supabase failed, using mock data:', error);
-        employees = await getMockData('employees.json');
+    let employees;
+    try {
+      const { data, error } = await supabase.from('employees').select('*');
+      if (error) {
+        console.error('🚫 Database query failed for employees:', error);
+        return res.status(500).json({ 
+          error: 'Database query failed',
+          message: 'Kunde inte hämta medarbetarupplysningar från databasen.',
+          code: 'EMPLOYEE_DB_QUERY_FAILED'
+        });
       }
-    } else {
-      console.log('Supabase not configured, using mock data');
-      employees = await getMockData('employees.json');
+      employees = data || [];
+      console.log(`✅ EMPLOYEE ACCESS: Retrieved ${employees.length} employees from database`);
+    } catch (error) {
+      console.error('🚫 Unexpected error accessing employees:', error);
+      return res.status(500).json({ 
+        error: 'Database access failed',
+        message: 'Ett oväntat fel uppstod vid hämtning av medarbetarupplysningar.',
+        code: 'EMPLOYEE_UNEXPECTED_ERROR'
+      });
     }
     
     // Return the first employee as the current user

@@ -1,13 +1,25 @@
 import 'dotenv/config';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
+import fs from 'fs';
+import path from 'path';
 
 // Initialize Supabase client
-
-// 🚫 MOCK DATA REMOVED - All endpoints must use real database data onlyconst supabaseUrl = process.env.SUPABASE_URL;
+const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_ANON_KEY;
 const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
 
+// Helper to read mock data
+async function getMockData(filename: string) {
+  try {
+    const filePath = path.join(process.cwd(), 'mock-data', filename);
+    const fileContent = fs.readFileSync(filePath, 'utf8');
+    return JSON.parse(fileContent);
+  } catch (error) {
+    console.error(`Error reading mock data ${filename}:`, error);
+    return [];
+  }
+}
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === 'GET') {
@@ -17,7 +29,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const deviationId = parseInt(id as string);
       let deviation;
       
-      // 🔒 DATABASE REQUIRED - No mock data fallback allowed
+      // Try Supabase first, fallback to mock data
       if (supabase) {
         try {
           const { data, error } = await supabase
@@ -31,11 +43,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           }
           deviation = data;
         } catch (error) {
+          console.log('Supabase failed, using mock data:', error);
         }
       }
       
       // If Supabase didn't work or no data found, try mock data
       if (!deviation) {
+        console.log('Using mock data for deviation');
+        const allDeviations = await getMockData('deviations.json');
         deviation = allDeviations.find((d: any) => d.id === deviationId);
       }
       
@@ -74,7 +89,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       
       let updatedDeviation;
       
-      // 🔒 DATABASE REQUIRED - No mock data fallback allowed
+      // Try Supabase first, fallback to mock data
       if (supabase) {
         try {
           const { data, error } = await supabase
@@ -87,11 +102,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           if (error) throw error;
           updatedDeviation = data;
         } catch (error) {
+          console.log('Supabase update failed, using mock data:', error);
         }
       }
       
       // If Supabase didn't work, try mock data fallback
       if (!updatedDeviation) {
+        const allDeviations = await getMockData('deviations.json');
         const index = allDeviations.findIndex((d: any) => d.id === deviationId);
         
         if (index >= 0) {

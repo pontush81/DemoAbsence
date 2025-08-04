@@ -1,13 +1,25 @@
 import 'dotenv/config';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
+import fs from 'fs';
+import path from 'path';
 
 // Initialize Supabase client
-
-// 🚫 MOCK DATA REMOVED - All endpoints must use real database data onlyconst supabaseUrl = process.env.SUPABASE_URL;
+const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_ANON_KEY;
 const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
 
+// Helper to read mock data
+async function getMockData(filename: string) {
+  try {
+    const filePath = path.join(process.cwd(), 'mock-data', filename);
+    const fileContent = fs.readFileSync(filePath, 'utf8');
+    return JSON.parse(fileContent);
+  } catch (error) {
+    console.error(`Error reading mock data ${filename}:`, error);
+    return [];
+  }
+}
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === 'GET') {
@@ -16,7 +28,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const { employeeId, status } = req.query;
       let leaveRequests;
     
-    // 🔒 DATABASE REQUIRED - No mock data fallback allowed
+    // Try Supabase first, fallback to mock data
     if (supabase) {
       try {
         let query = supabase.from('leave_requests').select('*');
@@ -42,11 +54,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         if (error) throw error;
         leaveRequests = data || [];
       } catch (error) {
+        console.log('Supabase failed, using mock data:', error);
+        leaveRequests = await getMockData('leave-requests.json');
       }
     } else {
+      console.log('Supabase not configured, using mock data');
+      leaveRequests = await getMockData('leave-requests.json');
     }
     
-    // Apply sorting and mapping
+    // Apply client-side filtering for mock data
     if (!supabase || leaveRequests.length === 0) {
       let filteredLeaveRequests = [...leaveRequests];
       
@@ -124,12 +140,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           console.log('🔍 VALIDATION DEBUG - Found existing requests:', existingRequests.length);
           console.log('🔍 VALIDATION DEBUG - Existing requests:', JSON.stringify(existingRequests, null, 2));
         } catch (error) {
+          console.log('Supabase validation check failed, using mock data:', error);
+          const mockData = await getMockData('leave-requests.json');
           existingRequests = mockData.filter((lr: any) => 
             (lr.employeeId === employeeId || lr.employee_id === employeeId) &&
             ['approved', 'pending'].includes(lr.status)
           );
         }
       } else {
+        const mockData = await getMockData('leave-requests.json');
         existingRequests = mockData.filter((lr: any) => 
           (lr.employeeId === employeeId || lr.employee_id === employeeId) &&
           ['approved', 'pending'].includes(lr.status)
@@ -181,7 +200,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       
       let newLeaveRequest;
       
-      // 🔒 DATABASE REQUIRED - No mock data fallback allowed
+      // Try Supabase first, fallback to mock data
       if (supabase) {
         try {
           const { data, error } = await supabase
@@ -194,17 +213,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           newLeaveRequest = data;
           console.log('Created new leave request via Supabase:', newLeaveRequest);
         } catch (error) {
+          console.log('Supabase creation failed, using mock data:', error);
         }
       }
       
       // If Supabase didn't work, try mock data fallback
       if (!newLeaveRequest) {
+        const mockLeaveRequests = await getMockData('leave-requests.json');
         const newId = Math.max(...mockLeaveRequests.map((lr: any) => lr.id || 0)) + 1;
         newLeaveRequest = {
           id: newId,
           ...leaveRequestData
         };
         // In a real implementation, we would save back to file
+        console.log('Created new leave request via mock fallback:', newLeaveRequest);
       }
       
       // Map snake_case to camelCase for frontend compatibility
