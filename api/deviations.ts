@@ -154,9 +154,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
       }
       
-      // Use EXACT same structure as working leave-requests endpoint
+      // Map frontend camelCase to database snake_case (EXACT schema match)
       const deviationData = {
-        ...req.body,
+        employee_id: req.body.employeeId,
+        date: req.body.date,
+        start_time: req.body.startTime,
+        end_time: req.body.endTime,
+        time_code: req.body.timeCode,
+        comment: req.body.comment,
         status: status || 'pending',
         submitted: new Date().toISOString(),
         last_updated: new Date().toISOString()
