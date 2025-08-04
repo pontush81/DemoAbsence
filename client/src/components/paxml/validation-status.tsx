@@ -4,15 +4,22 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useToast } from '@/hooks/use-toast';
 import { ValidationResult, ValidationIssue } from '@/hooks/usePAXMLValidation';
+import { Deviation } from '@shared/schema';
 
 interface ValidationStatusProps {
   validation: ValidationResult;
   isLoading?: boolean;
+  deviations?: Deviation[]; // Add deviations for duplicate removal
 }
 
-export function ValidationStatus({ validation, isLoading = false }: ValidationStatusProps) {
+export function ValidationStatus({ validation, isLoading = false, deviations = [] }: ValidationStatusProps) {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['errors']));
+  const [isFixingDuplicates, setIsFixingDuplicates] = useState(false);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const toggleSection = (section: string) => {
     setExpandedSections(prev => {
@@ -24,6 +31,90 @@ export function ValidationStatus({ validation, isLoading = false }: ValidationSt
       }
       return newSet;
     });
+  };
+
+  // Find and remove duplicate deviations
+  const handleRemoveDuplicates = async () => {
+    if (!deviations.length) {
+      toast({
+        title: "Inga avvikelser att kontrollera",
+        description: "Ingen data tillgänglig för dubblettborttagning",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsFixingDuplicates(true);
+    
+    try {
+      // Find duplicates (same employee, date, start time, end time)
+      const duplicateMap = new Map<string, Deviation[]>();
+      const approvedDeviations = deviations.filter(d => d.status === 'approved');
+      
+      approvedDeviations.forEach(deviation => {
+        const key = `${deviation.employeeId}-${deviation.date}-${deviation.startTime}-${deviation.endTime}`;
+        if (!duplicateMap.has(key)) {
+          duplicateMap.set(key, []);
+        }
+        duplicateMap.get(key)!.push(deviation);
+      });
+
+      const duplicatesToRemove: number[] = [];
+      let duplicateCount = 0;
+
+      duplicateMap.forEach(duplicates => {
+        if (duplicates.length > 1) {
+          // Keep the first one (usually oldest), remove the rest
+          for (let i = 1; i < duplicates.length; i++) {
+            duplicatesToRemove.push(duplicates[i].id);
+            duplicateCount++;
+          }
+        }
+      });
+
+      if (duplicatesToRemove.length === 0) {
+        toast({
+          title: "Inga dubbletter funna",
+          description: "Alla avvikelser verkar vara unika",
+        });
+        return;
+      }
+
+      // Delete duplicates via API
+      const deletePromises = duplicatesToRemove.map(id => 
+        fetch(`/api/deviations/${id}`, { method: 'DELETE' })
+      );
+
+      const results = await Promise.allSettled(deletePromises);
+      const successCount = results.filter(r => r.status === 'fulfilled').length;
+      const failureCount = results.length - successCount;
+
+      // Refresh data
+      await queryClient.invalidateQueries({ queryKey: ['/api/deviations'] });
+      
+      if (successCount > 0) {
+        toast({
+          title: "Dubbletter borttagna! ✅",
+          description: `${successCount} dubbletter togs bort${failureCount > 0 ? ` (${failureCount} misslyckades)` : ''}`,
+        });
+      } else {
+        toast({
+          title: "Kunde inte ta bort dubbletter",
+          description: "Försök igen eller kontakta support",
+          variant: "destructive"
+        });
+      }
+
+    } catch (error) {
+      console.error('Error removing duplicates:', error);
+      toast({
+        title: "Fel vid borttagning av dubbletter",
+        description: error instanceof Error ? error.message : "Okänt fel uppstod",
+        variant: "destructive"
+      });
+    } finally {
+      setIsFixingDuplicates(false);
+    }
   };
 
   if (isLoading) {
@@ -120,12 +211,20 @@ export function ValidationStatus({ validation, isLoading = false }: ValidationSt
                 size="sm" 
                 variant="outline" 
                 className="h-8 text-xs bg-white"
-                onClick={() => {
-                  alert('🔧 Kommer snart: Ta bort alla dubbletter automatiskt');
-                }}
+                onClick={handleRemoveDuplicates}
+                disabled={isFixingDuplicates}
               >
-                <span className="material-icons text-xs mr-1">content_copy</span>
-                Ta bort {validation.stats.duplicates} dubbletter
+                {isFixingDuplicates ? (
+                  <>
+                    <span className="material-icons text-xs mr-1 animate-spin">refresh</span>
+                    Tar bort...
+                  </>
+                ) : (
+                  <>
+                    <span className="material-icons text-xs mr-1">content_copy</span>
+                    Ta bort {validation.stats.duplicates} dubbletter
+                  </>
+                )}
               </Button>
             )}
             
@@ -291,8 +390,14 @@ function IssueCard({ issue }: { issue: ValidationIssue }) {
           variant="outline" 
           className="ml-2 h-6 text-xs"
           onClick={() => {
-            // TODO: Implement duplicate removal
-            alert('🔧 Funktion kommer snart: Ta bort dubbletter automatiskt');
+            // Extract employee and date from issue for targeted removal
+            const match = issue.description.match(/för (.+) på (.+)/);
+            if (match) {
+              toast({
+                title: "Specifik dubblett",
+                description: `Dubbletter för ${match[1]} på ${match[2]} - använd 'Ta bort alla dubbletter' knappen ovan`,
+              });
+            }
           }}
         >
           <span className="material-icons text-xs mr-1">auto_fix_high</span>

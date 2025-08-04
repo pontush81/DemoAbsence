@@ -190,15 +190,15 @@ export default function LeaveCalendar() {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {/* Calendar Grid with Swedish Week Numbers - Mobile Optimized */}
-        <div className="grid grid-cols-7 sm:grid-cols-8 gap-0.5 sm:gap-1 mb-4">
+        {/* Cron-inspired Calendar Grid - Ample spacing & crisp lines */}
+        <div className="grid grid-cols-7 sm:grid-cols-8 gap-1 sm:gap-2 mb-6 p-1">
           {/* Header row with week number column - Hidden on mobile */}
-          <div className="hidden sm:block p-2 text-center text-sm font-medium text-gray-500">
+          <div className="hidden sm:block p-3 sm:p-4 text-center text-sm font-semibold text-gray-600 bg-white border-b-2 border-gray-100">
             v.
           </div>
           {/* Header days - European/Swedish standard (Monday start) */}
           {['Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör', 'Sön'].map((day, index) => (
-            <div key={day} className="p-1 sm:p-2 text-center text-xs sm:text-sm font-medium text-gray-500">
+            <div key={day} className="p-3 sm:p-4 text-center text-sm font-semibold text-gray-600 bg-white border-b-2 border-gray-100">
               {/* Show abbreviated version on mobile */}
               <span className="sm:hidden">{day.substring(0, 1)}</span>
               <span className="hidden sm:inline">{day}</span>
@@ -213,8 +213,8 @@ export default function LeaveCalendar() {
             return (
               <React.Fragment key={weekIndex}>
                 {/* Week number column - Hidden on mobile */}
-                <div className="hidden sm:flex min-h-[60px] sm:min-h-[80px] p-2 border border-gray-200 bg-gray-50 items-center justify-center">
-                  <span className="text-sm font-medium text-gray-600 whitespace-nowrap">
+                <div className="hidden sm:flex min-h-[80px] sm:min-h-[100px] p-3 bg-white border border-gray-100 shadow-sm items-center justify-center">
+                  <span className="text-sm font-semibold text-gray-600 whitespace-nowrap">
                     v.{weekNumber}
                   </span>
                 </div>
@@ -246,10 +246,10 @@ export default function LeaveCalendar() {
                     <div
                       key={dayIndex}
                       className={`
-                        min-h-[60px] sm:min-h-[80px] p-1 sm:p-2 border border-gray-200 relative
+                        min-h-[80px] sm:min-h-[100px] p-2 sm:p-3 border border-gray-100 relative shadow-sm
                         ${dayBackgroundClass}
-                        ${isToday ? 'ring-1 sm:ring-2 ring-blue-500' : ''}
-                        hover:bg-gray-100 transition-colors duration-150
+                        ${isToday ? 'ring-2 ring-blue-400 bg-blue-50' : ''}
+                        hover:shadow-md transition-all duration-200 cursor-pointer
                       `}
                     >
                       <div className={`
@@ -267,9 +267,9 @@ export default function LeaveCalendar() {
                         )}
                       </div>
                       
-                      {/* Elegant continuous leave indicators - Modern gradient approach */}
+                      {/* Cron/Fantastical-inspired event bubbles - Card-based approach */}
                       {dayLeaves.length > 0 && (
-                        <div className="absolute inset-0">
+                        <div className="absolute inset-2 top-6">
                           {dayLeaves.map((leave: LeaveRequest, idx) => {
                             const isStart = new Date(leave.startDate).toDateString() === day.toDateString();
                             const isEnd = new Date(leave.endDate).toDateString() === day.toDateString();
@@ -279,51 +279,36 @@ export default function LeaveCalendar() {
                               <div
                                 key={idx}
                                 className={`
-                                  absolute inset-1
+                                  absolute inset-0 rounded-lg shadow-sm backdrop-blur-sm
                                   ${leave.status === 'approved' 
-                                    ? 'bg-gradient-to-r from-emerald-50 to-green-50 border-emerald-200' 
-                                    : 'bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-200'
+                                    ? 'bg-white/90 border-l-4 border-emerald-400' 
+                                    : 'bg-white/90 border-l-4 border-amber-400'
                                   }
-                                  ${isSingleDay ? 'rounded-full border shadow-sm' : ''}
-                                  ${isStart && !isSingleDay ? 'rounded-l-full border-l border-t border-b' : ''}
-                                  ${isEnd && !isSingleDay ? 'rounded-r-full border-r border-t border-b' : ''}
-                                  ${!isStart && !isEnd ? 'border-t border-b' : ''}
-                                  opacity-80 hover:opacity-100 transition-opacity duration-200
+                                  ${isSingleDay ? 'border border-gray-200' : ''}
+                                  ${isStart && !isSingleDay ? 'rounded-l-lg border-l-4 border-t border-b border-gray-200' : ''}
+                                  ${isEnd && !isSingleDay ? 'rounded-r-lg border-r border-t border-b border-gray-200' : ''}
+                                  ${!isStart && !isEnd ? 'border-t border-b border-gray-200' : ''}
+                                  hover:shadow-md transition-all duration-200
                                 `}
                                 title={`${leave.leaveType} - ${leave.status} (${leave.startDate} till ${leave.endDate})`}
                               >
-                                {/* Elegant start indicator - minimal and refined */}
+                                {/* Minimal card content */}
                                 {isStart && (
-                                  <div className="absolute top-1 left-2 flex items-center gap-1">
-                                    <div className={`
-                                      w-5 h-5 rounded-full flex items-center justify-center text-xs
-                                      ${leave.status === 'approved' 
-                                        ? 'bg-emerald-500 text-white shadow-sm' 
-                                        : 'bg-amber-500 text-white shadow-sm'
-                                      }
-                                    `}>
+                                  <div className="p-1 flex items-center gap-1 text-xs">
+                                    <span className="text-lg leading-none">
                                       {leave.leaveType === 'vacation' ? '🏖️' : 
                                        leave.leaveType === 'sick' ? '🏥' : 
                                        leave.leaveType === 'parental' ? '👶' : '📅'}
-                                    </div>
-                                    
-                                    {/* Subtle pending indicator */}
+                                    </span>
                                     {leave.status === 'pending' && (
-                                      <div className="w-3 h-3 bg-amber-400 rounded-full flex items-center justify-center">
-                                        <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
-                                      </div>
+                                      <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
                                     )}
                                   </div>
                                 )}
                                 
-                                {/* Subtle end indicator for multi-day periods */}
-                                {isEnd && !isSingleDay && (
-                                  <div className="absolute top-1 right-2">
-                                    <div className={`
-                                      w-2 h-2 rounded-full
-                                      ${leave.status === 'approved' ? 'bg-emerald-400' : 'bg-amber-400'}
-                                    `}></div>
-                                  </div>
+                                {/* Subtle continuation indicator */}
+                                {!isStart && !isEnd && (
+                                  <div className="absolute left-0 top-1/2 w-1 h-4 bg-gray-300 rounded-r-full transform -translate-y-1/2"></div>
                                 )}
                               </div>
                             );
@@ -338,41 +323,39 @@ export default function LeaveCalendar() {
           })}
         </div>
 
-        {/* Elegant Legend - Shows refined gradient visualization */}
-        <div className="pt-4 border-t border-gray-200">
-          <h4 className="text-sm font-semibold text-gray-900 mb-3">Förklaring</h4>
+        {/* Cron/Fantastical Legend - Shows card-based visualization */}
+        <div className="pt-6 border-t border-gray-100">
+          <h4 className="text-sm font-semibold text-gray-900 mb-4">Förklaring</h4>
           <div className="space-y-4">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
               <div className="flex items-center">
-                <div className="w-10 h-6 bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-l-full opacity-80 flex items-center justify-center relative">
-                  <div className="w-4 h-4 bg-emerald-500 rounded-full flex items-center justify-center text-xs">🏖️</div>
+                <div className="w-12 h-6 bg-white/90 border-l-4 border-emerald-400 border border-gray-200 rounded-l-lg shadow-sm flex items-center justify-center relative">
+                  <span className="text-sm">🏖️</span>
                 </div>
-                <div className="w-8 h-6 bg-gradient-to-r from-emerald-50 to-green-50 border-t border-b border-emerald-200 opacity-80"></div>
-                <div className="w-6 h-6 bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-r-full opacity-80 flex items-center justify-center">
-                  <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
+                <div className="w-8 h-6 bg-white/90 border-t border-b border-gray-200"></div>
+                <div className="w-8 h-6 bg-white/90 border border-gray-200 rounded-r-lg shadow-sm flex items-center justify-center">
+                  <div className="w-1 h-4 bg-gray-300 rounded-full"></div>
                 </div>
               </div>
-              <span className="text-sm font-medium text-gray-700">Godkänd ledighet (elegant gradient)</span>
+              <span className="text-sm font-medium text-gray-700">Godkänd ledighet (card-style)</span>
             </div>
             
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
               <div className="flex items-center">
-                <div className="w-10 h-6 bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-l-full opacity-80 flex items-center justify-center relative">
-                  <div className="w-4 h-4 bg-amber-500 rounded-full flex items-center justify-center text-xs">📅</div>
-                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-amber-400 rounded-full flex items-center justify-center">
-                    <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
-                  </div>
+                <div className="w-12 h-6 bg-white/90 border-l-4 border-amber-400 border border-gray-200 rounded-l-lg shadow-sm flex items-center justify-center relative">
+                  <span className="text-sm">📅</span>
+                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-amber-400 rounded-full"></div>
                 </div>
-                <div className="w-8 h-6 bg-gradient-to-r from-amber-50 to-yellow-50 border-t border-b border-amber-200 opacity-80"></div>
-                <div className="w-6 h-6 bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-r-full opacity-80 flex items-center justify-center">
-                  <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
+                <div className="w-8 h-6 bg-white/90 border-t border-b border-gray-200"></div>
+                <div className="w-8 h-6 bg-white/90 border border-gray-200 rounded-r-lg shadow-sm flex items-center justify-center">
+                  <div className="w-1 h-4 bg-gray-300 rounded-full"></div>
                 </div>
               </div>
-              <span className="text-sm font-medium text-gray-700">Väntar på svar (elegant gradient)</span>
+              <span className="text-sm font-medium text-gray-700">Väntar på svar (card-style)</span>
             </div>
             
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-6 ring-2 ring-blue-500 bg-blue-50 rounded opacity-80"></div>
+            <div className="flex items-center gap-4">
+              <div className="w-8 h-6 ring-2 ring-blue-400 bg-blue-50 rounded shadow-sm"></div>
               <span className="text-sm font-medium text-gray-700">Idag</span>
             </div>
           </div>

@@ -164,7 +164,8 @@ export default function PAXMLExport({ employees, deviations }: PAXMLExportProps)
       {/* Validation Status - Always at top */}
       <ValidationStatus 
         validation={validation} 
-        isLoading={isLoadingTimeCodes && filteredDeviations.length > 0} 
+        isLoading={isLoadingTimeCodes && filteredDeviations.length > 0}
+        deviations={filteredDeviations}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
