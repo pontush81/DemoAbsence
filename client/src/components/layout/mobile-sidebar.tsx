@@ -18,7 +18,8 @@ const MobileSidebar = () => {
   const isPayrollManager = user.currentRole === 'payroll-manager';
   
   // 🔒 PAYROLL EXPORT - HIGHLY RESTRICTED per GDPR and Swedish law
-  const canAccessPayrollExport = isPayrollAdmin || isPayrollManager || isHRManager;
+  const isPayroll = user.currentRole === 'payroll';
+  const canAccessPayrollExport = isPayrollAdmin || isPayrollManager || isHRManager || isPayroll;
   
   const closeSidebar = () => {
     setMobileSidebarOpen(false);

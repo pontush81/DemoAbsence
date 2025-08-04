@@ -27,7 +27,8 @@ const Sidebar = () => {
   
   // 🔒 PAYROLL EXPORT - HIGHLY RESTRICTED per GDPR and Swedish law
   // Only specific payroll roles + HR-manager (if they have payroll responsibility)
-  const canAccessPayrollExport = isPayrollAdmin || isPayrollManager || isHRManager;
+  const isPayroll = user.currentRole === 'payroll';
+  const canAccessPayrollExport = isPayrollAdmin || isPayrollManager || isHRManager || isPayroll;
   
   const menuItems = [
     {
