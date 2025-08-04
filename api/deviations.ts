@@ -180,15 +180,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         });
       }
       
-      // If Supabase didn't work, return error
-      if (!newDeviation) {
-        return res.status(500).json({ 
-          error: 'Database connection required', 
-          message: 'Kunde inte skapa avvikelse. Kontrollera databasanslutning.',
-          details: 'Supabase connection failed'
-        });
-      }
-      
       // Map snake_case to camelCase for frontend compatibility
       const mappedDeviation = {
         ...newDeviation,
