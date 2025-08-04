@@ -63,7 +63,25 @@ export function calculateVacationDeduction(
     return 0;
   }
 
+  // Validate dates to prevent NaN
+  if (!startDate || !endDate || isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+    console.warn('Invalid dates in calculateVacationDeduction:', startDate, endDate);
+    return 0;
+  }
+
+  // Ensure start date is not after end date
+  if (startDate > endDate) {
+    console.warn('Start date is after end date:', startDate, endDate);
+    return 0;
+  }
+
   const workingDays = calculateWorkingDays(startDate, endDate);
+
+  // Safety check for NaN result
+  if (isNaN(workingDays)) {
+    console.warn('NaN result from calculateWorkingDays:', startDate, endDate);
+    return 0;
+  }
 
   // Handle partial days
   if (scope === 'morning' || scope === 'afternoon') {

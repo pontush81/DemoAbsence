@@ -404,13 +404,27 @@ export default function LeaveCalendar() {
                       if (l.status === 'approved' && l.startDate && l.endDate) {
                         const start = new Date(l.startDate);
                         const end = new Date(l.endDate);
+                        
+                        // Validate dates to prevent NaN
+                        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+                          console.warn('Invalid dates in leave request:', l.startDate, l.endDate);
+                          return sum;
+                        }
+                        
                         const vacationDaysUsed = calculateVacationDeduction(l.leaveType, start, end, l.scope || 'full-day');
+                        
+                        // Additional safety check for NaN result
+                        if (isNaN(vacationDaysUsed)) {
+                          console.warn('NaN result from calculateVacationDeduction:', l);
+                          return sum;
+                        }
+                        
                         return sum + vacationDaysUsed;
                       }
                       return sum;
                     }, 0)}
                   </div>
-                  <div className="text-sm font-medium text-blue-700">Arbetsdagar använda</div>
+                  <div className="text-sm font-medium text-blue-700">Semesterdagar använda</div>
                 </div>
               </div>
             </div>

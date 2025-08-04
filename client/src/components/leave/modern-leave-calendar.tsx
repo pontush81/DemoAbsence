@@ -373,11 +373,20 @@ export default function ModernLeaveCalendar() {
               </div>
               <div>
                 <div className="text-2xl font-bold text-blue-700">
-                  {leaveRequests.reduce((sum: number, l: LeaveRequest) => 
-                    l.status === 'approved' ? sum + l.totalDays : sum, 0
-                  )}
+                  {leaveRequests.reduce((sum: number, l: LeaveRequest) => {
+                    if (l.status === 'approved') {
+                      // Safety check for NaN
+                      const totalDays = l.totalDays || 0;
+                      if (isNaN(totalDays)) {
+                        console.warn('NaN totalDays in leave request:', l);
+                        return sum;
+                      }
+                      return sum + totalDays;
+                    }
+                    return sum;
+                  }, 0)}
                 </div>
-                <div className="text-sm text-blue-600">Arbetsdagar använda</div>
+                <div className="text-sm text-blue-600">Semesterdagar använda</div>
               </div>
             </div>
           </CardContent>
