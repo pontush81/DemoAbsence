@@ -58,9 +58,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
     
-    // Apply sorting and mapping - use mock data if no Supabase or query failed
-    if (!supabase || leaveRequests.length === 0) {
-      let filteredLeaveRequests = [...(leaveRequests.length === 0 ? mockLeaveRequests : leaveRequests)];
+    // Apply sorting and mapping - database only, no mock data fallback
+    let filteredLeaveRequests = [...leaveRequests];
       
       // Filter by employeeId
       if (employeeId) {
@@ -213,7 +212,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       
       // If Supabase didn't work, try mock data fallback
       if (!newLeaveRequest) {
-        const newId = Math.max(...mockLeaveRequests.map((lr: any) => lr.id || 0)) + 1;
+        // Get next ID from database - no mock data used
+    const newId = Date.now(); // Use timestamp as unique ID fallback
         newLeaveRequest = {
           id: newId,
           ...leaveRequestData
