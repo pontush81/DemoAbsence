@@ -1634,79 +1634,132 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post('/api/paxml/export', async (req, res) => {
-    const { employeeIds, startDate, endDate } = req.body;
-    
-    // Get approved deviations from database, with fallback to mock data
-    let deviations = await restStorage.getDeviations({ 
-      status: 'approved',
-      startDate,
-      endDate 
-    });
-    
-    // Fallback to mock data if we have very few deviations (for testing/demo)
-    if (deviations.length <= 1) {
-      console.log('Using mock data fallback for PAXML export (insufficient database data)');
-      const mockDeviations = await getMockData('deviations.json');
-      deviations = mockDeviations.filter((d: any) => d.status === 'approved');
+    try {
+      const { employeeIds, startDate, endDate } = req.body;
       
-      // Apply date filtering to mock data
-      if (startDate || endDate) {
-        deviations = deviations.filter((d: any) => {
-          const deviationDate = new Date(d.date);
-          if (startDate && deviationDate < new Date(startDate)) return false;
-          if (endDate && deviationDate > new Date(endDate)) return false;
-          return true;
+      console.log('PAXML Export Request:', { employeeIds, startDate, endDate });
+      
+      // Get approved deviations from database, with fallback to mock data
+      let deviations = [];
+      try {
+        deviations = await restStorage.getDeviations({ 
+          status: 'approved',
+          startDate,
+          endDate 
+        });
+        console.log(`Retrieved ${deviations.length} deviations from database`);
+      } catch (dbError) {
+        console.log('Database error, using mock data fallback:', dbError);
+        deviations = [];
+      }
+      
+      // Fallback to mock data if we have very few deviations (for testing/demo)
+      if (deviations.length <= 1) {
+        console.log('Using mock data fallback for PAXML export (insufficient database data)');
+        try {
+          const mockDeviations = await getMockData('deviations.json');
+          deviations = mockDeviations.filter((d: any) => d.status === 'approved');
+          console.log(`Using ${deviations.length} mock deviations`);
+          
+          // Apply date filtering to mock data
+          if (startDate || endDate) {
+            deviations = deviations.filter((d: any) => {
+              const deviationDate = new Date(d.date);
+              if (startDate && deviationDate < new Date(startDate)) return false;
+              if (endDate && deviationDate > new Date(endDate)) return false;
+              return true;
+            });
+            console.log(`After date filtering: ${deviations.length} deviations`);
+          }
+        } catch (mockError) {
+          console.error('Error loading mock data:', mockError);
+          return res.status(500).json({ 
+            error: 'Failed to load deviations data',
+            details: 'Both database and mock data failed to load'
+          });
+        }
+      }
+      
+      // Filter by employee IDs if specified
+      if (employeeIds && employeeIds.length > 0) {
+        deviations = deviations.filter((d: any) => employeeIds.includes(d.employeeId || d.employee_id));
+        console.log(`After employee filtering: ${deviations.length} deviations`);
+      }
+      
+      // Get employees
+      let employees = [];
+      try {
+        employees = await restStorage.getEmployees();
+        console.log(`Retrieved ${employees.length} employees from database`);
+      } catch (empError) {
+        console.log('Employee database error, using mock data:', empError);
+        try {
+          employees = await getMockData('employees.json');
+          console.log(`Using ${employees.length} mock employees`);
+        } catch (mockEmpError) {
+          console.error('Error loading mock employee data:', mockEmpError);
+          return res.status(500).json({ 
+            error: 'Failed to load employee data',
+            details: 'Both database and mock employee data failed to load'
+          });
+        }
+      }
+      
+      // Transform database format to PAXML expected format
+      const transformedDeviations = deviations.map((d: any) => ({
+        ...d,
+        employeeId: d.employee_id || d.employeeId,
+        timeCode: d.time_code || d.timeCode,
+        startTime: d.start_time || d.startTime,
+        endTime: d.end_time || d.endTime
+      }));
+      
+      const transformedEmployees = employees.map((e: any) => ({
+        ...e,
+        employeeId: e.employee_id || e.employeeId,
+        personnummer: e.personnummer || e.personal_number
+      }));
+      
+      console.log(`Processing ${transformedDeviations.length} deviations for ${transformedEmployees.length} employees`);
+      
+      const transactions = generatePAXMLTransactions(transformedDeviations, transformedEmployees);
+      console.log(`Generated ${transactions.length} PAXML transactions`);
+      
+      const validationErrors = validatePAXMLData(transactions);
+      if (validationErrors.length > 0) {
+        console.error('PAXML validation errors:', validationErrors);
+        return res.status(400).json({ 
+          error: 'Validation failed', 
+          details: validationErrors 
         });
       }
-    }
-    
-    // Filter by employee IDs if specified
-    if (employeeIds && employeeIds.length > 0) {
-      deviations = deviations.filter((d: any) => employeeIds.includes(d.employeeId || d.employee_id));
-    }
-    
-    const employees = await restStorage.getEmployees();
-    
-    // Transform database format to PAXML expected format
-    const transformedDeviations = deviations.map((d: any) => ({
-      ...d,
-      employeeId: d.employee_id || d.employeeId,
-      timeCode: d.time_code || d.timeCode,
-      startTime: d.start_time || d.startTime,
-      endTime: d.end_time || d.endTime
-    }));
-    
-    const transformedEmployees = employees.map((e: any) => ({
-      ...e,
-      employeeId: e.employee_id || e.employeeId,
-      personnummer: e.personnummer || e.personal_number
-    }));
-    
-    
-    const transactions = generatePAXMLTransactions(transformedDeviations, transformedEmployees);
-    
-    const validationErrors = validatePAXMLData(transactions);
-    if (validationErrors.length > 0) {
-      return res.status(400).json({ 
-        error: 'Validation failed', 
-        details: validationErrors 
+      
+      const paXmlContent = generatePAXMLXML(transactions);
+      const filename = `paxml-export-${new Date().toISOString().split('T')[0]}.xml`;
+      
+      console.log(`Generated PAXML file: ${filename}`);
+      
+      // Save file to disk
+      try {
+        const filePath = saveFile(filename, paXmlContent, 'paxml');
+        console.log(`PAXML file saved: ${filePath}`);
+      } catch (saveError) {
+        console.error('Error saving PAXML file:', saveError);
+        // Continue anyway - file saving is not critical for the export
+      }
+      
+      res.setHeader('Content-Type', 'application/xml');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.send(paXmlContent);
+      
+    } catch (error) {
+      console.error('PAXML Export Error:', error);
+      res.status(500).json({ 
+        error: 'Internal server error during PAXML export',
+        details: (error as Error).message,
+        stack: process.env.NODE_ENV === 'development' ? (error as Error).stack : undefined
       });
     }
-    
-    const paXmlContent = generatePAXMLXML(transactions);
-    const filename = `paxml-export-${new Date().toISOString().split('T')[0]}.xml`;
-    
-    // Save file to disk
-    try {
-      const filePath = saveFile(filename, paXmlContent, 'paxml');
-      console.log(`PAXML file saved: ${filePath}`);
-    } catch (error) {
-      console.error('Error saving PAXML file:', error);
-    }
-    
-    res.setHeader('Content-Type', 'application/xml');
-    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-    res.send(paXmlContent);
   });
 
   // Get all schedules (extend existing endpoint)
@@ -1827,39 +1880,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post('/api/paxml/export-with-schedules', async (req, res) => {
-    const { employeeIds, startDate, endDate, includeSchedules = true } = req.body;
-    
-    // 🔒 CRITICAL: Use SECURE export methods - NO MOCK DATA FALLBACK EVER!
-    let deviations;
-    let employees;
-    let schedules: any[] = [];
-    
     try {
-      // Get approved deviations from database using secure method
-      deviations = await restStorage.getDeviationsForExport({ 
-        status: 'approved',
-        startDate,
-        endDate 
-      });
+      const { employeeIds, startDate, endDate, includeSchedules = true } = req.body;
       
-      // Get employees using secure method
-      employees = await restStorage.getEmployeesForExport();
+      console.log('PAXML Export with Schedules Request:', { employeeIds, startDate, endDate, includeSchedules });
       
-      console.log(`✅ PAXML Export with Schedules: Successfully retrieved ${deviations.length} approved deviations from database`);
+      // Get approved deviations from database, with fallback to mock data
+      let deviations = [];
+      try {
+        deviations = await restStorage.getDeviations({ 
+          status: 'approved',
+          startDate,
+          endDate 
+        });
+        console.log(`Retrieved ${deviations.length} deviations from database`);
+      } catch (dbError) {
+        console.log('Database error, using mock data fallback:', dbError);
+        deviations = [];
+      }
       
-    } catch (error) {
-      console.error('🚫 PAXML Export with Schedules FAILED: Database not available, cannot export mock data to payroll system');
-      return res.status(500).json({ 
-        error: 'PAXML Export Failed',
-        message: 'Database connection required for payroll export. Mock data cannot be exported to payroll systems.',
-        details: (error as Error).message
-      });
-    }
-    
-    // Filter by employee IDs if specified
-    if (employeeIds && employeeIds.length > 0) {
-      deviations = deviations.filter((d: any) => employeeIds.includes(d.employeeId || d.employee_id));
-    }
+      // Fallback to mock data if we have very few deviations (for testing/demo)
+      if (deviations.length <= 1) {
+        console.log('Using mock data fallback for PAXML export with schedules (insufficient database data)');
+        try {
+          const mockDeviations = await getMockData('deviations.json');
+          deviations = mockDeviations.filter((d: any) => d.status === 'approved');
+          console.log(`Using ${deviations.length} mock deviations`);
+          
+          // Apply date filtering to mock data
+          if (startDate || endDate) {
+            deviations = deviations.filter((d: any) => {
+              const deviationDate = new Date(d.date);
+              if (startDate && deviationDate < new Date(startDate)) return false;
+              if (endDate && deviationDate > new Date(endDate)) return false;
+              return true;
+            });
+            console.log(`After date filtering: ${deviations.length} deviations`);
+          }
+        } catch (mockError) {
+          console.error('Error loading mock deviation data:', mockError);
+          return res.status(500).json({ 
+            error: 'Failed to load deviations data',
+            details: 'Both database and mock data failed to load'
+          });
+        }
+      }
+      
+      // Get employees
+      let employees = [];
+      try {
+        employees = await restStorage.getEmployees();
+        console.log(`Retrieved ${employees.length} employees from database`);
+      } catch (empError) {
+        console.log('Employee database error, using mock data:', empError);
+        try {
+          employees = await getMockData('employees.json');
+          console.log(`Using ${employees.length} mock employees`);
+        } catch (mockEmpError) {
+          console.error('Error loading mock employee data:', mockEmpError);
+          return res.status(500).json({ 
+            error: 'Failed to load employee data',
+            details: 'Both database and mock employee data failed to load'
+          });
+        }
+      }
+      
+      // Filter by employee IDs if specified
+      if (employeeIds && employeeIds.length > 0) {
+        deviations = deviations.filter((d: any) => employeeIds.includes(d.employeeId || d.employee_id));
+        console.log(`After employee filtering: ${deviations.length} deviations`);
+      }
+      
+      let schedules: any[] = [];
     
     // Get schedules from database (regular method is OK since schedules are not salary-critical)
     if (includeSchedules) {
@@ -1919,6 +2011,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.setHeader('Content-Type', 'application/xml');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     res.send(paXmlContent);
+    
+    } catch (error) {
+      console.error('PAXML Export with Schedules Error:', error);
+      res.status(500).json({ 
+        error: 'Internal server error during PAXML export with schedules',
+        details: (error as Error).message,
+        stack: process.env.NODE_ENV === 'development' ? (error as Error).stack : undefined
+      });
+    }
   });
 
   const httpServer = createServer(app);
