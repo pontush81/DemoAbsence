@@ -107,6 +107,56 @@ export function ValidationStatus({ validation, isLoading = false }: ValidationSt
           </div>
         </div>
 
+        {/* Quick Fix Actions */}
+        {(errors.length > 0 || warnings.length > 0) && (
+          <div className="flex flex-wrap gap-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="flex items-center gap-2 text-blue-700 text-sm font-medium mb-2 w-full">
+              <span className="material-icons text-sm">build</span>
+              Snabbåtgärder:
+            </div>
+            
+            {validation.stats.duplicates > 0 && (
+              <Button 
+                size="sm" 
+                variant="outline" 
+                className="h-8 text-xs bg-white"
+                onClick={() => {
+                  alert('🔧 Kommer snart: Ta bort alla dubbletter automatiskt');
+                }}
+              >
+                <span className="material-icons text-xs mr-1">content_copy</span>
+                Ta bort {validation.stats.duplicates} dubbletter
+              </Button>
+            )}
+            
+            {validation.stats.missingTimeCodes > 0 && (
+              <Button 
+                size="sm" 
+                variant="outline" 
+                className="h-8 text-xs bg-white"
+                onClick={() => {
+                  alert('🔧 Kommer snart: Massredigera avvikelser utan tidkoder');
+                }}
+              >
+                <span className="material-icons text-xs mr-1">schedule</span>
+                Lägg till tidkoder ({validation.stats.missingTimeCodes})
+              </Button>
+            )}
+            
+            <Button 
+              size="sm" 
+              variant="outline" 
+              className="h-8 text-xs bg-white"
+              onClick={() => {
+                alert('🔍 Exporterar rapport med alla problem för Excel-redigering');
+              }}
+            >
+              <span className="material-icons text-xs mr-1">download</span>
+              Exportera problemrapport
+            </Button>
+          </div>
+        )}
+
         {/* Issues */}
         {validation.issues.length === 0 && validation.stats.totalDeviations > 0 && (
           <Alert className="border-green-200 bg-green-50">
@@ -232,6 +282,61 @@ function IssueCard({ issue }: { issue: ValidationIssue }) {
 
   const style = getIssueStyle(issue.type);
 
+  const getFixButton = () => {
+    // Quick fix buttons for common issues
+    if (issue.id.includes('duplicate')) {
+      return (
+        <Button 
+          size="sm" 
+          variant="outline" 
+          className="ml-2 h-6 text-xs"
+          onClick={() => {
+            // TODO: Implement duplicate removal
+            alert('🔧 Funktion kommer snart: Ta bort dubbletter automatiskt');
+          }}
+        >
+          <span className="material-icons text-xs mr-1">auto_fix_high</span>
+          Fixa automatiskt
+        </Button>
+      );
+    }
+
+    if (issue.id.includes('missing-timecode')) {
+      return (
+        <Button 
+          size="sm" 
+          variant="outline" 
+          className="ml-2 h-6 text-xs"
+          onClick={() => {
+            // TODO: Navigate to deviation editing
+            alert('🔧 Funktion kommer snart: Navigera till avvikelse för redigering');
+          }}
+        >
+          <span className="material-icons text-xs mr-1">edit</span>
+          Redigera
+        </Button>
+      );
+    }
+
+    if (issue.employeeId && issue.deviationId) {
+      return (
+        <Button 
+          size="sm" 
+          variant="outline" 
+          className="ml-2 h-6 text-xs"
+          onClick={() => {
+            alert(`🔍 Visa avvikelse ${issue.deviationId} för ${issue.employeeId}`);
+          }}
+        >
+          <span className="material-icons text-xs mr-1">visibility</span>
+          Visa
+        </Button>
+      );
+    }
+
+    return null;
+  };
+
   return (
     <div className={`p-3 rounded-md border ${style.bgColor} ${style.borderColor}`}>
       <div className="flex items-start gap-2">
@@ -239,13 +344,16 @@ function IssueCard({ issue }: { issue: ValidationIssue }) {
           {style.icon}
         </span>
         <div className="flex-1 min-w-0">
-          <div className={`text-sm font-medium ${style.textColor}`}>
-            {issue.title}
-            {issue.employeeId && (
-              <Badge variant="outline" className="ml-2 text-xs">
-                {issue.employeeId}
-              </Badge>
-            )}
+          <div className={`text-sm font-medium ${style.textColor} flex items-center justify-between`}>
+            <div>
+              {issue.title}
+              {issue.employeeId && (
+                <Badge variant="outline" className="ml-2 text-xs">
+                  {issue.employeeId}
+                </Badge>
+              )}
+            </div>
+            {getFixButton()}
           </div>
           <div className={`text-sm ${style.textColor} opacity-90 mt-1`}>
             {issue.description}

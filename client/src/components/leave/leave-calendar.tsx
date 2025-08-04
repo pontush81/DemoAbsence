@@ -267,9 +267,9 @@ export default function LeaveCalendar() {
                         )}
                       </div>
                       
-                      {/* Professional continuous leave indicators */}
+                      {/* Elegant continuous leave indicators - Modern gradient approach */}
                       {dayLeaves.length > 0 && (
-                        <div className="absolute inset-1">
+                        <div className="absolute inset-0">
                           {dayLeaves.map((leave: LeaveRequest, idx) => {
                             const isStart = new Date(leave.startDate).toDateString() === day.toDateString();
                             const isEnd = new Date(leave.endDate).toDateString() === day.toDateString();
@@ -279,31 +279,50 @@ export default function LeaveCalendar() {
                               <div
                                 key={idx}
                                 className={`
-                                  absolute inset-0 
-                                  ${leave.status === 'approved' ? 'bg-green-100 border-green-300' : 'bg-yellow-100 border-yellow-300'}
-                                  ${isSingleDay ? 'rounded-md border-2' : ''}
-                                  ${isStart && !isSingleDay ? 'rounded-l-md border-l-2 border-t-2 border-b-2' : ''}
-                                  ${isEnd && !isSingleDay ? 'rounded-r-md border-r-2 border-t-2 border-b-2' : ''}
-                                  ${!isStart && !isEnd ? 'border-t-2 border-b-2' : ''}
+                                  absolute inset-1
+                                  ${leave.status === 'approved' 
+                                    ? 'bg-gradient-to-r from-emerald-50 to-green-50 border-emerald-200' 
+                                    : 'bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-200'
+                                  }
+                                  ${isSingleDay ? 'rounded-full border shadow-sm' : ''}
+                                  ${isStart && !isSingleDay ? 'rounded-l-full border-l border-t border-b' : ''}
+                                  ${isEnd && !isSingleDay ? 'rounded-r-full border-r border-t border-b' : ''}
+                                  ${!isStart && !isEnd ? 'border-t border-b' : ''}
+                                  opacity-80 hover:opacity-100 transition-opacity duration-200
                                 `}
                                 title={`${leave.leaveType} - ${leave.status} (${leave.startDate} till ${leave.endDate})`}
                               >
-                                {/* Show leave type only at start of period */}
+                                {/* Elegant start indicator - minimal and refined */}
                                 {isStart && (
-                                  <div className={`
-                                    absolute top-1 left-1 px-1 py-0.5 rounded-sm text-xs font-medium
-                                    ${leave.status === 'approved' ? 'bg-green-600 text-white' : 'bg-yellow-600 text-white'}
-                                  `}>
-                                    {leave.leaveType === 'vacation' ? '🏖️' : 
-                                     leave.leaveType === 'sick' ? '🏥' : 
-                                     leave.leaveType === 'parental' ? '👶' : '📅'}
+                                  <div className="absolute top-1 left-2 flex items-center gap-1">
+                                    <div className={`
+                                      w-5 h-5 rounded-full flex items-center justify-center text-xs
+                                      ${leave.status === 'approved' 
+                                        ? 'bg-emerald-500 text-white shadow-sm' 
+                                        : 'bg-amber-500 text-white shadow-sm'
+                                      }
+                                    `}>
+                                      {leave.leaveType === 'vacation' ? '🏖️' : 
+                                       leave.leaveType === 'sick' ? '🏥' : 
+                                       leave.leaveType === 'parental' ? '👶' : '📅'}
+                                    </div>
+                                    
+                                    {/* Subtle pending indicator */}
+                                    {leave.status === 'pending' && (
+                                      <div className="w-3 h-3 bg-amber-400 rounded-full flex items-center justify-center">
+                                        <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                                      </div>
+                                    )}
                                   </div>
                                 )}
                                 
-                                {/* Status indicator for pending items */}
-                                {leave.status === 'pending' && isStart && (
-                                  <div className="absolute top-1 right-1 w-4 h-4 bg-yellow-600 rounded-full flex items-center justify-center">
-                                    <span className="text-white text-xs">⏳</span>
+                                {/* Subtle end indicator for multi-day periods */}
+                                {isEnd && !isSingleDay && (
+                                  <div className="absolute top-1 right-2">
+                                    <div className={`
+                                      w-2 h-2 rounded-full
+                                      ${leave.status === 'approved' ? 'bg-emerald-400' : 'bg-amber-400'}
+                                    `}></div>
                                   </div>
                                 )}
                               </div>
@@ -319,37 +338,41 @@ export default function LeaveCalendar() {
           })}
         </div>
 
-        {/* Professional Legend - Shows continuous period visualization */}
+        {/* Elegant Legend - Shows refined gradient visualization */}
         <div className="pt-4 border-t border-gray-200">
           <h4 className="text-sm font-semibold text-gray-900 mb-3">Förklaring</h4>
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <div className="flex">
-                <div className="w-8 h-6 bg-green-100 border-2 border-green-300 rounded-l-md flex items-center justify-center">
-                  <span className="text-green-700 text-xs">🏖️</span>
+              <div className="flex items-center">
+                <div className="w-10 h-6 bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-l-full opacity-80 flex items-center justify-center relative">
+                  <div className="w-4 h-4 bg-emerald-500 rounded-full flex items-center justify-center text-xs">🏖️</div>
                 </div>
-                <div className="w-8 h-6 bg-green-100 border-t-2 border-b-2 border-green-300"></div>
-                <div className="w-8 h-6 bg-green-100 border-2 border-green-300 rounded-r-md"></div>
+                <div className="w-8 h-6 bg-gradient-to-r from-emerald-50 to-green-50 border-t border-b border-emerald-200 opacity-80"></div>
+                <div className="w-6 h-6 bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-r-full opacity-80 flex items-center justify-center">
+                  <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
+                </div>
               </div>
-              <span className="text-sm font-medium text-gray-700">Godkänd ledighet (sammanhängande period)</span>
+              <span className="text-sm font-medium text-gray-700">Godkänd ledighet (elegant gradient)</span>
             </div>
             
             <div className="flex items-center gap-3">
-              <div className="flex">
-                <div className="w-8 h-6 bg-yellow-100 border-2 border-yellow-300 rounded-l-md flex items-center justify-center relative">
-                  <span className="text-yellow-700 text-xs">📅</span>
-                  <div className="absolute top-0 right-0 w-3 h-3 bg-yellow-600 rounded-full flex items-center justify-center">
-                    <span className="text-white text-xs">⏳</span>
+              <div className="flex items-center">
+                <div className="w-10 h-6 bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-l-full opacity-80 flex items-center justify-center relative">
+                  <div className="w-4 h-4 bg-amber-500 rounded-full flex items-center justify-center text-xs">📅</div>
+                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-amber-400 rounded-full flex items-center justify-center">
+                    <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
                   </div>
                 </div>
-                <div className="w-8 h-6 bg-yellow-100 border-t-2 border-b-2 border-yellow-300"></div>
-                <div className="w-8 h-6 bg-yellow-100 border-2 border-yellow-300 rounded-r-md"></div>
+                <div className="w-8 h-6 bg-gradient-to-r from-amber-50 to-yellow-50 border-t border-b border-amber-200 opacity-80"></div>
+                <div className="w-6 h-6 bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-r-full opacity-80 flex items-center justify-center">
+                  <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
+                </div>
               </div>
-              <span className="text-sm font-medium text-gray-700">Väntar på svar (sammanhängande period)</span>
+              <span className="text-sm font-medium text-gray-700">Väntar på svar (elegant gradient)</span>
             </div>
             
             <div className="flex items-center gap-3">
-              <div className="w-8 h-6 ring-2 ring-blue-500 bg-blue-50 rounded"></div>
+              <div className="w-8 h-6 ring-2 ring-blue-500 bg-blue-50 rounded opacity-80"></div>
               <span className="text-sm font-medium text-gray-700">Idag</span>
             </div>
           </div>
