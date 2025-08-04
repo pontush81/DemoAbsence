@@ -21,25 +21,8 @@ export class SupabaseRestStorage {
         throw new Error(`🚫 CRITICAL: Database connection required for ${tableName} but Supabase is not available. Mock data fallback is disabled for production exports.`);
       }
       
-      console.log(`🔄 Supabase not available for ${tableName}, falling back to JSON files`);
-      // Map table name to JSON filename
-      const filenameMap: Record<string, string> = {
-        'employees': 'employees.json',
-        'schedules': 'schedules.json',
-        'deviations': 'deviations.json',
-        'leave_requests': 'leave-requests.json',
-        'time_codes': 'timecodes.json',
-        'time_balances': 'timebalances.json',
-        'payslips': 'payslips.json'
-      };
-      
-      const filename = filenameMap[tableName];
-      if (filename) {
-        return await getMockData(filename) as T;
-      } else {
-        console.warn(`No JSON file mapping for table: ${tableName}`);
-        return [] as T;
-      }
+      // 🚫 NO GENERAL MOCK FALLBACK: All data access must use real database only
+      throw new Error(`🚫 CRITICAL: Database connection required for ${tableName}. Mock data fallbacks have been eliminated.`);
     }
     
     let query = supabase!.from(tableName).select('*');
@@ -56,28 +39,9 @@ export class SupabaseRestStorage {
     const { data, error } = await query;
     
     if (error) {
-      if (requireDatabase) {
-        throw new Error(`🚫 CRITICAL: Database query failed for ${tableName} and fallback is disabled for production exports: ${error.message}`);
-      }
-      
-      console.error(`❌ Supabase query failed for ${tableName}, falling back to JSON:`, error.message);
-      // Fallback to JSON files
-      const filenameMap: Record<string, string> = {
-        'employees': 'employees.json',
-        'schedules': 'schedules.json',
-        'deviations': 'deviations.json',
-        'leave_requests': 'leave-requests.json',
-        'time_codes': 'timecodes.json',
-        'time_balances': 'timebalances.json',
-        'payslips': 'payslips.json'
-      };
-      
-      const filename = filenameMap[tableName];
-      if (filename) {
-        return await getMockData(filename) as T;
-      } else {
-        throw new Error(`❌ Both Supabase and JSON fallback failed for ${tableName}`);
-      }
+      // 🚫 NO ERROR FALLBACK: Database errors must not fallback to mock data
+      console.error(`❌ Supabase query failed for ${tableName}:`, error.message);
+      throw new Error(`🚫 CRITICAL: Database query failed for ${tableName}: ${error.message}. Mock data fallbacks have been eliminated.`);
     }
     
     return data as T;
@@ -503,25 +467,8 @@ export class SupabaseRestStorage {
   // Update deviation
   async updateDeviation(id: number, updates: any) {
     if (!this.isSupabaseAvailable()) {
-      // Fallback to mock data update when Supabase not available
-      const deviations = await getMockData('deviations.json');
-      const index = deviations.findIndex((d: any) => d.id === id);
-      
-      if (index === -1) {
-        throw new Error(`Deviation with id ${id} not found`);
-      }
-      
-      // Update the deviation in mock data
-      const updatedDeviation = {
-        ...deviations[index],
-        ...updates,
-        lastUpdated: new Date().toISOString()
-      };
-      
-      deviations[index] = updatedDeviation;
-      await saveMockData('deviations.json', deviations);
-      
-      return updatedDeviation;
+      // 🚫 NO MOCK FALLBACK: Deviation updates must use real database only
+      throw new Error('🚫 CRITICAL: Database connection required for deviation updates. Mock data is not allowed for updates.');
     }
 
     try {
@@ -613,25 +560,8 @@ export class SupabaseRestStorage {
   // Update leave request
   async updateLeaveRequest(id: number, updates: any) {
     if (!this.isSupabaseAvailable()) {
-      // Fallback to mock data update when Supabase not available
-      const leaveRequests = await getMockData('leave-requests.json');
-      const index = leaveRequests.findIndex((lr: any) => lr.id === id);
-      
-      if (index === -1) {
-        throw new Error(`Leave request with id ${id} not found`);
-      }
-      
-      // Update the leave request in mock data
-      const updatedLeaveRequest = {
-        ...leaveRequests[index],
-        ...updates,
-        lastUpdated: new Date().toISOString()
-      };
-      
-      leaveRequests[index] = updatedLeaveRequest;
-      await saveMockData('leave-requests.json', leaveRequests);
-      
-      return updatedLeaveRequest;
+      // 🚫 NO MOCK FALLBACK: Leave request updates must use real database only
+      throw new Error('🚫 CRITICAL: Database connection required for leave request updates. Mock data is not allowed for updates.');
     }
 
     try {

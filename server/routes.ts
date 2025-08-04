@@ -16,19 +16,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ message: 'API is working', timestamp: new Date() });
   });
 
-  // Debug endpoint to test JSON reading
-  app.get('/api/debug/schedules', async (req, res) => {
-    try {
-      const jsonData = await getMockData('schedules.json');
-      res.json({
-        totalCount: Array.isArray(jsonData) ? jsonData.length : 0,
-        e001Count: Array.isArray(jsonData) ? jsonData.filter((s: any) => s.employeeId === 'E001').length : 0,
-        sample: Array.isArray(jsonData) ? jsonData.slice(0, 3) : jsonData
-      });
-    } catch (error) {
-      res.status(500).json({ error: (error as Error).message });
-    }
-  });
+  // 🗑️ REMOVED: Debug endpoint for schedules (mock data eliminated)
 
   // Debug endpoint to test restStorage
   app.get('/api/debug/reststorage-schedules', async (req, res) => {
@@ -44,30 +32,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Simple test deviation creation
-  app.post('/api/test-deviation', async (req, res) => {
-    try {
-      const mockDeviations = await getMockData('deviations.json');
-      const newId = 999;
-      const newDeviation = {
-        id: newId,
-        employeeId: "E001",
-        date: "2024-01-15",
-        startTime: "08:00:00",
-        endTime: "17:00:00", 
-        timeCode: "300",
-        comment: "Test from simple route",
-        status: "approved",
-        lastUpdated: new Date().toISOString(),
-        submitted: new Date().toISOString()
-      };
-      
-      res.status(201).json(newDeviation);
-    } catch (error) {
-      console.error('Simple test error:', error);
-      res.status(500).json({ error: (error as Error).message });
-    }
-  });
+  // 🗑️ REMOVED: Test deviation creation endpoint (mock data eliminated)
 
 
   // Test database connection
@@ -81,134 +46,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Debug time balances mock data
-    app.get('/api/admin/debug-time-balances', async (req, res) => {
-    try {
-      const mockData = await getMockData('timebalances.json');
-      res.json({
-        message: 'Mock time balances data',
-        count: mockData.length,
-        data: mockData,
-        employeeIds: mockData.map((tb: any) => tb.employeeId)
-      });
-    } catch (error) {
-      res.status(500).json({ error: (error as Error).message });
-    }
-  });
+  // 🗑️ REMOVED: Debug endpoint for mock time balances data (no longer needed)
 
-  // Seed deviations from mock data to database
-  app.post('/api/admin/seed-deviations', async (req, res) => {
-    try {
-      const deviationData = await getMockData('deviations.json');
-      const seededDeviations = [];
-      
-      for (const deviation of deviationData) {
-        try {
-          const deviationEntry = {
-            employeeId: deviation.employeeId,
-            date: deviation.date,
-            startTime: deviation.startTime,
-            endTime: deviation.endTime,
-            timeCode: deviation.timeCode,
-            comment: deviation.comment,
-            status: deviation.status,
-            managerComment: deviation.managerComment,
-            lastUpdated: deviation.lastUpdated ? new Date(deviation.lastUpdated) : new Date(),
-            submitted: deviation.submitted ? new Date(deviation.submitted) : null,
-            approvedBy: deviation.approvedBy,
-            approvedAt: deviation.approvedAt ? new Date(deviation.approvedAt) : null,
-            rejectedBy: deviation.rejectedBy,
-            rejectedAt: deviation.rejectedAt ? new Date(deviation.rejectedAt) : null
-          };
+  // 🗑️ REMOVED: Seed deviations endpoint (mock data eliminated)
 
-          const created = await restStorage.createDeviation(deviationEntry);
-          seededDeviations.push({ 
-            id: deviation.id, 
-            status: 'success',
-            timeCode: deviation.timeCode,
-            deviationStatus: deviation.status
-          });
-        } catch (error) {
-          console.error(`Error seeding deviation ${deviation.id}:`, error);
-          seededDeviations.push({
-            id: deviation.id,
-            status: 'error',
-            error: (error as Error).message
-          });
-        }
-      }
-
-      res.json({
-        message: 'Deviation seeding completed',
-        results: seededDeviations,
-        total: deviationData.length,
-        successful: seededDeviations.filter(r => r.status === 'success').length,
-        approved: seededDeviations.filter(r => r.deviationStatus === 'approved').length
-      });
-    } catch (error) {
-      console.error('Error during deviation seeding:', error);
-      res.status(500).json({ error: (error as Error).message });
-    }
-  });
-
-  // Seed time balances from mock data
-  app.post('/api/admin/seed-time-balances', async (req, res) => {
-    try {
-      const timeBalanceData = await getMockData('timebalances.json');
-      const seededBalances = [];
-      
-      for (const balance of timeBalanceData) {
-        try {
-          // Try to create or update time balance using storage
-          const timeBalanceEntry = {
-            employeeId: balance.employeeId,
-            timeBalance: balance.timeBalance,
-            vacationDays: balance.vacationDays, 
-            savedVacationDays: balance.savedVacationDays,
-            vacationUnit: balance.vacationUnit,
-            compensationTime: balance.compensationTime,
-            lastUpdated: new Date(balance.lastUpdated)
-          };
-          
-          // For now, let's use a direct database insert since we don't have createTimeBalance in storage
-          if (db) {
-            await db.insert(timeBalances).values(timeBalanceEntry)
-              .onConflictDoUpdate({
-                target: timeBalances.employeeId,
-                set: {
-                  timeBalance: timeBalanceEntry.timeBalance,
-                  vacationDays: timeBalanceEntry.vacationDays,
-                  savedVacationDays: timeBalanceEntry.savedVacationDays,
-                  vacationUnit: timeBalanceEntry.vacationUnit,
-                  compensationTime: timeBalanceEntry.compensationTime,
-                  lastUpdated: timeBalanceEntry.lastUpdated
-                }
-              });
-            seededBalances.push({ employeeId: balance.employeeId, status: 'success' });
-          } else {
-            seededBalances.push({ employeeId: balance.employeeId, status: 'no_db' });
-          }
-        } catch (error) {
-          console.error(`Error seeding time balance for ${balance.employeeId}:`, error);
-          seededBalances.push({ 
-            employeeId: balance.employeeId, 
-            status: 'error', 
-            error: (error as Error).message 
-          });
-        }
-      }
-      
-      res.json({ 
-        message: 'Time balance seeding completed', 
-        results: seededBalances,
-        total: timeBalanceData.length,
-        successful: seededBalances.filter(r => r.status === 'success').length
-      });
-    } catch (error) {
-      console.error('Error during time balance seeding:', error);
-      res.status(500).json({ error: (error as Error).message });
-    }
-  });
+  // 🗑️ REMOVED: Seed time balances endpoint (mock data eliminated)
 
   // Demo PAXML export matching the test file exactly
   app.post('/api/paxml/demo-franvaro', async (req, res) => {
@@ -752,8 +594,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/deviations', async (req, res) => {
     try {
       // Get time codes to check if approval is required
-      const timeCodes = await getMockData('timecodes.json');
-      const timeCode = timeCodes.find((tc: any) => tc.code === req.body.timeCode);
+      let timeCode;
+      try {
+        const timeCodes = await restStorage.getTimeCodes();
+        timeCode = timeCodes.find((tc: any) => tc.code === req.body.timeCode);
+      } catch (error) {
+        // 🚫 NO MOCK FALLBACK: Time codes must come from database for approval logic
+        console.error('🚫 CRITICAL: Time codes lookup failed - database connection required for approval logic:', error);
+        return res.status(500).json({ 
+          error: 'Time codes lookup failed',
+          message: 'Database connection required for time code approval logic. Mock data is not allowed.',
+          details: error.message
+        });
+      }
       
       // Determine status based on Swedish HR law compliance
       let status = req.body.status;
@@ -781,21 +634,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log('Created new deviation via REST API:', newDeviation);
         res.status(201).json(newDeviation);
       } catch (restError) {
-        console.log('REST API creation failed, falling back to mock data:', restError);
-        // Fallback to mock data if REST API fails
-        const mockDeviations = await getMockData('deviations.json');
-        const newId = Math.max(...mockDeviations.map((d: any) => d.id || 0)) + 1;
-        const newDeviation = {
-          id: newId,
-          ...deviationData,
-          lastUpdated: new Date().toISOString(),
-          submitted: new Date().toISOString()  
-        };
-        mockDeviations.push(newDeviation);
-        await saveMockData('deviations.json', mockDeviations);
-        
-        console.log('Created new deviation via mock fallback:', newDeviation);
-        res.status(201).json(newDeviation);
+        // 🚫 NO MOCK FALLBACK: Deviation creation must use real database only
+        console.error('🚫 CRITICAL: Deviation creation failed - database connection required:', restError);
+        return res.status(500).json({ 
+          error: 'Deviation creation failed',
+          message: 'Database connection required for deviation creation. Mock data is not allowed.',
+          details: restError.message
+        });
       }
     } catch (error) {
       console.error('Error creating deviation:', error);
@@ -1072,16 +917,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         newLeaveRequest = await restStorage.createLeaveRequest(leaveRequestData);
       } catch (storageError) {
-        console.log('Storage create failed, using mock data fallback:', storageError);
-        // Fallback to mock data creation
-        const leaveRequests = await getMockData('leave-requests.json');
-        const newId = generateId(leaveRequests);
-        newLeaveRequest = {
-          id: newId,
-          ...leaveRequestData
-        };
-        leaveRequests.push(newLeaveRequest);
-        await saveMockData('leave-requests.json', leaveRequests);
+        // 🚫 NO MOCK FALLBACK: Leave request creation must use real database only
+        console.error('🚫 CRITICAL: Leave request creation failed - database connection required:', storageError);
+        return res.status(500).json({ 
+          error: 'Leave request creation failed',
+          message: 'Database connection required for leave request creation. Mock data is not allowed.',
+          details: storageError.message
+        });
       }
       
       res.status(201).json(newLeaveRequest);
@@ -1161,13 +1003,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         timeBalance = await restStorage.getTimeBalance(req.params.employeeId);
       } catch (error) {
-        console.log('restStorage failed, trying direct mock fallback:', error);
-      }
-      
-      // If restStorage didn't work, try direct mock data fallback
-      if (!timeBalance) {
-        const mockTimeBalances = await getMockData('timebalances.json');
-        timeBalance = mockTimeBalances.find((tb: any) => tb.employeeId === req.params.employeeId);
+        // 🚫 NO MOCK FALLBACK: Time balance lookup must use real database only
+        console.error('🚫 CRITICAL: Time balance lookup failed - database connection required:', error);
+        return res.status(500).json({ 
+          error: 'Time balance lookup failed',
+          message: 'Database connection required for time balance data. Mock data is not allowed for payroll-related information.',
+          details: error.message
+        });
       }
       
       if (timeBalance) {
@@ -1308,19 +1150,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         approvedDeviation = await restStorage.updateDeviation(parseInt(req.params.id), updateData);
       } catch (storageError) {
-        console.log('Storage update failed, using mock data fallback:', storageError);
-        // Fallback to mock data update
-        const deviations = await getMockData('deviations.json');
-        const index = deviations.findIndex((d: any) => d.id === parseInt(req.params.id));
-        if (index !== -1) {
-          approvedDeviation = {
-            ...deviations[index],
-            ...updateData,
-            lastUpdated: new Date()
-          };
-          deviations[index] = approvedDeviation;
-          await saveMockData('deviations.json', deviations);
-        }
+        // 🚫 NO MOCK FALLBACK: Manager approval must use real database only
+        console.error('🚫 CRITICAL: Manager approval failed - database connection required for deviation approval:', storageError);
+        return res.status(500).json({ 
+          error: 'Manager approval failed',
+          message: 'Database connection required for deviation approval. Mock data is not allowed for approval workflows.',
+          details: storageError.message
+        });
       }
       
       if (approvedDeviation) {
@@ -1364,19 +1200,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         rejectedDeviation = await restStorage.updateDeviation(parseInt(req.params.id), updateData);
       } catch (storageError) {
-        console.log('Storage update failed, using mock data fallback:', storageError);
-        // Fallback to mock data update
-        const deviations = await getMockData('deviations.json');
-        const index = deviations.findIndex((d: any) => d.id === parseInt(req.params.id));
-        if (index !== -1) {
-          rejectedDeviation = {
-            ...deviations[index],
-            ...updateData,
-            lastUpdated: new Date()
-          };
-          deviations[index] = rejectedDeviation;
-          await saveMockData('deviations.json', deviations);
-        }
+        // 🚫 NO MOCK FALLBACK: Manager rejection must use real database only
+        console.error('🚫 CRITICAL: Manager rejection failed - database connection required for deviation rejection:', storageError);
+        return res.status(500).json({ 
+          error: 'Manager rejection failed',
+          message: 'Database connection required for deviation rejection. Mock data is not allowed for approval workflows.',
+          details: storageError.message
+        });
       }
       
       if (rejectedDeviation) {
@@ -1418,19 +1248,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         returnedDeviation = await restStorage.updateDeviation(parseInt(req.params.id), updateData);
       } catch (storageError) {
-        console.log('Storage update failed, using mock data fallback:', storageError);
-        // Fallback to mock data update
-        const deviations = await getMockData('deviations.json');
-        const index = deviations.findIndex((d: any) => d.id === parseInt(req.params.id));
-        if (index !== -1) {
-          returnedDeviation = {
-            ...deviations[index],
-            ...updateData,
-            lastUpdated: new Date()
-          };
-          deviations[index] = returnedDeviation;
-          await saveMockData('deviations.json', deviations);
-        }
+        // 🚫 NO MOCK FALLBACK: Manager return action must use real database only
+        console.error('🚫 CRITICAL: Manager return failed - database connection required for deviation return:', storageError);
+        return res.status(500).json({ 
+          error: 'Manager return failed',
+          message: 'Database connection required for deviation return action. Mock data is not allowed for approval workflows.',
+          details: storageError.message
+        });
       }
       
       if (returnedDeviation) {
@@ -1538,19 +1362,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         approvedLeaveRequest = await restStorage.updateLeaveRequest(parseInt(req.params.id), updateData);
       } catch (storageError) {
-        console.log('Storage update failed, using mock data fallback:', storageError);
-        // Fallback to mock data update
-        const leaveRequests = await getMockData('leave-requests.json');
-        const index = leaveRequests.findIndex((lr: any) => lr.id === parseInt(req.params.id));
-        if (index !== -1) {
-          approvedLeaveRequest = {
-            ...leaveRequests[index],
-            ...updateData,
-            lastUpdated: new Date()
-          };
-          leaveRequests[index] = approvedLeaveRequest;
-          await saveMockData('leave-requests.json', leaveRequests);
-        }
+        // 🚫 NO MOCK FALLBACK: Leave request approval must use real database only
+        console.error('🚫 CRITICAL: Leave request approval failed - database connection required:', storageError);
+        return res.status(500).json({ 
+          error: 'Leave request approval failed',
+          message: 'Database connection required for leave request approval. Mock data is not allowed for approval workflows.',
+          details: storageError.message
+        });
       }
       
       if (approvedLeaveRequest) {
@@ -1655,29 +1473,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Fallback to mock data if we have very few deviations (for testing/demo)
       if (deviations.length <= 1) {
-        console.log('Using mock data fallback for PAXML export (insufficient database data)');
-        try {
-          const mockDeviations = await getMockData('deviations.json');
-          deviations = mockDeviations.filter((d: any) => d.status === 'approved');
-          console.log(`Using ${deviations.length} mock deviations`);
-          
-          // Apply date filtering to mock data
-          if (startDate || endDate) {
-            deviations = deviations.filter((d: any) => {
-              const deviationDate = new Date(d.date);
-              if (startDate && deviationDate < new Date(startDate)) return false;
-              if (endDate && deviationDate > new Date(endDate)) return false;
-              return true;
-            });
-            console.log(`After date filtering: ${deviations.length} deviations`);
-          }
-        } catch (mockError) {
-          console.error('Error loading mock data:', mockError);
-          return res.status(500).json({ 
-            error: 'Failed to load deviations data',
-            details: 'Both database and mock data failed to load'
-          });
-        }
+        // 🚫 REMOVED: Mock data fallback eliminated for PAXML export security
+        throw new Error('🚫 CRITICAL: PAXML export found insufficient data but mock fallback is disabled for security.');
       }
       
       // Filter by employee IDs if specified
@@ -1692,17 +1489,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         employees = await restStorage.getEmployees();
         console.log(`Retrieved ${employees.length} employees from database`);
       } catch (empError) {
-        console.log('Employee database error, using mock data:', empError);
-        try {
-          employees = await getMockData('employees.json');
-          console.log(`Using ${employees.length} mock employees`);
-        } catch (mockEmpError) {
-          console.error('Error loading mock employee data:', mockEmpError);
-          return res.status(500).json({ 
-            error: 'Failed to load employee data',
-            details: 'Both database and mock employee data failed to load'
-          });
-        }
+        // 🚫 NO MOCK FALLBACK: Employee data for PAXML must be from database only
+        console.error('🚫 CRITICAL: Employee database error for PAXML export, mock fallback disabled:', empError);
+        return res.status(500).json({ 
+          error: 'Employee database access failed',
+          message: 'PAXML export requires real employee data from database. Mock data is not allowed.',
+          details: empError.message
+        });
+        // 🗑️ REMOVED: Unreachable mock fallback code (already returns above)
       }
       
       // Transform database format to PAXML expected format
@@ -1783,21 +1577,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           throw new Error('Low result count, trying JSON fallback');
         }
       } catch (error) {
-        console.log('🔄 RestStorage failed, using JSON fallback for schedules');
-        // Fallback to JSON file
-        const allSchedules = await getMockData('schedules.json');
-        schedules = Array.isArray(allSchedules) ? allSchedules : [];
-        
-        // Apply client-side filtering
-        if (employeeId) {
-          schedules = schedules.filter((s: any) => s.employeeId === employeeId);
-        }
-        if (startDate) {
-          schedules = schedules.filter((s: any) => s.date >= startDate);
-        }
-        if (endDate) {
-          schedules = schedules.filter((s: any) => s.date <= endDate);
-        }
+        // 🚫 NO MOCK FALLBACK: Schedule lookup must use real database only
+        console.error('🚫 CRITICAL: Schedule lookup failed - database connection required:', error);
+        return res.status(500).json({ 
+          error: 'Schedule lookup failed',
+          message: 'Database connection required for schedule data. Mock data is not allowed.',
+          details: error.message
+        });
       }
       
       // Map snake_case to camelCase for consistency
@@ -1899,31 +1685,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         deviations = [];
       }
       
-      // Fallback to mock data if we have very few deviations (for testing/demo)
-      if (deviations.length <= 1) {
-        console.log('Using mock data fallback for PAXML export with schedules (insufficient database data)');
-        try {
-          const mockDeviations = await getMockData('deviations.json');
-          deviations = mockDeviations.filter((d: any) => d.status === 'approved');
-          console.log(`Using ${deviations.length} mock deviations`);
-          
-          // Apply date filtering to mock data
-          if (startDate || endDate) {
-            deviations = deviations.filter((d: any) => {
-              const deviationDate = new Date(d.date);
-              if (startDate && deviationDate < new Date(startDate)) return false;
-              if (endDate && deviationDate > new Date(endDate)) return false;
-              return true;
-            });
-            console.log(`After date filtering: ${deviations.length} deviations`);
-          }
-        } catch (mockError) {
-          console.error('Error loading mock deviation data:', mockError);
-          return res.status(500).json({ 
-            error: 'Failed to load deviations data',
-            details: 'Both database and mock data failed to load'
-          });
-        }
+      // 🚫 NO MOCK FALLBACK: PAXML export with schedules must NEVER use mock data
+      console.log(`✅ PAXML Export with Schedules: Found ${deviations.length} approved deviations from database (mock fallback eliminated)`);
+      if (deviations.length === 0) {
+        console.warn('⚠️  PAXML Export with Schedules: No approved deviations found for the specified period - this is acceptable for real data');
       }
       
       // Get employees
@@ -1932,17 +1697,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         employees = await restStorage.getEmployees();
         console.log(`Retrieved ${employees.length} employees from database`);
       } catch (empError) {
-        console.log('Employee database error, using mock data:', empError);
-        try {
-          employees = await getMockData('employees.json');
-          console.log(`Using ${employees.length} mock employees`);
-        } catch (mockEmpError) {
-          console.error('Error loading mock employee data:', mockEmpError);
-          return res.status(500).json({ 
-            error: 'Failed to load employee data',
-            details: 'Both database and mock employee data failed to load'
-          });
-        }
+        // 🚫 NO MOCK FALLBACK: Employee data for PAXML must be from database only
+        console.error('🚫 CRITICAL: Employee database error for PAXML export, mock fallback disabled:', empError);
+        return res.status(500).json({ 
+          error: 'Employee database access failed',
+          message: 'PAXML export requires real employee data from database. Mock data is not allowed.',
+          details: empError.message
+        });
+        // 🗑️ REMOVED: Unreachable mock fallback code (already returns above)
       }
       
       // Filter by employee IDs if specified

@@ -14,18 +14,17 @@ export class SupabaseStorage {
     return db !== null;
   }
   
-  // Helper method to get data with fallback
-  private async getDataWithFallback<T>(operation: () => Promise<T>, fallbackFile: string): Promise<T> {
+  // Helper method - DATABASE ONLY, NO FALLBACK
+  private async getDataFromDatabase<T>(operation: () => Promise<T>, tableName: string): Promise<T> {
     if (!this.isDatabaseAvailable()) {
-      console.log(`Database not available, falling back to ${fallbackFile}`);
-      return await getMockData(fallbackFile) as T;
+      throw new Error(`🚫 CRITICAL: Database connection required for ${tableName}. Mock data fallbacks have been eliminated.`);
     }
     
     try {
       return await operation();
     } catch (error) {
-      console.error(`Database error, falling back to ${fallbackFile}:`, error);
-      return await getMockData(fallbackFile) as T;
+      console.error(`❌ Database error for ${tableName}:`, error);
+      throw new Error(`🚫 CRITICAL: Database query failed for ${tableName}: ${(error as Error).message}. Mock data fallbacks have been eliminated.`);
     }
   }
   
@@ -194,7 +193,7 @@ export class SupabaseStorage {
 
   // Schedules
   async getSchedules(filters: any = {}) {
-    return await this.getDataWithFallback(
+    return await this.getDataFromDatabase(
       async () => {
         const conditions = [];
         
@@ -221,31 +220,8 @@ export class SupabaseStorage {
         
         return await db!.select().from(schedules);
       },
-      'schedules.json'
-    ).then((data: any) => {
-      // Apply client-side filtering for JSON fallback
-      let filteredData = data;
-      
-      if (filters.employeeId) {
-        filteredData = filteredData.filter((s: any) => 
-          (s.employeeId === filters.employeeId) || (s.employee_id === filters.employeeId)
-        );
-      }
-      
-      if (filters.date) {
-        filteredData = filteredData.filter((s: any) => s.date === filters.date);
-      }
-      
-      if (filters.startDate) {
-        filteredData = filteredData.filter((s: any) => s.date >= filters.startDate);
-      }
-      
-      if (filters.endDate) {
-        filteredData = filteredData.filter((s: any) => s.date <= filters.endDate);
-      }
-      
-      return filteredData;
-    });
+      'schedules'
+    );
   }
 
   // Time balances
