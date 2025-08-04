@@ -32,6 +32,7 @@ const DeviationDetails = ({ deviationId, onBack }: DeviationDetailsProps) => {
   const { data: timeCodes = [] } = useQuery({
     queryKey: ['/api/timecodes'],
     queryFn: () => apiService.getTimeCodes(),
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
   
   // Delete mutation
@@ -273,7 +274,7 @@ const DeviationDetails = ({ deviationId, onBack }: DeviationDetailsProps) => {
               <p className="text-sm text-muted-foreground">{t('deviations.timeCode')}</p>
               <p className="font-medium">
                 {(() => {
-                  const timeCode = timeCodes.find(tc => tc.code === deviation.timeCode);
+                  const timeCode = Array.isArray(timeCodes) ? timeCodes.find(tc => tc.code === deviation.timeCode) : null;
                   return timeCode ? `${timeCode.code} - ${timeCode.name}` : deviation.timeCode;
                 })()}
               </p>

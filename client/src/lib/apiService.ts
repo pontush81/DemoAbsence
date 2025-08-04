@@ -135,6 +135,12 @@ class ApiService {
       
       const rawData = await response.json();
       
+      // Ensure we always return an array
+      if (!Array.isArray(rawData)) {
+        console.error('Time codes API returned non-array:', rawData);
+        return [];
+      }
+
       // Map snake_case fields to camelCase for TypeScript compatibility
       return rawData.map((tc: any) => ({
         ...tc,
@@ -143,7 +149,7 @@ class ApiService {
       }));
     } catch (error) {
       console.error('Error fetching time codes:', error);
-      throw error;
+      return []; // Return empty array instead of throwing
     }
   }
   

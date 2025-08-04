@@ -117,7 +117,7 @@ export default function Dashboard() {
 
   // Helper function to get time code name
   const getTimeCodeName = (code: string) => {
-    const timeCode = timeCodes.find(tc => tc.code === code);
+              const timeCode = Array.isArray(timeCodes) ? timeCodes.find(tc => tc.code === code) : null;
     return timeCode?.nameSV || code;
   };
   

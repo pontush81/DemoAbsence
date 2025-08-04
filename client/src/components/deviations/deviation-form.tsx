@@ -333,7 +333,7 @@ const DeviationForm = ({ deviationId, onCancel }: DeviationFormProps) => {
   const calculateDuration = createCalculateDuration(t, scheduleForDate);
 
   // Get workflow info for selected time code
-  const selectedTimeCode = timeCodes?.find(tc => tc.code === form.watch('timeCode'));
+  const selectedTimeCode = Array.isArray(timeCodes) ? timeCodes.find(tc => tc.code === form.watch('timeCode')) : null;
   const workflowInfo = selectedTimeCode ? getWorkflowInfo(selectedTimeCode) : null;
   
   // Update form when deviation data loads

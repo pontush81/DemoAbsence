@@ -107,7 +107,7 @@ const ApprovalsList = ({ type }: ApprovalsListProps) => {
 
   // Helper function to get time code for a deviation
   const getTimeCodeForDeviation = (timeCodeStr: string): TimeCode | undefined => {
-    return timeCodes.find(tc => tc.code === timeCodeStr);
+          return Array.isArray(timeCodes) ? timeCodes.find(tc => tc.code === timeCodeStr) : null;
   };
   
   // Approve all mutation

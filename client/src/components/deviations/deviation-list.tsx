@@ -47,6 +47,7 @@ const DeviationList = ({ onSelect }: DeviationListProps) => {
 
   // Helper function to get time code name
   const getTimeCodeName = (timeCodeStr: string) => {
+    if (!Array.isArray(timeCodes)) return timeCodeStr;
     const timeCode = timeCodes.find(tc => tc.code === timeCodeStr);
     return timeCode ? `${timeCode.code} - ${timeCode.name}` : timeCodeStr;
   };
