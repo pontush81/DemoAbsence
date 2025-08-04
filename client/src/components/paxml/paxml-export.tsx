@@ -188,6 +188,66 @@ export default function PAXMLExport({ employees, deviations }: PAXMLExportProps)
                 </p>
               </div>
 
+              {/* Snabba månadsval */}
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Snabba månadsval</Label>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const now = new Date();
+                      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+                      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+                      setStartDate(startOfMonth.toISOString().split('T')[0]);
+                      setEndDate(endOfMonth.toISOString().split('T')[0]);
+                    }}
+                  >
+                    Denna månad
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const now = new Date();
+                      const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                      const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+                      setStartDate(startOfLastMonth.toISOString().split('T')[0]);
+                      setEndDate(endOfLastMonth.toISOString().split('T')[0]);
+                    }}
+                  >
+                    Föregående månad
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const now = new Date();
+                      const startOfYear = new Date(now.getFullYear(), 0, 1);
+                      const endOfYear = new Date(now.getFullYear(), 11, 31);
+                      setStartDate(startOfYear.toISOString().split('T')[0]);
+                      setEndDate(endOfYear.toISOString().split('T')[0]);
+                    }}
+                  >
+                    Hela året
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setStartDate('');
+                      setEndDate('');
+                    }}
+                  >
+                    Rensa
+                  </Button>
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="startDate">Från datum (valfritt)</Label>
