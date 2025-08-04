@@ -505,6 +505,18 @@ const translations: Translations = {
     sv: 'Studieledighet',
     en: 'Study Leave',
   },
+  'leave.sick': {
+    sv: 'Sjukdom',
+    en: 'Sick Leave',
+  },
+  'leave.parental': {
+    sv: 'Föräldraledighet',
+    en: 'Parental Leave',
+  },
+  'leave.personal': {
+    sv: 'Vård av barn',
+    en: 'Personal Leave',
+  },
   'leave.startDate': {
     sv: 'Från datum',
     en: 'Start Date',
