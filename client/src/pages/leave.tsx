@@ -89,7 +89,7 @@ export default function Leave() {
           {/* Enhanced leave display with calendar/list toggle - Following UX best practices */}
           <div className="space-y-6">
             {displayMode === 'calendar' ? (
-              <LeaveCalendar />
+              <ModernLeaveCalendar />
             ) : (
               <LeaveList />
             )}

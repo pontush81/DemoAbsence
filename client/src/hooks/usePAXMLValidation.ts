@@ -199,15 +199,16 @@ export function usePAXMLValidation(
         const today = new Date();
         const deviationDate = new Date(deviation.date);
         if (deviationDate > today) {
+          const daysDiff = Math.ceil((deviationDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
           issues.push({
             id: `future-date-${deviation.id}`,
             type: 'warning',
             category: 'business',
             title: 'Framtida datum',
-            description: `Avvikelse för ${getEmployeeName(deviation.employeeId, employees)} har framtida datum`,
+            description: `Avvikelse för ${getEmployeeName(deviation.employeeId, employees)} är daterad ${daysDiff} dag${daysDiff !== 1 ? 'ar' : ''} framåt i tiden (${deviation.date})`,
             employeeId: deviation.employeeId,
             deviationId: deviation.id,
-            action: 'Kontrollera datum'
+            action: 'Kontrollera om datumit är korrekt - är det verkligen framtida arbetstid eller felaktigt inmatat?'
           });
         }
       } catch (error) {

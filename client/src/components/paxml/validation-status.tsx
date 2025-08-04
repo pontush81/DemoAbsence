@@ -178,6 +178,20 @@ export function ValidationStatus({ validation, isLoading = false, deviations = [
       </CardHeader>
 
       <CardContent className="space-y-4">
+        {/* Quick Help for Common Issues */}
+        {(validation.hasWarnings || validation.hasErrors) && (
+          <Alert className="border-blue-200 bg-blue-50">
+            <span className="material-icons text-blue-600">info</span>
+            <AlertDescription className="text-blue-800 text-sm">
+              <strong>💡 Vanliga problem:</strong>
+              <br />• <strong>Framtida datum:</strong> Avvikelse daterad efter idag - kontrollera om datumit är korrekt
+              <br />• <strong>Dubblett:</strong> Samma avvikelse finns flera gånger - ta bort överflödiga
+              <br />• <strong>Saknar tidkod:</strong> Avvikelsen saknar PAXML-kompatibel tidkod
+              <br />📌 <em>Klicka på "Detaljer" för specifik hjälp per varning</em>
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Stats Overview */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
           <div className="text-center p-2 bg-white/50 rounded border">
@@ -430,11 +444,43 @@ function IssueCard({ issue }: { issue: ValidationIssue }) {
           variant="outline" 
           className="ml-2 h-6 text-xs"
           onClick={() => {
-            alert(`🔍 Visa avvikelse ${issue.deviationId} för ${issue.employeeId}`);
+            // Show detailed info in a more useful way
+            const futureDate = issue.id.includes('future-date');
+            const duplicate = issue.id.includes('duplicate');
+            const timecodeIssue = issue.id.includes('missing-timecode');
+            
+            let message = `📊 AVVIKELSE DETALJER:\n\n`;
+            message += `👤 Anställd: ${issue.employeeId}\n`;
+            message += `🆔 Avvikelse ID: ${issue.deviationId}\n\n`;
+            
+            if (futureDate) {
+              message += `⚠️ PROBLEM: Framtida datum\n`;
+              message += `📅 Detta datum ligger i framtiden jämfört med idag\n`;
+              message += `💡 LÖSNING: Kontrollera om datumit är korrekt\n`;
+              message += `• Är det verkligen framtida arbetstid?\n`;
+              message += `• Eller är datumit felaktigt inmatat?\n\n`;
+              message += `🔧 GÅ TILL: Avvikelser-sidan för att redigera`;
+            } else if (duplicate) {
+              message += `⚠️ PROBLEM: Dubblett\n`;
+              message += `📋 Samma avvikelse finns flera gånger\n`;
+              message += `💡 LÖSNING: Ta bort dubbletter`;
+            } else if (timecodeIssue) {
+              message += `⚠️ PROBLEM: Saknar tidkod\n`;
+              message += `🏷️ Avvikelsen har ingen PAXML tidkod\n`;
+              message += `💡 LÖSNING: Lägg till korrekt tidkod`;
+            } else {
+              message += `⚠️ PROBLEM: ${issue.title}\n`;
+              message += `📝 ${issue.description}\n`;
+              if (issue.action) {
+                message += `💡 LÖSNING: ${issue.action}`;
+              }
+            }
+            
+            alert(message);
           }}
         >
-          <span className="material-icons text-xs mr-1">visibility</span>
-          Visa
+          <span className="material-icons text-xs mr-1">info</span>
+          Detaljer
         </Button>
       );
     }
