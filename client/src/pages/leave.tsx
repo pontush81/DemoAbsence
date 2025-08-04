@@ -15,7 +15,7 @@ export default function Leave() {
   const [location, navigate] = useLocation();
   const [view, setView] = useState<'list' | 'new' | 'edit' | 'details'>('list');
   const [leaveId, setLeaveId] = useState<number | null>(null);
-  const [displayMode, setDisplayMode] = useState<'calendar' | 'list'>('calendar'); // Default to calendar (UX best practice)
+  const [displayMode, setDisplayMode] = useState<'calendar' | 'list'>('list'); // Default to list view
   
   // Determine the view based on the route
   useEffect(() => {
