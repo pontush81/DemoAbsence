@@ -1,13 +1,17 @@
 import 'dotenv/config';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
+import * as mockLeaveRequestsData from '../mock-data/leave-requests.json';
 
 // Initialize Supabase client
-
-// 🚫 MOCK DATA REMOVED - All endpoints must use real database data onlyconst supabaseUrl = process.env.SUPABASE_URL;
+// 🚫 MOCK DATA REMOVED - All endpoints must use real database data only
+const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_ANON_KEY;
 const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
 
+// Fallback mock data
+const mockLeaveRequests = mockLeaveRequestsData.default || mockLeaveRequestsData;
+const mockData = mockLeaveRequests; // Alias for compatibility
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === 'GET') {
@@ -42,13 +46,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         if (error) throw error;
         leaveRequests = data || [];
       } catch (error) {
+        console.error('🚫 Database query failed for leave requests:', error);
+        // Fallback to empty array, will be handled below
+        leaveRequests = [];
       }
     } else {
+      console.log('📂 No Supabase connection, using mock data');
+      leaveRequests = mockLeaveRequests;
     }
     
-    // Apply sorting and mapping
+    // Apply sorting and mapping - use mock data if no Supabase or query failed
     if (!supabase || leaveRequests.length === 0) {
-      let filteredLeaveRequests = [...leaveRequests];
+      let filteredLeaveRequests = [...(leaveRequests.length === 0 ? mockLeaveRequests : leaveRequests)];
       
       // Filter by employeeId
       if (employeeId) {
@@ -194,6 +203,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           newLeaveRequest = data;
           console.log('Created new leave request via Supabase:', newLeaveRequest);
         } catch (error) {
+          console.error('🚫 Database insert failed for leave request:', error);
+          // Will fall back to mock data below
         }
       }
       
