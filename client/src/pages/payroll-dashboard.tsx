@@ -68,7 +68,16 @@ interface PayrollEmployeeData {
 export default function PayrollDashboard() {
   const { t } = useI18n();
   const { user } = useStore();
-  const currentUserId = user.currentUser?.employeeId;
+  const currentUserId = user.currentUser?.employeeId || user.currentUser?.id;
+  
+  // Debug logging
+  console.log('🔍 DEBUG - Payroll Dashboard User Object:', {
+    currentUser: user.currentUser,
+    employeeId: user.currentUser?.employeeId,
+    id: user.currentUser?.id,
+    currentUserId: currentUserId,
+    typeof_currentUserId: typeof currentUserId
+  });
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedMonth, setSelectedMonth] = useState(format(new Date(), 'yyyy-MM'));
