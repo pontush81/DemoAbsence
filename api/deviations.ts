@@ -8,17 +8,7 @@ const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_ANON_KEY;
 const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
 
-// Fallback mock data - embedded for Vercel compatibility
-const mockDeviations = [
-  {"id":1,"date":"2023-04-14","comment":"Akut projektleverans","status":"approved","submitted":"2023-04-14T19:45:00+00:00","employeeId":"E001","timeCode":"200","startTime":"17:00:00","endTime":"19:30:00"},
-  {"id":2,"date":"2023-04-11","comment":"Förkylning","status":"returned","submitted":"2023-04-11T18:10:00+00:00","employeeId":"E001","timeCode":"300","startTime":"08:00:00","endTime":"17:00:00"},
-  {"id":3,"date":"2023-04-05","comment":"Vård av sjukt barn","status":"rejected","submitted":"2023-04-05T12:15:00+00:00","employeeId":"E001","timeCode":"400","startTime":"08:00:00","endTime":"12:00:00"}
-];
-const timeCodes = [
-  {"code":"200","name":"Övertid","description":"Övertidsarbete utöver ordinarie arbetstid","requiresApproval":true,"category":"overtime"},
-  {"code":"300","name":"Sjukfrånvaro","description":"Frånvaro på grund av sjukdom","requiresApproval":false,"category":"absence"},
-  {"code":"400","name":"VAB","description":"Vård av barn","requiresApproval":false,"category":"absence"}
-];
+// Production: Only use Supabase, no mock data fallback
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === 'GET') {
@@ -99,86 +89,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         });
       }
     } else {
-      console.error('🚫 Database connection required for deviations');
+      console.error('🚫 Supabase credentials missing');
       return res.status(500).json({ 
-        error: 'Database connection required',
-        message: 'Avvikelser kräver databasanslutning.',
-        code: 'DEVIATIONS_DB_REQUIRED'
+        error: 'Database configuration missing',
+        message: 'Supabase credentials krävs. Kontrollera SUPABASE_URL och SUPABASE_ANON_KEY.',
+        code: 'SUPABASE_CONFIG_REQUIRED'
       });
     }
     
-    // Apply sorting and mapping
-    if (deviations && deviations.length > 0) {
-      let filteredDeviations = [...deviations];
-      
-      // Filter by employeeId
-      if (employeeId) {
-        filteredDeviations = filteredDeviations.filter((d: any) => 
-          (d.employeeId === employeeId || d.employee_id === employeeId)
-        );
-      }
-      
-      // Filter by status  
-      if (status && status !== 'all') {
-        if (status === 'needs-action') {
-          filteredDeviations = filteredDeviations.filter((d: any) => 
-            ['pending', 'returned', 'draft'].includes(d.status)
-          );
-        } else {
-          filteredDeviations = filteredDeviations.filter((d: any) => d.status === status);
-        }
-      }
-      
-      // Filter by timeCode
-      if (timeCode && timeCode !== 'all') {
-        filteredDeviations = filteredDeviations.filter((d: any) => 
-          (d.timeCode === timeCode || d.time_code === timeCode)
-        );
-      }
-      
-      // Filter by period
-      if (period) {
-        const today = new Date();
-        const year = today.getFullYear();
-        const month = today.getMonth(); // 0-indexed
-        
-        if (period === 'current-month') {
-          const startDate = `${year}-${String(month + 1).padStart(2, '0')}-01`;
-          const lastDay = new Date(year, month + 1, 0).getDate();
-          const endDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
-          
-          filteredDeviations = filteredDeviations.filter((d: any) => 
-            d.date >= startDate && d.date <= endDate
-          );
-        } else if (period === 'last-month') {
-          const lastMonthYear = month === 0 ? year - 1 : year;
-          const lastMonth = month === 0 ? 12 : month;
-          
-          const startDate = `${lastMonthYear}-${String(lastMonth).padStart(2, '0')}-01`;
-          const lastDay = new Date(lastMonthYear, lastMonth, 0).getDate();
-          const endDate = `${lastMonthYear}-${String(lastMonth).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
-          
-          filteredDeviations = filteredDeviations.filter((d: any) => 
-            d.date >= startDate && d.date <= endDate
-          );
-        }
-        // For 'all-time', don't filter by date
-      }
-      
-      // Apply client-side sorting for mock data
-      if (sortBy === 'date-desc') {
-        filteredDeviations.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
-      } else if (sortBy === 'date-asc') {
-        filteredDeviations.sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime());
-      } else if (sortBy === 'status') {
-        filteredDeviations.sort((a: any, b: any) => a.status.localeCompare(b.status));
-      } else {
-        // Default sort by date descending
-        filteredDeviations.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
-      }
-      
-      deviations = filteredDeviations;
-    }
+    // Data already filtered and sorted by Supabase query above
     
     // Map snake_case to camelCase for frontend compatibility
     const mappedDeviations = deviations.map((deviation: any) => ({
@@ -197,8 +116,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   } else if (req.method === 'POST') {
     // POST - create new deviation
     try {
-      // Get time codes to check if approval is required
-      const timeCode = timeCodes.find((tc: any) => tc.code === req.body.timeCode);
+      // Get time codes from Supabase to check if approval is required
+      let timeCode = null;
+      if (supabase) {
+        const { data: timeCodesData } = await supabase.from('time_codes').select('*').eq('code', req.body.timeCode).single();
+        timeCode = timeCodesData;
+      }
       
       // Determine status based on Swedish HR law compliance
       let status = req.body.status;
@@ -240,16 +163,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
       }
       
-      // If Supabase didn't work, try mock data fallback
+      // If Supabase didn't work, return error
       if (!newDeviation) {
-        const newId = Math.max(...mockDeviations.map((d: any) => d.id || 0)) + 1;
-        newDeviation = {
-          id: newId,
-          ...deviationData,
-          lastUpdated: new Date().toISOString(),
-          submitted: new Date().toISOString()
-        };
-        // In a real implementation, we would save back to file
+        return res.status(500).json({ 
+          error: 'Database connection required', 
+          message: 'Kunde inte skapa avvikelse. Kontrollera databasanslutning.',
+          details: 'Supabase connection failed'
+        });
       }
       
       // Map snake_case to camelCase for frontend compatibility
