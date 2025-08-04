@@ -70,14 +70,7 @@ export default function PayrollDashboard() {
   const { user } = useStore();
   const currentUserId = user.currentUser?.employeeId || user.currentUser?.id;
   
-  // Debug logging
-  console.log('🔍 DEBUG - Payroll Dashboard User Object:', {
-    currentUser: user.currentUser,
-    employeeId: user.currentUser?.employeeId,
-    id: user.currentUser?.id,
-    currentUserId: currentUserId,
-    typeof_currentUserId: typeof currentUserId
-  });
+  // DEBUG: Removed user object logging - authentication now works correctly
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedMonth, setSelectedMonth] = useState(format(new Date(), 'yyyy-MM'));
@@ -131,26 +124,7 @@ export default function PayrollDashboard() {
             new Date(d.date) <= monthEnd
           );
           
-          // 🔍 DEBUG: Log filtering for debugging
-          if (employee.employeeId === 'E001') {
-            const annaAllDeviations = (allDeviations as Deviation[]).filter(d => d.employeeId === 'E001');
-            const augustAnnaDeviations = annaAllDeviations.filter(d => {
-              const devDate = new Date(d.date);
-              return devDate >= monthStart && devDate <= monthEnd;
-            });
-            
-            console.log('🔍 DEBUG E001 Anna Andersson:', {
-              selectedMonth,
-              monthStart: monthStart.toISOString(),
-              monthEnd: monthEnd.toISOString(),
-              totalDeviations: allDeviations.length,
-              annaDeviations: annaAllDeviations.length,
-              filteredCount: employeeDeviations.length,
-              augustCount: augustAnnaDeviations.length,
-              sampleDates: annaAllDeviations.slice(0,5).map(d => ({ date: d.date, status: d.status })),
-              augustDates: augustAnnaDeviations.slice(0,3).map(d => ({ date: d.date, status: d.status }))
-            });
-          }
+          // DEBUG: Removed debug logging - payroll counting now works correctly
 
           const employeeLeaveRequests = (allLeaveRequests as LeaveRequest[]).filter((lr: LeaveRequest) => 
             lr.employeeId === employee.employeeId &&
