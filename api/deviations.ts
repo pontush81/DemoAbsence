@@ -193,7 +193,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       try {
         const { data, error } = await supabase
           .from('deviations')
-          .insert(deviationData)
+          .insert([deviationData])
           .select()
           .single();
         
