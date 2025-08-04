@@ -93,6 +93,25 @@ export default function Dashboard() {
     staleTime: 10 * 60 * 1000, // Cache for 10 minutes
     retry: 2, // Extra retry for timecodes
   });
+
+  // Fetch current employee details to get manager information
+  const { data: currentEmployee, isLoading: isLoadingEmployee } = useQuery({
+    queryKey: ['/api/employees', employeeId],
+    queryFn: () => employeeId 
+      ? apiService.getEmployee(employeeId)
+      : Promise.resolve(null),
+    enabled: isEmployee && !!employeeId,
+  });
+
+  // Fetch manager details if we have the manager ID
+  const managerId = currentEmployee?.manager;
+  const { data: managerDetails, isLoading: isLoadingManager } = useQuery({
+    queryKey: ['/api/employees', managerId],
+    queryFn: () => managerId 
+      ? apiService.getEmployee(managerId)
+      : Promise.resolve(null),
+    enabled: isEmployee && !!managerId,
+  });
   
   // Get today's schedule
   const todaySchedule = schedule && schedule.length > 0 ? schedule[0] : null;
@@ -116,6 +135,61 @@ export default function Dashboard() {
   // Check if user has any deviations or leave for current month
   const hasMonthlyDeviations = currentMonthDeviations.length > 0 || currentMonthLeaveRequests.length > 0;
   const hasPendingItems = [...currentMonthDeviations, ...currentMonthLeaveRequests].some(item => item.status === 'pending');
+  
+  // Helper function to get the latest submission date
+  const getLatestSubmissionDate = () => {
+    const submissionDates = [
+      ...currentMonthDeviations
+        .filter(d => d.status === 'pending' && d.submitted)
+        .map(d => new Date(d.submitted)),
+      ...currentMonthLeaveRequests
+        .filter(lr => lr.status === 'pending' && lr.submittedAt)
+        .map(lr => new Date(lr.submittedAt))
+    ];
+    
+    if (submissionDates.length === 0) return null;
+    return new Date(Math.max(...submissionDates.map(d => d.getTime())));
+  };
+
+  // Helper function to calculate expected approval time
+  const getExpectedApprovalDays = () => {
+    // According to Perplexity research: typically 2-3 days for monthly submissions
+    const submissionDate = getLatestSubmissionDate();
+    if (!submissionDate) return null;
+    
+    const daysSinceSubmission = Math.floor((Date.now() - submissionDate.getTime()) / (1000 * 60 * 60 * 24));
+    const expectedDays = 3; // 3 working days as per best practice
+    const remainingDays = Math.max(0, expectedDays - daysSinceSubmission);
+    
+    return { daysSinceSubmission, remainingDays, expectedDays };
+  };
+
+  // Get manager name with fallback
+  const getManagerName = () => {
+    if (isLoadingManager) return 'Laddar...';
+    if (!managerDetails) return 'Din chef';
+    return `${managerDetails.firstName} ${managerDetails.lastName}`;
+  };
+
+  // Helper function to check if we have sufficient data to show enhanced UX
+  const hasEnhancedDataAvailable = () => {
+    return !isLoadingEmployee && !isLoadingManager && currentEmployee;
+  };
+
+  // Helper function to format submission date with fallback
+  const formatSubmissionDate = (date: Date | null) => {
+    if (!date) return 'Okänt datum';
+    
+    const today = new Date();
+    const diffTime = today.getTime() - date.getTime();
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) return 'Idag';
+    if (diffDays === 1) return 'Igår';
+    if (diffDays < 7) return `${diffDays} dagar sedan`;
+    
+    return formatDate(date.toISOString());
+  };
 
   // Helper function to get time code name
   const getTimeCodeName = (code: string) => {
@@ -465,43 +539,145 @@ export default function Dashboard() {
             </div>
 
             {hasPendingItems ? (
-              /* COMPACT WAITING STATE - Perplexity's "reduce unnecessary whitespace" */
-              <div className="flex items-center justify-between p-6 bg-blue-50 rounded-lg border border-blue-200">
-                <div className="flex items-center gap-4">
-                  {/* Subtle icon */}
-                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <span className="material-icons text-xl text-blue-600">schedule</span>
-                  </div>
-                  
-                  {/* Status message */}
-                  <div>
-                    <div className="font-medium text-gray-900 mb-1">
-                      Väntar på chefens godkännande
+              /* IMPROVED WAITING STATE - Enhanced UX with manager info and timeline */
+              <div className="space-y-4">
+                {/* Main status card */}
+                <div className="p-6 bg-blue-50 rounded-lg border border-blue-200">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start gap-4">
+                      {/* Status icon with progress indicator */}
+                      <div className="relative">
+                        <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                          <span className="material-icons text-xl text-blue-600">schedule</span>
+                        </div>
+                        {/* Progress ring - subtle animation */}
+                        <div className="absolute inset-0 rounded-full border-2 border-blue-200">
+                          <div className="absolute inset-0 rounded-full border-2 border-blue-500 border-t-transparent animate-spin" style={{ animationDuration: '3s' }}></div>
+                        </div>
+                      </div>
+                      
+                      {/* Status information */}
+                      <div className="flex-1">
+                        <div className="font-medium text-gray-900 mb-1">
+                          Väntar på godkännande från {getManagerName()}
+                        </div>
+                        
+                        {/* Submission and timeline info */}
+                        <div className="space-y-1 text-sm text-gray-600">
+                          {hasEnhancedDataAvailable() && getLatestSubmissionDate() ? (
+                            <div className="flex items-center gap-2">
+                              <span className="material-icons text-sm">upload</span>
+                              <span>Skickad: {formatSubmissionDate(getLatestSubmissionDate())}</span>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <span className="material-icons text-sm">upload</span>
+                              <span>Skickad för granskning</span>
+                            </div>
+                          )}
+                          
+                          {(() => {
+                            const approvalInfo = getExpectedApprovalDays();
+                            if (hasEnhancedDataAvailable() && approvalInfo) {
+                              return (
+                                <div className="flex items-center gap-2">
+                                  <span className="material-icons text-sm">schedule</span>
+                                  <span>
+                                    {approvalInfo.remainingDays > 0 
+                                      ? `Förväntas inom ${approvalInfo.remainingDays} dag${approvalInfo.remainingDays > 1 ? 'ar' : ''}`
+                                      : approvalInfo.daysSinceSubmission <= 5 
+                                        ? 'Vanligtvis klar inom 2-3 dagar'
+                                        : 'Tar längre tid än vanligt'
+                                    }
+                                  </span>
+                                </div>
+                              );
+                            } else {
+                              // Fallback when we don't have detailed timing information
+                              return (
+                                <div className="flex items-center gap-2">
+                                  <span className="material-icons text-sm">schedule</span>
+                                  <span>Vanligtvis klar inom 2-3 arbetsdagar</span>
+                                </div>
+                              );
+                            }
+                          })()}
+                        </div>
+                      </div>
                     </div>
-                    {/* Collapsed details available */}
-                    {!isManager && (
-                      <Collapsible>
-                        <CollapsibleTrigger className="text-sm text-gray-600 hover:text-gray-800 underline decoration-1 underline-offset-2">
-                          Se status
-                        </CollapsibleTrigger>
-                        <CollapsibleContent className="mt-2 text-xs text-gray-600">
-                          <div className="space-y-1">
-                            {currentMonthDeviations.filter(d => d.status === 'pending').length > 0 && (
-                              <p>• {currentMonthDeviations.filter(d => d.status === 'pending').length} avvikelse{currentMonthDeviations.filter(d => d.status === 'pending').length > 1 ? 'r' : ''} väntar</p>
-                            )}
-                            {currentMonthLeaveRequests.filter(lr => lr.status === 'pending').length > 0 && (
-                              <p>• {currentMonthLeaveRequests.filter(lr => lr.status === 'pending').length} ledighetsansöka{currentMonthLeaveRequests.filter(lr => lr.status === 'pending').length > 1 ? 'n' : 'n'} väntar</p>
-                            )}
-                          </div>
-                        </CollapsibleContent>
-                      </Collapsible>
-                    )}
-                  </div>
-      </div>
 
-                {/* Right side actions */}
-                <div className="flex items-center gap-3">
-                  {/* Disabled button - compact version */}
+                    {/* Status badge */}
+                    <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
+                      Under granskning
+                    </Badge>
+                  </div>
+
+                  {/* Progress timeline */}
+                  <div className="mt-4 pl-16">
+                    <div className="flex items-center space-x-4 text-xs">
+                      <div className="flex items-center text-green-600">
+                        <span className="material-icons text-sm mr-1">check_circle</span>
+                        <span>Skickad</span>
+                      </div>
+                      <div className="flex-1 h-px bg-blue-200 relative">
+                        <div className="absolute left-0 top-0 h-full bg-blue-500 transition-all duration-1000" style={{ width: '60%' }}></div>
+                      </div>
+                      <div className="flex items-center text-blue-600">
+                        <span className="material-icons text-sm mr-1 animate-pulse">schedule</span>
+                        <span>Under granskning</span>
+                      </div>
+                      <div className="flex-1 h-px bg-gray-200"></div>
+                      <div className="flex items-center text-gray-400">
+                        <span className="material-icons text-sm mr-1">check_circle</span>
+                        <span>Godkänd</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action buttons */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Button variant="outline" size="sm" onClick={() => setShowDeviationDetails(!showDeviationDetails)}>
+                      <span className="material-icons mr-2 text-sm">visibility</span>
+                      Se detaljer
+                    </Button>
+                    
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      disabled={isLoadingManager || !hasEnhancedDataAvailable()}
+                      onClick={() => {
+                        if (!managerDetails) {
+                          toast({
+                            title: "Kunde inte ladda chefsinformation",
+                            description: "Försök igen om en stund eller kontakta IT-support.",
+                            variant: "destructive"
+                          });
+                          return;
+                        }
+
+                        if (managerDetails.workEmail || managerDetails.email) {
+                          const subject = `Tidrapport ${format(monthStart, 'MMMM yyyy', { locale: sv })}`;
+                          const body = `Hej ${managerDetails.firstName},%0D%0A%0D%0AJag undrar över statusen på min tidrapport för ${format(monthStart, 'MMMM yyyy', { locale: sv })}. Kan du ge mig en uppdatering?%0D%0A%0D%0ATack!`;
+                          window.location.href = `mailto:${managerDetails.workEmail || managerDetails.email}?subject=${subject}&body=${body}`;
+                        } else {
+                          toast({
+                            title: "Ingen e-postadress registrerad",
+                            description: `${managerDetails.firstName} ${managerDetails.lastName} har ingen e-postadress registrerad i systemet.`,
+                            variant: "destructive"
+                          });
+                        }
+                      }}
+                    >
+                      <span className="material-icons mr-2 text-sm">
+                        {isLoadingManager ? 'hourglass_empty' : 'email'}
+                      </span>
+                      {isLoadingManager ? 'Laddar...' : 'Kontakta chef'}
+                    </Button>
+                  </div>
+
+                  {/* Disabled submit button */}
                   <Button
                     size="default"
                     variant="secondary"
@@ -509,17 +685,45 @@ export default function Dashboard() {
                     className="bg-gray-100 text-gray-500 cursor-not-allowed border-gray-200"
                   >
                     <span className="material-icons mr-2 text-sm">schedule</span>
-                    <span className="hidden sm:inline">Skicka tidrapport</span>
-                    <span className="sm:hidden">Skicka</span>
+                    <span className="hidden sm:inline">Tidrapport skickad</span>
+                    <span className="sm:hidden">Skickad</span>
                   </Button>
-                  
-                  {/* Manager action */}
-                  {isManager && (
-                    <Link href="/manager" className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 text-sm font-medium">
-                      Godkänn →
-                    </Link>
-                  )}
                 </div>
+
+                {/* Collapsible details */}
+                {showDeviationDetails && (
+                  <div className="mt-4 p-4 bg-white rounded-lg border border-gray-200">
+                    <h4 className="font-medium text-gray-900 mb-3 flex items-center">
+                      <span className="material-icons mr-2 text-sm">list</span>
+                      Väntar på godkännande
+                    </h4>
+                    <div className="space-y-2 text-sm">
+                      {currentMonthDeviations.filter(d => d.status === 'pending').map((deviation, index) => (
+                        <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                          <div>
+                            <span className="font-medium">{formatDate(deviation.date)}</span>
+                            <span className="mx-2">•</span>
+                            <span>{getTimeCodeName(deviation.timeCode)}</span>
+                            <span className="mx-2">•</span>
+                            <span className="text-gray-600">{deviation.startTime} - {deviation.endTime}</span>
+                          </div>
+                          <Badge variant="secondary" className="text-xs">Väntar</Badge>
+                        </div>
+                      ))}
+                      
+                      {currentMonthLeaveRequests.filter(lr => lr.status === 'pending').map((leave, index) => (
+                        <div key={`leave-${index}`} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                          <div>
+                            <span className="font-medium">{formatDate(leave.startDate)} - {formatDate(leave.endDate)}</span>
+                            <span className="mx-2">•</span>
+                            <span>{getTimeCodeName(leave.timeCode)}</span>
+                          </div>
+                          <Badge variant="secondary" className="text-xs">Väntar</Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               /* COMPACT ACTIONABLE STATE - matching visual weight */

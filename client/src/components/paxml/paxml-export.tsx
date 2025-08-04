@@ -10,7 +10,7 @@ import { useQuery } from '@tanstack/react-query';
 import { apiService } from '@/lib/apiService';
 import { Employee, Deviation } from '@shared/schema';
 import { usePAXMLValidation } from '@/hooks/usePAXMLValidation';
-import { ValidationStatus } from './validation-status';
+import { ValidationStatusImproved as ValidationStatus } from './validation-status-improved';
 
 interface PAXMLExportProps {
   employees: Employee[];

@@ -70,6 +70,30 @@ class ApiService {
       throw error;
     }
   }
+
+  async getEmployee(employeeId: string): Promise<Employee> {
+    try {
+      await delay(MOCK_DELAY);
+      const response = await fetch(`/api/employees/${employeeId}`);
+      
+      if (!response.ok) {
+        throw new ApiError(`Failed to fetch employee: ${response.statusText}`, response.status);
+      }
+      
+      const rawData = await response.json();
+      
+      // Map snake_case fields to camelCase for TypeScript compatibility
+      return {
+        ...rawData,
+        employeeId: rawData.employee_id || rawData.employeeId,
+        firstName: rawData.first_name || rawData.firstName,
+        lastName: rawData.last_name || rawData.lastName,
+      };
+    } catch (error) {
+      console.error('Error fetching employee:', error);
+      throw error;
+    }
+  }
   
   async updateEmployeeInfo(employeeId: string, updateData: Partial<Employee>): Promise<Employee> {
     try {
