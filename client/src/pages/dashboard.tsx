@@ -463,7 +463,7 @@ export default function Dashboard() {
             icon="pending_actions"
             className="bg-[#FFC107] bg-opacity-5"
             footer={
-              <Link href="/manager">
+              <Link href="/manager?tab=deviations">
                 <div className="text-sm text-primary flex items-center cursor-pointer">
                   {t('dashboard.viewAll')}
                   <span className="material-icons text-sm ml-1">arrow_forward</span>
@@ -502,7 +502,7 @@ export default function Dashboard() {
                     icon="event_available"
                     className="bg-[#4CAF50] bg-opacity-5"
                     footer={
-                      <Link href="/manager">
+                      <Link href="/manager?tab=leaveRequests">
                         <div className="text-sm text-primary flex items-center cursor-pointer">
                           {t('dashboard.viewAll')}
                           <span className="material-icons text-sm ml-1">arrow_forward</span>

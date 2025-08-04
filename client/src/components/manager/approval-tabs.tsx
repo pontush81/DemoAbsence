@@ -1,20 +1,38 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useI18n } from "@/lib/i18n";
+import { useLocation } from "wouter";
 import ApprovalsList from "./approvals-list";
 
 type TabType = 'deviations' | 'leaveRequests' | 'history';
 
 const ApprovalTabs = () => {
   const { t } = useI18n();
+  const [location, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState<TabType>('deviations');
   
+  // Check URL parameters on mount to set the correct tab
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabParam = urlParams.get('tab');
+    
+    if (tabParam && ['deviations', 'leaveRequests', 'history'].includes(tabParam)) {
+      setActiveTab(tabParam as TabType);
+    }
+  }, [location]);
+  
   const handleTabChange = (value: string) => {
-    setActiveTab(value as TabType);
+    const newTab = value as TabType;
+    setActiveTab(newTab);
+    
+    // Update URL without page reload
+    const url = new URL(window.location.href);
+    url.searchParams.set('tab', newTab);
+    window.history.replaceState({}, '', url.toString());
   };
   
   return (
-    <Tabs defaultValue="deviations" onValueChange={handleTabChange}>
+    <Tabs value={activeTab} onValueChange={handleTabChange}>
       <TabsList className="border-b border-gray-200 w-full bg-transparent">
         <TabsTrigger 
           value="deviations" 
