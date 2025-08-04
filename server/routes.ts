@@ -542,10 +542,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      if (currentUser !== employeeId) {
+      // 🚨 DEMO SECURITY: Allow payroll admins to access all employee schedules
+      const allowedPayrollIds = ['pay-001']; // Lars Johansson is payroll admin
+      const isPayrollAdmin = allowedPayrollIds.includes(currentUser as string);
+      
+      if (currentUser !== employeeId && !isPayrollAdmin) {
         return res.status(403).json({ 
           error: 'Access denied',
-          message: 'Du kan bara se dina egna scheman'
+          message: isPayrollAdmin ? 'Payroll admin access granted' : 'Du kan bara se dina egna scheman'
         });
       }
       
@@ -1140,10 +1144,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      if (currentUser !== employeeId) {
+      // 🚨 DEMO SECURITY: Allow payroll admins to access all employee time balances
+      const allowedPayrollIds = ['pay-001']; // Lars Johansson is payroll admin
+      const isPayrollAdmin = allowedPayrollIds.includes(currentUser as string);
+      
+      if (currentUser !== employeeId && !isPayrollAdmin) {
         return res.status(403).json({ 
           error: 'Access denied',
-          message: 'Du kan bara se din egen arbetstidsbalans'
+          message: isPayrollAdmin ? 'Payroll admin access granted' : 'Du kan bara se din egen arbetstidsbalans'
         });
       }
       
