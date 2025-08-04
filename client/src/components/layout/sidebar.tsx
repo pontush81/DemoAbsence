@@ -55,7 +55,8 @@ const Sidebar = () => {
       href: "/payslips",
       icon: "receipt",
       label: t('nav.payslips'),
-      active: location === "/payslips"
+      active: location === "/payslips",
+      hasSubmenu: true
     },
 
     {
@@ -101,13 +102,7 @@ const Sidebar = () => {
     }
   ] : [];
   
-  const travelExpensesMenuItem = {
-    href: "#",
-    icon: "receipt_long",
-    label: t('nav.expenses'),
-    active: false,
-    disabled: true
-  };
+
   
   return (
     <aside className="hidden md:flex md:flex-col md:w-64 bg-white shadow-md z-10">
@@ -137,6 +132,22 @@ const Sidebar = () => {
                 <span className="material-icons mr-3">{item.icon}</span>
                 {item.label}
               </Link>
+              
+              {/* Submenu for Payslips */}
+              {item.href === "/payslips" && showTravelExpenses && (
+                <ul className="ml-4 border-l border-gray-200">
+                  <li className="opacity-50">
+                    <a
+                      href="#"
+                      className="flex items-center px-4 py-2 text-sm text-sidebar-foreground cursor-not-allowed"
+                      onClick={(e) => e.preventDefault()}
+                    >
+                      <span className="material-icons mr-3 text-sm">receipt_long</span>
+                      {t('nav.expenses')}
+                    </a>
+                  </li>
+                </ul>
+              )}
             </li>
           ))}
           
@@ -199,22 +210,7 @@ const Sidebar = () => {
             </>
           )}
           
-          {/* Travel & Expenses - Feature flagged */}
-          {showTravelExpenses && (
-            <li className={cn(travelExpensesMenuItem.disabled && "opacity-50")}>
-              <a
-                href={travelExpensesMenuItem.href}
-                className={cn(
-                  "flex items-center px-4 py-3 text-sidebar-foreground",
-                  travelExpensesMenuItem.active && "text-primary border-l-4 border-primary"
-                )}
-                onClick={(e) => travelExpensesMenuItem.disabled && e.preventDefault()}
-              >
-                <span className="material-icons mr-3">{travelExpensesMenuItem.icon}</span>
-                {travelExpensesMenuItem.label}
-              </a>
-            </li>
-          )}
+
         </ul>
       </nav>
       
