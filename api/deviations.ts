@@ -151,15 +151,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
       }
       
-      // Map camelCase to snake_case for Supabase columns
+      // Use EXACT same structure as working createDeviation method
       const deviationData = {
         employee_id: req.body.employeeId,
-        time_code: req.body.timeCode,
+        date: req.body.date,
         start_time: req.body.startTime && !req.body.startTime.includes(':00') ? req.body.startTime + ':00' : req.body.startTime,
         end_time: req.body.endTime && !req.body.endTime.includes(':00') ? req.body.endTime + ':00' : req.body.endTime,
-        date: req.body.date,
+        time_code: req.body.timeCode,
         comment: req.body.comment,
-        status: status
+        status: status || 'pending',
+        manager_comment: req.body.managerComment || null,
+        submitted: req.body.submitted || new Date().toISOString(),
+        approved_by: req.body.approvedBy || null,
+        approved_at: req.body.approvedAt || null,
+        rejected_by: req.body.rejectedBy || null,
+        rejected_at: req.body.rejectedAt || null
       };
       
       let newDeviation;
