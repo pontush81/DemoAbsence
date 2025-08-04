@@ -18,12 +18,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    // Check if currentUser is a manager (E005 is manager in our demo data)
+    // Check if currentUser is a manager or payroll admin (can see all employee data)
     const allowedManagerIds = ['E005']; // Mikael is the manager
-    if (!allowedManagerIds.includes(currentUser as string)) {
+    const allowedPayrollIds = ['pay-001']; // Lars Johansson is payroll admin
+    
+    const hasAccess = allowedManagerIds.includes(currentUser as string) || 
+                     allowedPayrollIds.includes(currentUser as string);
+    
+    if (!hasAccess) {
       return res.status(403).json({
-        error: 'Access denied - Manager rights required',
-        message: 'Bara chefer kan se all medarbetardata'
+        error: 'Access denied - Manager or Payroll admin rights required',
+        message: 'Bara chefer och löneadministratörer kan se all medarbetardata'
       });
     }
 

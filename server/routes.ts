@@ -363,14 +363,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Check if currentUser is a manager (E005 is manager in our demo data)
-      const allowedManagerIds = ['E005']; // Mikael is the manager
-      if (!allowedManagerIds.includes(currentUser as string)) {
-        return res.status(403).json({ 
-          error: 'Access denied - Manager rights required',
-          message: 'Bara chefer kan se all medarbetardata'
-        });
-      }
+          // Check if currentUser is a manager or payroll admin (can see all employee data)
+    const allowedManagerIds = ['E005']; // Mikael is the manager
+    const allowedPayrollIds = ['pay-001']; // Lars Johansson is payroll admin
+    
+    const hasAccess = allowedManagerIds.includes(currentUser as string) || 
+                     allowedPayrollIds.includes(currentUser as string);
+    
+    if (!hasAccess) {
+      return res.status(403).json({
+        error: 'Access denied - Manager or Payroll admin rights required',
+        message: 'Bara chefer och löneadministratörer kan se all medarbetardata'
+      });
+    }
       
       const employees = await restStorage.getEmployees();
       
