@@ -238,7 +238,7 @@ const RoleSwitcher = () => {
           {user.currentRole === 'manager' && (
             <Button 
               type="button"
-              className="w-full mt-4 bg-blue-600 hover:bg-blue-700 relative z-10" 
+              className="w-full mt-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 rounded-lg border-0 relative z-10" 
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -253,7 +253,7 @@ const RoleSwitcher = () => {
           {user.currentRole === 'hr' && (
             <Button 
               type="button"
-              className="w-full mt-4 bg-purple-600 hover:bg-purple-700 relative z-10" 
+              className="w-full mt-4 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 rounded-lg border-0 relative z-10" 
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -268,7 +268,7 @@ const RoleSwitcher = () => {
           {(user.currentRole === 'payroll-admin' || user.currentRole === 'payroll-manager') && (
             <Button 
               type="button"
-              className="w-full mt-4 bg-orange-600 hover:bg-orange-700 relative z-10" 
+              className="w-full mt-4 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 rounded-lg border-0 relative z-10" 
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
