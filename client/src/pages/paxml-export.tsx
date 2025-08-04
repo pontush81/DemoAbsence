@@ -10,13 +10,7 @@ export default function PAXMLExportPage() {
   const currentUserId = user.currentUser?.employeeId || user.currentUser?.id;
   
   // Debug logging
-  console.log('🔍 DEBUG - PAXML Export User Object:', {
-    currentUser: user.currentUser,
-    employeeId: user.currentUser?.employeeId,
-    id: user.currentUser?.id,
-    currentUserId: currentUserId,
-    typeof_currentUserId: typeof currentUserId
-  });
+  // DEBUG: Removed debug logging - authentication now works correctly
   
   // Kontrollera behörighet - endast payroll och HR har tillgång
   const hasAccess = ['payroll', 'hr'].includes(user.currentRole);
