@@ -6,8 +6,11 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { useQuery } from '@tanstack/react-query';
 import { apiService } from '@/lib/apiService';
 import { Employee, Deviation } from '@shared/schema';
+import { usePAXMLValidation } from '@/hooks/usePAXMLValidation';
+import { ValidationStatus } from './validation-status';
 
 interface PAXMLExportProps {
   employees: Employee[];
@@ -25,6 +28,13 @@ export default function PAXMLExport({ employees, deviations }: PAXMLExportProps)
     message: string;
     filename?: string;
   } | null>(null);
+
+  // Fetch time codes for validation
+  const { data: timeCodes = [], isLoading: isLoadingTimeCodes } = useQuery({
+    queryKey: ['/api/timecodes'],
+    queryFn: () => apiService.getTimeCodes(),
+    staleTime: 10 * 60 * 1000, // Cache for 10 minutes
+  });
 
   const approvedDeviations = deviations.filter(d => d.status === 'approved');
   
@@ -48,7 +58,18 @@ export default function PAXMLExport({ employees, deviations }: PAXMLExportProps)
 
   const filteredDeviations = getFilteredDeviations();
 
+  // Run validation on filtered deviations
+  const validation = usePAXMLValidation(filteredDeviations, employees, timeCodes);
+
   const handleExport = async () => {
+    // Block export if there are critical errors
+    if (validation.hasErrors) {
+      setExportResult({
+        success: false,
+        message: 'Export blockerad: Fixa kritiska fel innan export till Kontek Lön',
+      });
+      return;
+    }
     setIsExporting(true);
     setExportResult(null);
 
@@ -139,9 +160,16 @@ export default function PAXMLExport({ employees, deviations }: PAXMLExportProps)
   const isIndeterminate = selectedEmployees.length > 0 && selectedEmployees.length < employees.length;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div className="lg:col-span-2">
-        <Card>
+    <div className="space-y-6">
+      {/* Validation Status - Always at top */}
+      <ValidationStatus 
+        validation={validation} 
+        isLoading={isLoadingTimeCodes && filteredDeviations.length > 0} 
+      />
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <span className="material-icons">file_download</span>
@@ -354,8 +382,19 @@ export default function PAXMLExport({ employees, deviations }: PAXMLExportProps)
 
             <Button
               onClick={handleExport}
-              disabled={isExporting || filteredDeviations.length === 0}
-              className="w-full"
+              disabled={
+                isExporting || 
+                filteredDeviations.length === 0 || 
+                validation.hasErrors ||
+                isLoadingTimeCodes
+              }
+              className={`w-full ${
+                validation.hasErrors 
+                  ? 'bg-red-100 text-red-700 border-red-300 cursor-not-allowed' 
+                  : validation.hasWarnings 
+                    ? 'bg-yellow-50 border-yellow-300 hover:bg-yellow-100' 
+                    : ''
+              }`}
               size="lg"
             >
               {isExporting ? (
@@ -363,10 +402,23 @@ export default function PAXMLExport({ employees, deviations }: PAXMLExportProps)
                   <span className="material-icons mr-2 animate-spin">refresh</span>
                   Exporterar...
                 </>
+              ) : validation.hasErrors ? (
+                <>
+                  <span className="material-icons mr-2">block</span>
+                  Export blockerad ({validation.issues.filter(i => i.type === 'error').length} fel)
+                </>
+              ) : isLoadingTimeCodes ? (
+                <>
+                  <span className="material-icons mr-2 animate-spin">refresh</span>
+                  Validerar...
+                </>
               ) : (
                 <>
-                  <span className="material-icons mr-2">file_download</span>
-                  Exportera PAXML{includeSchedules ? ' med scheman' : ''} ({filteredDeviations.length} transaktioner)
+                  <span className="material-icons mr-2">
+                    {validation.hasWarnings ? 'warning' : 'file_download'}
+                  </span>
+                  {validation.hasWarnings ? 'Exportera med varningar' : 'Exportera PAXML'}
+                  {includeSchedules ? ' med scheman' : ''} ({filteredDeviations.length} transaktioner)
                 </>
               )}
             </Button>
@@ -388,53 +440,83 @@ export default function PAXMLExport({ employees, deviations }: PAXMLExportProps)
             )}
           </CardContent>
         </Card>
-      </div>
+        </div>
 
-      <div>
-        <Card>
-          <CardHeader>
-            <CardTitle>Exportöversikt</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <p className="text-sm text-muted-foreground">
-                Totalt godkända avvikelser:
-              </p>
-              <p className="text-2xl font-bold text-primary">
-                {approvedDeviations.length}
-              </p>
-            </div>
+        <div>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <span className="material-icons">summarize</span>
+                Exportöversikt
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <p className="text-sm text-muted-foreground">
+                  Totalt godkända avvikelser:
+                </p>
+                <p className="text-2xl font-bold text-primary">
+                  {approvedDeviations.length}
+                </p>
+              </div>
 
-            <Separator />
+              <Separator />
 
-            <div>
-              <p className="text-sm text-muted-foreground">
-                Kommer att exporteras:
-              </p>
-              <p className="text-2xl font-bold text-green-600">
-                {filteredDeviations.length}
-              </p>
-            </div>
+              <div>
+                <p className="text-sm text-muted-foreground">
+                  Kommer att exporteras:
+                </p>
+                <p className={`text-2xl font-bold ${
+                  validation.hasErrors ? 'text-red-600' : 
+                  validation.hasWarnings ? 'text-yellow-600' : 'text-green-600'
+                }`}>
+                  {filteredDeviations.length}
+                </p>
+              </div>
 
-            {filteredDeviations.length === 0 && approvedDeviations.length > 0 && (
-              <Alert>
-                <span className="material-icons">info</span>
-                <AlertDescription>
-                  Inga avvikelser matchar de valda filtren.
-                </AlertDescription>
-              </Alert>
-            )}
+              <Separator />
 
-            {approvedDeviations.length === 0 && (
-              <Alert className="border-yellow-200 bg-yellow-50">
-                <span className="material-icons text-yellow-600">warning</span>
-                <AlertDescription className="text-yellow-800">
-                  Inga godkända avvikelser finns att exportera.
-                </AlertDescription>
-              </Alert>
-            )}
-          </CardContent>
-        </Card>
+              {/* Export Readiness Status */}
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">Export status:</p>
+                {validation.isValid ? (
+                  <div className="flex items-center gap-2 text-green-700 text-sm">
+                    <span className="material-icons text-sm">check_circle</span>
+                    <span className="font-medium">Redo för Kontek Lön</span>
+                  </div>
+                ) : validation.hasErrors ? (
+                  <div className="flex items-center gap-2 text-red-700 text-sm">
+                    <span className="material-icons text-sm">error</span>
+                    <span className="font-medium">Export blockerad</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 text-blue-700 text-sm">
+                    <span className="material-icons text-sm">info</span>
+                    <span className="font-medium">Validerar...</span>
+                  </div>
+                )}
+              </div>
+
+              {filteredDeviations.length === 0 && approvedDeviations.length > 0 && (
+                <Alert>
+                  <span className="material-icons">info</span>
+                  <AlertDescription>
+                    Inga avvikelser matchar de valda filtren.
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {approvedDeviations.length === 0 && (
+                <Alert className="border-yellow-200 bg-yellow-50">
+                  <span className="material-icons text-yellow-600">warning</span>
+                  <AlertDescription className="text-yellow-800">
+                    Inga godkända avvikelser finns att exportera.
+                  </AlertDescription>
+                </Alert>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
