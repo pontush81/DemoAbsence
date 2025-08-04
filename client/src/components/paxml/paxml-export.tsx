@@ -165,10 +165,6 @@ export default function PAXMLExport({ employees, deviations }: PAXMLExportProps)
         <div className="lg:col-span-2">
           <Card>
           <CardContent className="space-y-6 pt-6">
-            <p className="text-sm text-muted-foreground">
-              Exportera godkända avvikelser till PAXML-format för import i Kontek Lön.
-            </p>
-
             <div className="space-y-4">
               <div>
                 <div className="flex items-center justify-between mb-3">
