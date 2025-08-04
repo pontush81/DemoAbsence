@@ -10,12 +10,17 @@ export class SupabaseRestStorage {
     return supabase !== null;
   }
   
-  // Helper method to get data from Supabase with JSON fallback
+  // Helper method to get data from Supabase with strict database-only mode for production exports
   private async getDataFromSupabase<T>(
     tableName: string,
-    filters?: any
+    filters?: any,
+    requireDatabase: boolean = false
   ): Promise<T> {
     if (!this.isSupabaseAvailable()) {
+      if (requireDatabase) {
+        throw new Error(`🚫 CRITICAL: Database connection required for ${tableName} but Supabase is not available. Mock data fallback is disabled for production exports.`);
+      }
+      
       console.log(`🔄 Supabase not available for ${tableName}, falling back to JSON files`);
       // Map table name to JSON filename
       const filenameMap: Record<string, string> = {
@@ -51,6 +56,10 @@ export class SupabaseRestStorage {
     const { data, error } = await query;
     
     if (error) {
+      if (requireDatabase) {
+        throw new Error(`🚫 CRITICAL: Database query failed for ${tableName} and fallback is disabled for production exports: ${error.message}`);
+      }
+      
       console.error(`❌ Supabase query failed for ${tableName}, falling back to JSON:`, error.message);
       // Fallback to JSON files
       const filenameMap: Record<string, string> = {
@@ -192,11 +201,64 @@ export class SupabaseRestStorage {
     
     return filteredData.map(this.mapDeviationFields);
   }
+  
+
 
   async getDeviation(id: number) {
     const deviations = await this.getDataFromSupabase('deviations');
     const deviation = Array.isArray(deviations) ? deviations.find((d: any) => d.id === id) : null;
     return deviation ? this.mapDeviationFields(deviation) : deviation;
+  }
+
+  // 🔒 SECURE VERSION: Get deviations for PAXML export - NO MOCK DATA FALLBACK EVER!
+  async getDeviationsForExport(filters: any = {}) {
+    console.log('🔒 PAXML EXPORT: Getting deviations from database only (no mock data fallback)');
+    
+    // This will throw error if Supabase is not available - prevents mock data export
+    const data = await this.getDataFromSupabase('deviations', filters, true); // requireDatabase = true
+    
+    // Apply strict filtering - only database data
+    let filteredData = Array.isArray(data) ? data : [];
+    
+    if (filters.employeeId) {
+      filteredData = filteredData.filter((d: any) => 
+        (d.employeeId === filters.employeeId) || (d.employee_id === filters.employeeId)
+      );
+    }
+    
+    if (filters.status && filters.status !== 'all') {
+      filteredData = filteredData.filter((d: any) => d.status === filters.status);
+    }
+    
+    if (filters.startDate) {
+      filteredData = filteredData.filter((d: any) => d.date >= filters.startDate);
+    }
+    
+    if (filters.endDate) {
+      filteredData = filteredData.filter((d: any) => d.date <= filters.endDate);
+    }
+    
+    // Apply sorting (default newest first)
+    filteredData.sort((a: any, b: any) => 
+      new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+    
+    const result = filteredData.map(this.mapDeviationFields);
+    console.log(`🔒 PAXML EXPORT: Returning ${result.length} deviations from database`);
+    
+    return result;
+  }
+
+  // 🔒 SECURE VERSION: Get employees for PAXML export - NO MOCK DATA FALLBACK EVER!
+  async getEmployeesForExport() {
+    console.log('🔒 PAXML EXPORT: Getting employees from database only (no mock data fallback)');
+    
+    // This will throw error if Supabase is not available - prevents mock data export
+    const employees = await this.getDataFromSupabase('employees', null, true); // requireDatabase = true
+    const result = Array.isArray(employees) ? employees.map(this.mapEmployeeFields) : [];
+    
+    console.log(`🔒 PAXML EXPORT: Returning ${result.length} employees from database`);
+    return result;
   }
 
   // Helper: Map deviation snake_case → camelCase
