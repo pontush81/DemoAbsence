@@ -10,6 +10,11 @@ const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabase
 // 🚫 MOCK DATA REMOVED - Time balances are SALARY-CRITICAL and must use real database data only
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  // Route to appropriate handler based on method
+  if (req.method === 'PATCH') {
+    return patchHandler(req, res);
+  }
+  
   try {
     const { employeeId } = req.query;
     const { currentUser } = req.query;
@@ -105,6 +110,74 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
   } catch (error) {
     console.error('Error fetching time balance:', error);
+    res.status(500).json({ error: (error as Error).message });
+  }
+}
+
+// PATCH method to update time balance
+export async function patchHandler(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== 'PATCH') {
+    return res.status(405).json({ message: 'Method not allowed' });
+  }
+  
+  try {
+    const { employeeId } = req.query;
+    const { currentUser } = req.query;
+    const updateData = req.body;
+
+    // 🚨 DEMO SECURITY: Only payroll admins can update time balances
+    const allowedPayrollIds = ['pay-001'];
+    const isPayrollAdmin = allowedPayrollIds.includes(currentUser as string);
+    
+    if (!isPayrollAdmin) {
+      return res.status(403).json({
+        error: 'Access denied',
+        message: 'Bara löneadministratörer kan uppdatera tidssaldon'
+      });
+    }
+
+    if (!supabase) {
+      return res.status(500).json({ 
+        error: 'Database connection required',
+        message: 'Tidssaldo uppdatering kräver databasanslutning.'
+      });
+    }
+
+    // Map camelCase to snake_case for database
+    const dbUpdateData: any = {};
+    if (updateData.vacationDays !== undefined) dbUpdateData.vacation_days = updateData.vacationDays;
+    if (updateData.timeBalance !== undefined) dbUpdateData.time_balance = updateData.timeBalance;
+    if (updateData.compensationTime !== undefined) dbUpdateData.compensation_time = updateData.compensationTime;
+    if (updateData.savedVacationDays !== undefined) dbUpdateData.saved_vacation_days = updateData.savedVacationDays;
+    if (updateData.vacationUnit !== undefined) dbUpdateData.vacation_unit = updateData.vacationUnit;
+    
+    // Always update last_updated
+    dbUpdateData.last_updated = new Date().toISOString();
+
+    const { data, error } = await supabase
+      .from('time_balances')
+      .update(dbUpdateData)
+      .eq('employee_id', employeeId)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    // Map response back to camelCase
+    const response = {
+      ...data,
+      employeeId: data.employee_id,
+      timeBalance: data.time_balance,
+      vacationDays: data.vacation_days,
+      savedVacationDays: data.saved_vacation_days,
+      vacationUnit: data.vacation_unit,
+      compensationTime: data.compensation_time,
+      lastUpdated: data.last_updated,
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error('Error updating time balance:', error);
     res.status(500).json({ error: (error as Error).message });
   }
 }
