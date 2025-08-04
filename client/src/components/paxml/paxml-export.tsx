@@ -161,13 +161,6 @@ export default function PAXMLExport({ employees, deviations }: PAXMLExportProps)
 
   return (
     <div className="space-y-6">
-      {/* Validation Status - Always at top */}
-      <ValidationStatus 
-        validation={validation} 
-        isLoading={isLoadingTimeCodes && filteredDeviations.length > 0}
-        deviations={filteredDeviations}
-      />
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <Card>
@@ -529,6 +522,13 @@ export default function PAXMLExport({ employees, deviations }: PAXMLExportProps)
           </Card>
         </div>
       </div>
+      
+      {/* Validation Status - After controls for better UX flow */}
+      <ValidationStatus 
+        validation={validation} 
+        isLoading={isLoadingTimeCodes && filteredDeviations.length > 0}
+        deviations={filteredDeviations}
+      />
     </div>
   );
 }
