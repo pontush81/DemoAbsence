@@ -199,14 +199,23 @@ class ApiService {
   }): Promise<Deviation[]> {
     try {
       await delay(MOCK_DELAY);
-      let url = `/api/deviations?employeeId=${employeeId}`;
+      // 🔧 FIX: Build URL with proper query parameters
+      const params = new URLSearchParams();
+      
+      // Only add employeeId if it's not "ALL"
+      if (employeeId !== 'ALL') {
+        params.append('employeeId', employeeId);
+      }
       
       if (filters) {
-        if (filters.period) url += `&period=${filters.period}`;
-        if (filters.status) url += `&status=${filters.status}`;
-        if (filters.timeCode) url += `&timeCode=${filters.timeCode}`;
-        if (filters.sortBy) url += `&sortBy=${filters.sortBy}`;
+        if (filters.period) params.append('period', filters.period);
+        if (filters.status) params.append('status', filters.status);
+        if (filters.timeCode) params.append('timeCode', filters.timeCode);
+        if (filters.sortBy) params.append('sortBy', filters.sortBy);
       }
+      
+      const queryString = params.toString();
+      const url = `/api/deviations${queryString ? `?${queryString}` : ''}`;
       
       const response = await fetch(url);
       
