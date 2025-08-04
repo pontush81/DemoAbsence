@@ -25,6 +25,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // 🚨 DEMO SECURITY: Allow payroll admins to access all employee time balances
     const allowedPayrollIds = ['pay-001']; // Lars Johansson is payroll admin
     const isPayrollAdmin = allowedPayrollIds.includes(currentUser as string);
+    const isRequestingOwnPayrollBalance = isPayrollAdmin && employeeId === currentUser;
     
     if (currentUser !== employeeId && !isPayrollAdmin) {
       return res.status(403).json({
@@ -86,6 +87,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       };
       
       res.json(mappedTimeBalance);
+    } else if (isRequestingOwnPayrollBalance) {
+      // Payroll admins may not have time balance records (they don't track hours like regular employees)
+      console.log(`💼 PAYROLL ADMIN: No time balance found for ${employeeId}, returning default structure`);
+      res.json({
+        employeeId: employeeId,
+        timeBalance: 0,
+        vacationDays: 0,
+        savedVacationDays: 0,
+        vacationUnit: 'days',
+        compensationTime: 0,
+        lastUpdated: new Date().toISOString(),
+        isPayrollAdmin: true
+      });
     } else {
       res.status(404).json({ message: 'Time balance not found' });
     }

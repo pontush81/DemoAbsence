@@ -88,8 +88,10 @@ export default function Dashboard() {
 
   // Fetch time codes for displaying readable names
   const { data: timeCodes = [] } = useQuery({
-    queryKey: ['timeCodes'],
-    queryFn: () => apiService.getTimeCodes()
+    queryKey: ['/api/timecodes'], // Consistent key with other components
+    queryFn: () => apiService.getTimeCodes(),
+    staleTime: 10 * 60 * 1000, // Cache for 10 minutes
+    retry: 2, // Extra retry for timecodes
   });
   
   // Get today's schedule

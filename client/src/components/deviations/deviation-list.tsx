@@ -43,6 +43,8 @@ const DeviationList = ({ onSelect }: DeviationListProps) => {
   const { data: timeCodes = [] } = useQuery({
     queryKey: ['/api/timecodes'],
     queryFn: () => apiService.getTimeCodes(),
+    staleTime: 10 * 60 * 1000, // Cache for 10 minutes
+    retry: 2, // Extra retry for timecodes
   });
 
   // Helper function to get time code name
