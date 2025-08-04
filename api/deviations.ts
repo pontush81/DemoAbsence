@@ -15,7 +15,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   console.log('🔍 Environment check:', {
     hasSupabaseUrl: !!process.env.SUPABASE_URL,
     hasSupabaseKey: !!process.env.SUPABASE_ANON_KEY,
-    supabaseClientExists: !!supabase
+    supabaseClientExists: !!supabase,
+    runtime: process.env.VERCEL ? 'VERCEL' : 'LOCAL',
+    nodeVersion: process.version,
+    supabaseUrlPrefix: process.env.SUPABASE_URL ? process.env.SUPABASE_URL.substring(0, 20) + '...' : 'MISSING'
   });
   if (req.method === 'GET') {
     // GET - fetch deviations with filtering
@@ -181,6 +184,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
 
       console.log('🔍 Attempting to insert deviation data:', JSON.stringify(deviationData, null, 2));
+      console.log('🔍 Supabase client info:', {
+        clientUrl: supabase?.supabaseUrl?.substring(0, 20) + '...',
+        clientKey: supabase?.supabaseKey?.substring(0, 10) + '...',
+        hasAuth: !!supabase?.auth,
+        hasStorage: !!supabase?.storage
+      });
       try {
         const { data, error } = await supabase
           .from('deviations')
