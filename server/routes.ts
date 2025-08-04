@@ -590,66 +590,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create deviation
-  app.post('/api/deviations', async (req, res) => {
-    try {
-      // Get time codes to check if approval is required
-      let timeCode;
-      try {
-        const timeCodes = await restStorage.getTimeCodes();
-        timeCode = timeCodes.find((tc: any) => tc.code === req.body.timeCode);
-      } catch (error) {
-        // 🚫 NO MOCK FALLBACK: Time codes must come from database for approval logic
-        console.error('🚫 CRITICAL: Time codes lookup failed - database connection required for approval logic:', error);
-        return res.status(500).json({ 
-          error: 'Time codes lookup failed',
-          message: 'Database connection required for time code approval logic. Mock data is not allowed.',
-          details: error.message
-        });
-      }
-      
-      // Determine status based on Swedish HR law compliance
-      let status = req.body.status;
-      if (!status) {
-        // If no status provided, determine based on time code requirements
-        if (timeCode && timeCode.requiresApproval === false) {
-          // Auto-approve only if explicitly configured as no approval required
-          status = 'approved';
-        } else {
-          // All types require manager approval per Swedish labor law
-          status = 'pending';
-        }
-      }
-      
-      const deviationData = {
-        ...req.body,
-        startTime: req.body.startTime + ':00', // Add seconds for consistency
-        endTime: req.body.endTime + ':00',     // Add seconds for consistency
-        status: status
-      };
-      
-      // Use consistent REST API for all operations
-      try {
-        const newDeviation = await restStorage.createDeviation(deviationData);
-        console.log('Created new deviation via REST API:', newDeviation);
-        res.status(201).json(newDeviation);
-      } catch (restError) {
-        // 🚫 NO MOCK FALLBACK: Deviation creation must use real database only
-        console.error('🚫 CRITICAL: Deviation creation failed - database connection required:', restError);
-        return res.status(500).json({ 
-          error: 'Deviation creation failed',
-          message: 'Database connection required for deviation creation. Mock data is not allowed.',
-          details: restError.message
-        });
-      }
-    } catch (error) {
-      console.error('Error creating deviation:', error);
-      res.status(500).json({ 
-        error: 'Failed to create deviation', 
-        details: (error as Error).message 
-      });
-    }
-  });
+  // 🗑️ REMOVED: Duplicate POST /api/deviations route
+  // This conflicted with the Vercel serverless function in /api/deviations.ts
+  // All deviation creation now handled by /api/deviations.ts serverless function
 
   // Update deviation
   app.patch('/api/deviations/:id', async (req, res) => {
