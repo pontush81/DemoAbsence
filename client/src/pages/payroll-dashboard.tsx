@@ -76,8 +76,9 @@ export default function PayrollDashboard() {
 
   // Fetch all employees
   const { data: employees = [] } = useQuery({
-    queryKey: ['employees'],
-    queryFn: apiService.getAllEmployees
+    queryKey: ['employees', currentUserId],
+    queryFn: () => apiService.getAllEmployees(currentUserId),
+    enabled: !!currentUserId // Only run if we have currentUserId
   });
 
   // Fetch deviations for current month
