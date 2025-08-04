@@ -11,6 +11,12 @@ const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabase
 // Production: Only use Supabase, no mock data fallback
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  // Debug: Check environment variables
+  console.log('🔍 Environment check:', {
+    hasSupabaseUrl: !!process.env.SUPABASE_URL,
+    hasSupabaseKey: !!process.env.SUPABASE_ANON_KEY,
+    supabaseClientExists: !!supabase
+  });
   if (req.method === 'GET') {
     // GET - fetch deviations with filtering
     try {
@@ -146,21 +152,32 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       let newDeviation;
       
       // 🔒 DATABASE REQUIRED - No mock data fallback allowed
-      if (supabase) {
-        try {
-          const { data, error } = await supabase
-            .from('deviations')
-            .insert([deviationData])
-            .select()
-            .single();
-          
-          if (error) throw error;
-          newDeviation = data;
-          console.log('Created new deviation via Supabase:', newDeviation);
-        } catch (error) {
-          console.error('🚫 Database insert failed for deviation:', error);
-          // Will fall back to mock data below
-        }
+      if (!supabase) {
+        console.error('🚫 CRITICAL: Supabase client is null - environment variables missing');
+        return res.status(500).json({ 
+          error: 'Database configuration error', 
+          message: 'Supabase connection not configured. Check environment variables.',
+          details: `URL: ${!!process.env.SUPABASE_URL}, KEY: ${!!process.env.SUPABASE_ANON_KEY}`
+        });
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('deviations')
+          .insert([deviationData])
+          .select()
+          .single();
+        
+        if (error) throw error;
+        newDeviation = data;
+        console.log('Created new deviation via Supabase:', newDeviation);
+      } catch (error) {
+        console.error('🚫 Database insert failed for deviation:', error);
+        return res.status(500).json({ 
+          error: 'Database insert failed', 
+          message: 'Kunde inte skapa avvikelse i databasen.',
+          details: (error as Error).message
+        });
       }
       
       // If Supabase didn't work, return error
