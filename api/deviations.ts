@@ -125,8 +125,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       // Get time codes from Supabase to check if approval is required
       let timeCode = null;
       if (supabase) {
-        const { data: timeCodesData } = await supabase.from('time_codes').select('*').eq('code', req.body.timeCode).single();
-        timeCode = timeCodesData;
+        console.log('🔍 Looking up time code:', req.body.timeCode);
+        try {
+          const { data: timeCodesData, error: timeCodeError } = await supabase.from('time_codes').select('*').eq('code', req.body.timeCode).single();
+          if (timeCodeError) {
+            console.warn('⚠️  Time code lookup error:', timeCodeError);
+          }
+          timeCode = timeCodesData;
+          console.log('✅ Time code found:', timeCode);
+        } catch (timeCodeLookupError) {
+          console.error('❌ Time code lookup failed:', timeCodeLookupError);
+        }
       }
       
       // Determine status based on Swedish HR law compliance
@@ -165,6 +174,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         });
       }
 
+      console.log('🔍 Attempting to insert deviation data:', JSON.stringify(deviationData, null, 2));
       try {
         const { data, error } = await supabase
           .from('deviations')
@@ -172,9 +182,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           .select()
           .single();
         
-        if (error) throw error;
+        if (error) {
+          console.error('❌ Supabase insert error details:', error);
+          throw error;
+        }
         newDeviation = data;
-        console.log('Created new deviation via Supabase:', newDeviation);
+        console.log('✅ Created new deviation via Supabase:', newDeviation);
       } catch (error) {
         console.error('🚫 Database insert failed for deviation:', error);
         return res.status(500).json({ 
