@@ -60,34 +60,33 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     
     // Apply sorting and mapping - database only, no mock data fallback
     let filteredLeaveRequests = [...leaveRequests];
-      
-      // Filter by employeeId
-      if (employeeId) {
-        filteredLeaveRequests = filteredLeaveRequests.filter((lr: any) => 
-          (lr.employeeId === employeeId || lr.employee_id === employeeId)
-        );
-      }
-      
-      // Filter by status
-      if (status && status !== 'all') {
-        if (status === 'active') {
-          filteredLeaveRequests = filteredLeaveRequests.filter((lr: any) => 
-            ['pending', 'approved'].includes(lr.status)
-          );
-        } else {
-          filteredLeaveRequests = filteredLeaveRequests.filter((lr: any) => lr.status === status);
-        }
-      }
-      
-      // Sort by start date descending
-      filteredLeaveRequests.sort((a: any, b: any) => {
-        const dateA = new Date(a.startDate || a.start_date);
-        const dateB = new Date(b.startDate || b.start_date);
-        return dateB.getTime() - dateA.getTime();
-      });
-      
-      leaveRequests = filteredLeaveRequests;
+    
+    // Filter by employeeId
+    if (employeeId) {
+      filteredLeaveRequests = filteredLeaveRequests.filter((lr: any) => 
+        (lr.employeeId === employeeId || lr.employee_id === employeeId)
+      );
     }
+    
+    // Filter by status
+    if (status && status !== 'all') {
+      if (status === 'active') {
+        filteredLeaveRequests = filteredLeaveRequests.filter((lr: any) => 
+          ['pending', 'approved'].includes(lr.status)
+        );
+      } else {
+        filteredLeaveRequests = filteredLeaveRequests.filter((lr: any) => lr.status === status);
+      }
+    }
+    
+    // Sort by start date descending
+    filteredLeaveRequests.sort((a: any, b: any) => {
+      const dateA = new Date(a.startDate || a.start_date);
+      const dateB = new Date(b.startDate || b.start_date);
+      return dateB.getTime() - dateA.getTime();
+    });
+    
+    leaveRequests = filteredLeaveRequests;
     
     // Map snake_case to camelCase for frontend compatibility
     const mappedLeaveRequests = leaveRequests.map((leave: any) => ({
