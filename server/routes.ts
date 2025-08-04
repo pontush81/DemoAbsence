@@ -277,8 +277,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get employee by ID
-  app.get('/api/employees/:id', async (req, res) => {
+  // 🗑️ REMOVED: Conflicted with /api/employees/[id].ts serverless function  
+  // app.get('/api/employees/:id', async (req, res) => {
     try {
       const employee = await restStorage.getEmployee(req.params.id);
       if (employee) {
@@ -337,8 +337,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Update employee
-  app.patch('/api/employees/:id', async (req, res) => {
+  // 🗑️ REMOVED: Conflicted with /api/employees/[id].ts serverless function
+  // app.patch('/api/employees/:id', async (req, res) => {
     try {
       const { id } = req.params;
       const { currentUser } = req.query;
@@ -419,8 +419,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get time codes
-  app.get('/api/timecodes', async (req, res) => {
+  // 🗑️ REMOVED: Conflicted with /api/timecodes.ts serverless function
+  // app.get('/api/timecodes', async (req, res) => {
     try {
       const timeCodes = await restStorage.getTimeCodes();
       res.json(timeCodes);
