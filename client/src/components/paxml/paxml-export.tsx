@@ -258,9 +258,9 @@ export default function PAXMLExport({ employees, deviations }: PAXMLExportProps)
                 </p>
               </div>
 
-              {/* Snabba månadsval */}
+              {/* Månadsval */}
               <div className="space-y-3">
-                <Label className="text-sm font-medium">Snabba månadsval</Label>
+                <Label className="text-sm font-medium">Månadsval</Label>
                 <div className="flex flex-wrap gap-2">
                   <Button
                     type="button"
@@ -268,10 +268,13 @@ export default function PAXMLExport({ employees, deviations }: PAXMLExportProps)
                     size="sm"
                     onClick={() => {
                       const now = new Date();
-                      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-                      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-                      setStartDate(startOfMonth.toISOString().split('T')[0]);
-                      setEndDate(endOfMonth.toISOString().split('T')[0]);
+                      const year = now.getFullYear();
+                      const month = now.getMonth() + 1; // Convert to 1-indexed month
+                      const startOfMonth = `${year}-${String(month).padStart(2, '0')}-01`;
+                      const lastDay = new Date(year, month, 0).getDate(); // Last day of current month
+                      const endOfMonth = `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+                      setStartDate(startOfMonth);
+                      setEndDate(endOfMonth);
                     }}
                   >
                     Denna månad
@@ -282,10 +285,15 @@ export default function PAXMLExport({ employees, deviations }: PAXMLExportProps)
                     size="sm"
                     onClick={() => {
                       const now = new Date();
-                      const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-                      const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
-                      setStartDate(startOfLastMonth.toISOString().split('T')[0]);
-                      setEndDate(endOfLastMonth.toISOString().split('T')[0]);
+                      const year = now.getFullYear();
+                      const month = now.getMonth(); // Previous month (0-indexed)
+                      const prevYear = month === 0 ? year - 1 : year;
+                      const prevMonth = month === 0 ? 12 : month;
+                      const startOfLastMonth = `${prevYear}-${String(prevMonth).padStart(2, '0')}-01`;
+                      const lastDay = new Date(prevYear, prevMonth, 0).getDate(); // Last day of previous month
+                      const endOfLastMonth = `${prevYear}-${String(prevMonth).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+                      setStartDate(startOfLastMonth);
+                      setEndDate(endOfLastMonth);
                     }}
                   >
                     Föregående månad
@@ -296,10 +304,11 @@ export default function PAXMLExport({ employees, deviations }: PAXMLExportProps)
                     size="sm"
                     onClick={() => {
                       const now = new Date();
-                      const startOfYear = new Date(now.getFullYear(), 0, 1);
-                      const endOfYear = new Date(now.getFullYear(), 11, 31);
-                      setStartDate(startOfYear.toISOString().split('T')[0]);
-                      setEndDate(endOfYear.toISOString().split('T')[0]);
+                      const year = now.getFullYear();
+                      const startOfYear = `${year}-01-01`;
+                      const endOfYear = `${year}-12-31`;
+                      setStartDate(startOfYear);
+                      setEndDate(endOfYear);
                     }}
                   >
                     Hela året
