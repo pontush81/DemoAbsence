@@ -279,96 +279,96 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // 🗑️ REMOVED: Conflicted with /api/employees/[id].ts serverless function  
   // app.get('/api/employees/:id', async (req, res) => {
-    try {
-      const employee = await restStorage.getEmployee(req.params.id);
-      if (employee) {
-        // Map snake_case to camelCase for frontend compatibility - COMPREHENSIVE MAPPING
-        const mappedEmployee = {
-          ...employee,
-          // Core fields
-          employeeId: employee.employee_id || employee.employeeId,
-          firstName: employee.first_name || employee.firstName,
-          lastName: employee.last_name || employee.lastName,
-          // Contact fields
-          phoneNumber: employee.phone_number || employee.phoneNumber,
-          workEmail: employee.work_email || employee.workEmail,
-          preferredEmail: employee.preferred_email || employee.preferredEmail,
-          // Address fields
-          careOfAddress: employee.care_of_address || employee.careOfAddress,
-          streetAddress: employee.street_address || employee.streetAddress,
-          postalCode: employee.postal_code || employee.postalCode,
-          // Banking fields
-          bankAccountNumber: employee.bank_account_number || employee.bankAccountNumber,
-          bankClearingNumber: employee.bank_clearing_number || employee.bankClearingNumber,
-          bankBIC: employee.bank_bic || employee.bankBIC,
-          bankCountryCode: employee.bank_country_code || employee.bankCountryCode,
-          bankIBAN: employee.bank_iban || employee.bankIBAN,
-          // Work fields
-          scheduleTemplate: employee.schedule_template || employee.scheduleTemplate,
-          // Timestamps
-          createdAt: employee.created_at || employee.createdAt,
-        };
-        
-        // Remove snake_case duplicates
-        delete mappedEmployee.employee_id;
-        delete mappedEmployee.first_name;
-        delete mappedEmployee.last_name;
-        delete mappedEmployee.phone_number;
-        delete mappedEmployee.work_email;
-        delete mappedEmployee.preferred_email;
-        delete mappedEmployee.care_of_address;
-        delete mappedEmployee.street_address;
-        delete mappedEmployee.postal_code;
-        delete mappedEmployee.bank_account_number;
-        delete mappedEmployee.bank_clearing_number;
-        delete mappedEmployee.bank_bic;
-        delete mappedEmployee.bank_country_code;
-        delete mappedEmployee.bank_iban;
-        delete mappedEmployee.schedule_template;
-        delete mappedEmployee.created_at;
-        
-        res.json(mappedEmployee);
-      } else {
-        res.status(404).json({ message: 'Employee not found' });
-      }
-    } catch (error) {
-      console.error('Error fetching employee:', error);
-      res.status(500).json({ error: (error as Error).message });
-    }
-  });
+  //   try {
+  //     const employee = await restStorage.getEmployee(req.params.id);
+  //     if (employee) {
+  //       // Map snake_case to camelCase for frontend compatibility - COMPREHENSIVE MAPPING
+  //       const mappedEmployee = {
+  //         ...employee,
+  //         // Core fields
+  //         employeeId: employee.employee_id || employee.employeeId,
+  //         firstName: employee.first_name || employee.firstName,
+  //         lastName: employee.last_name || employee.lastName,
+  //         // Contact fields
+  //         phoneNumber: employee.phone_number || employee.phoneNumber,
+  //         workEmail: employee.work_email || employee.workEmail,
+  //         preferredEmail: employee.preferred_email || employee.preferredEmail,
+  //         // Address fields
+  //         careOfAddress: employee.care_of_address || employee.careOfAddress,
+  //         streetAddress: employee.street_address || employee.streetAddress,
+  //         postalCode: employee.postal_code || employee.postalCode,
+  //         // Banking fields
+  //         bankAccountNumber: employee.bank_account_number || employee.bankAccountNumber,
+  //         bankClearingNumber: employee.bank_clearing_number || employee.bankClearingNumber,
+  //         bankBIC: employee.bank_bic || employee.bankBIC,
+  //         bankCountryCode: employee.bank_country_code || employee.bankCountryCode,
+  //         bankIBAN: employee.bank_iban || employee.bankIBAN,
+  //         // Work fields
+  //         scheduleTemplate: employee.schedule_template || employee.scheduleTemplate,
+  //         // Timestamps
+  //         createdAt: employee.created_at || employee.createdAt,
+  //       };
+  //       
+  //       // Remove snake_case duplicates
+  //       delete mappedEmployee.employee_id;
+  //       delete mappedEmployee.first_name;
+  //       delete mappedEmployee.last_name;
+  //       delete mappedEmployee.phone_number;
+  //       delete mappedEmployee.work_email;
+  //       delete mappedEmployee.preferred_email;
+  //       delete mappedEmployee.care_of_address;
+  //       delete mappedEmployee.street_address;
+  //       delete mappedEmployee.postal_code;
+  //       delete mappedEmployee.bank_account_number;
+  //       delete mappedEmployee.bank_clearing_number;
+  //       delete mappedEmployee.bank_bic;
+  //       delete mappedEmployee.bank_country_code;
+  //       delete mappedEmployee.bank_iban;
+  //       delete mappedEmployee.schedule_template;
+  //       delete mappedEmployee.created_at;
+  //       
+  //       res.json(mappedEmployee);
+  //     } else {
+  //       res.status(404).json({ message: 'Employee not found' });
+  //     }
+  //   } catch (error) {
+  //     console.error('Error fetching employee:', error);
+  //     res.status(500).json({ error: (error as Error).message });
+  //   }
+  // });
 
   // 🗑️ REMOVED: Conflicted with /api/employees/[id].ts serverless function
   // app.patch('/api/employees/:id', async (req, res) => {
-    try {
-      const { id } = req.params;
-      const { currentUser } = req.query;
-      
-      // 🚨 DEMO SECURITY: Prevent IDOR - can only update own employee data
-      if (!currentUser) {
-        return res.status(400).json({
-          error: 'currentUser parameter required',
-          message: 'Du måste ange vem du är för att uppdatera medarbetardata'
-        });
-      }
-      
-      if (currentUser !== id) {
-        return res.status(403).json({
-          error: 'Access denied',
-          message: 'Du kan bara uppdatera din egen medarbetardata'
-        });
-      }
-      
-      const updated = await restStorage.updateEmployee(id, req.body);
-      if (updated) {
-        res.json(updated);
-      } else {
-        res.status(404).json({ message: 'Employee not found' });
-      }
-    } catch (error) {
-      console.error('Error updating employee:', error);
-      res.status(500).json({ error: (error as Error).message });
-    }
-  });
+  //   try {
+  //     const { id } = req.params;
+  //     const { currentUser } = req.query;
+  //     
+  //     // 🚨 DEMO SECURITY: Prevent IDOR - can only update own employee data
+  //     if (!currentUser) {
+  //       return res.status(400).json({
+  //         error: 'currentUser parameter required',
+  //         message: 'Du måste ange vem du är för att uppdatera medarbetardata'
+  //       });
+  //     }
+  //     
+  //     if (currentUser !== id) {
+  //       return res.status(403).json({
+  //         error: 'Access denied',
+  //         message: 'Du kan bara uppdatera din egen medarbetardata'
+  //       });
+  //     }
+  //     
+  //     const updated = await restStorage.updateEmployee(id, req.body);
+  //     if (updated) {
+  //       res.json(updated);
+  //     } else {
+  //       res.status(404).json({ message: 'Employee not found' });
+  //     }
+  //   } catch (error) {
+  //     console.error('Error updating employee:', error);
+  //     res.status(500).json({ error: (error as Error).message });
+  //   }
+  // });
 
   // Get schedules
   app.get('/api/schedules/:employeeId', async (req, res) => {
@@ -421,14 +421,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // 🗑️ REMOVED: Conflicted with /api/timecodes.ts serverless function
   // app.get('/api/timecodes', async (req, res) => {
-    try {
-      const timeCodes = await restStorage.getTimeCodes();
-      res.json(timeCodes);
-    } catch (error) {
-      console.error('Error fetching time codes:', error);
-      res.status(500).json({ error: (error as Error).message });
-    }
-  });
+  //   try {
+  //     const timeCodes = await restStorage.getTimeCodes();
+  //     res.json(timeCodes);
+  //   } catch (error) {
+  //     console.error('Error fetching time codes:', error);
+  //     res.status(500).json({ error: (error as Error).message });
+  //   }
+  // });
 
   // Get deviations
   app.get('/api/deviations', async (req, res) => {
