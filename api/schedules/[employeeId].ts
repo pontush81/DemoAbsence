@@ -1,16 +1,14 @@
 import 'dotenv/config';
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createClient } from '@supabase/supabase-js';
-import * as mockSchedulesData from '../mock-data/schedules.json';
-
 // Initialize Supabase client
 // 🚫 MOCK DATA REMOVED - All endpoints must use real database data only
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_ANON_KEY;
 const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
 
-// Fallback mock data
-const mockSchedules = mockSchedulesData.default || mockSchedulesData;
+// Fallback mock data - use require for better Vercel compatibility
+const mockSchedules = require('../../mock-data/schedules.json');
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
