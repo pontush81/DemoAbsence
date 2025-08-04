@@ -25,11 +25,12 @@ export default function LeaveCalendar() {
   const { t } = useI18n();
   const { user } = useStore();
   const [currentDate, setCurrentDate] = useState(new Date());
+  const currentUserId = user.currentUser?.employeeId || user.currentUser?.id;
   
   // Fetch leave requests
   const { data: leaveRequests = [], isLoading } = useQuery({
-    queryKey: ['/api/leave-requests', user.currentUser?.employeeId],
-    queryFn: () => apiService.getLeaveRequests(user.currentUser?.employeeId || ''),
+    queryKey: ['/api/leave-requests', currentUserId],
+    queryFn: () => apiService.getLeaveRequests(currentUserId || ''),
   });
 
   // Get calendar data

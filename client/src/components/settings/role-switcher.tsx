@@ -69,10 +69,12 @@ const RoleSwitcher = () => {
     }
   };
   
+  const currentUserId = user.currentUser?.employeeId || user.currentUser?.id;
+  
   const handleRoleChange = (role: string) => {
     if (!canChangeRoles) {
       console.warn('🚨 SECURITY: Unauthorized role change attempt blocked', {
-        currentUser: user.currentUser?.employeeId,
+        currentUser: currentUserId,
         currentRole: user.currentRole,
         attemptedRole: role,
         timestamp: new Date().toISOString()
@@ -83,7 +85,7 @@ const RoleSwitcher = () => {
     console.log('✅ AUTHORIZED: Role change by HR administrator', {
       from: user.currentRole,
       to: role,
-      user: user.currentUser?.employeeId
+      user: currentUserId
     });
     setCurrentRole(role as UserRole);
   };

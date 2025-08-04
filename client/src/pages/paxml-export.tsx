@@ -7,14 +7,24 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function PAXMLExportPage() {
   const { user } = useStore();
+  const currentUserId = user.currentUser?.employeeId || user.currentUser?.id;
+  
+  // Debug logging
+  console.log('🔍 DEBUG - PAXML Export User Object:', {
+    currentUser: user.currentUser,
+    employeeId: user.currentUser?.employeeId,
+    id: user.currentUser?.id,
+    currentUserId: currentUserId,
+    typeof_currentUserId: typeof currentUserId
+  });
   
   // Kontrollera behörighet - endast payroll och HR har tillgång
   const hasAccess = ['payroll', 'hr'].includes(user.currentRole);
   
   const { data: employees = [], isLoading: employeesLoading } = useQuery({
-    queryKey: ['/api/employees'],
-    queryFn: () => apiService.getAllEmployees(user.currentUser?.employeeId),
-    enabled: hasAccess, // Ladda endast data om användaren har behörighet
+    queryKey: ['/api/employees', currentUserId],
+    queryFn: () => apiService.getAllEmployees(currentUserId),
+    enabled: hasAccess && !!currentUserId, // Ladda endast data om användaren har behörighet och currentUserId finns
   });
 
   const { data: deviations = [], isLoading: deviationsLoading } = useQuery({

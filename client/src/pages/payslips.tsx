@@ -11,7 +11,7 @@ import PayslipList from "@/components/payslips/payslip-list";
 export default function Payslips() {
   const { t } = useI18n();
   const { user } = useStore();
-  const employeeId = user.currentUser?.employeeId;
+  const employeeId = user.currentUser?.employeeId || user.currentUser?.id;
   
   // Fetch payslips
   const { data: payslips, isLoading, error } = useQuery({

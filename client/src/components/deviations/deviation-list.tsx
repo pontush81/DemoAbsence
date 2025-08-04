@@ -20,7 +20,7 @@ const DeviationList = ({ onSelect }: DeviationListProps) => {
   const { t } = useI18n();
   const [, setLocation] = useLocation();
   const { user } = useStore();
-  const employeeId = user.currentUser?.employeeId;
+  const employeeId = user.currentUser?.employeeId || user.currentUser?.id;
   
   // Filters - default to show items needing action first (UX best practice)
   const [filters, setFilters] = useState({

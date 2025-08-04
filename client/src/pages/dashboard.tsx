@@ -26,7 +26,7 @@ export default function Dashboard() {
   const [showDeviationDetails, setShowDeviationDetails] = useState(false);
   const [showLeaveDetails, setShowLeaveDetails] = useState(false);
   const { user } = useStore();
-  const employeeId = user.currentUser?.employeeId;
+  const employeeId = user.currentUser?.employeeId || user.currentUser?.id;
   const currentUser = user.currentUser;
   const isManager = user.currentRole === 'manager';
   const isEmployee = user.currentRole === 'employee';
@@ -191,11 +191,11 @@ export default function Dashboard() {
   return (
     <section>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold">
-          {t('dashboard.greeting')}, {currentUser?.firstName || ''}!
-        </h1>
-        <p className="text-muted-foreground">{formattedDate}</p>
-      </div>
+          <h1 className="text-2xl font-bold">
+            {t('dashboard.greeting')}, {currentUser?.firstName || ''}!
+          </h1>
+          <p className="text-muted-foreground">{formattedDate}</p>
+        </div>
 
       {/* Enhanced Work Schedule Overview */}
       <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 mb-6">
@@ -260,10 +260,10 @@ export default function Dashboard() {
                   <span className="material-icons mr-4 sm:mr-2 text-2xl sm:text-base">add</span>
                   <span className="hidden sm:inline">Annan avvikelse</span>
                   <span className="sm:hidden text-xl font-bold">Annan avvikelse</span>
-                </Button>
-              </Link>
-            </div>
-          </div>
+            </Button>
+          </Link>
+        </div>
+      </div>
         </CardContent>
       </Card>
 
@@ -275,32 +275,32 @@ export default function Dashboard() {
           <Tooltip>
             <TooltipTrigger asChild>
               <div>
-                <StatusCard
-                  title={t('dashboard.timeBalance')}
-                  value={
-                    isLoadingTimeBalance ? (
-                      <Skeleton className="h-6 w-24" />
-                    ) : timeBalance ? (
-                      formatDuration(timeBalance.timeBalance ?? 0)
-                    ) : (
-                      "0"
-                    )
-                  }
-                  icon="hourglass_top"
-                  footer={
-                    isLoadingTimeBalance ? (
-                      <div className="flex justify-between text-sm">
-                        <Skeleton className="h-4 w-28" />
-                        <Skeleton className="h-4 w-16" />
-                      </div>
-                    ) : timeBalance?.compensationTime ? (
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">{t('dashboard.compensationTime')}:</span>
-                        <span>{formatDuration(timeBalance.compensationTime)}</span>
-                      </div>
-                    ) : null
-                  }
-                />
+        <StatusCard
+          title={t('dashboard.timeBalance')}
+          value={
+            isLoadingTimeBalance ? (
+              <Skeleton className="h-6 w-24" />
+            ) : timeBalance ? (
+              formatDuration(timeBalance.timeBalance ?? 0)
+            ) : (
+              "0"
+            )
+          }
+          icon="hourglass_top"
+          footer={
+            isLoadingTimeBalance ? (
+              <div className="flex justify-between text-sm">
+                <Skeleton className="h-4 w-28" />
+                <Skeleton className="h-4 w-16" />
+              </div>
+            ) : timeBalance?.compensationTime ? (
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">{t('dashboard.compensationTime')}:</span>
+                <span>{formatDuration(timeBalance.compensationTime)}</span>
+              </div>
+            ) : null
+          }
+        />
               </div>
             </TooltipTrigger>
             <TooltipContent side="bottom" className="max-w-xs">
@@ -323,34 +323,34 @@ export default function Dashboard() {
           <Tooltip>
             <TooltipTrigger asChild>
               <div>
-                <StatusCard
-                  title={t('dashboard.vacationBalance')}
-                  value={
-                    isLoadingTimeBalance ? (
-                      <Skeleton className="h-6 w-24" />
-                    ) : timeBalance ? (
-                      `${timeBalance.vacationDays} ${t('days')}`
-                    ) : (
-                      "0 " + t('days')
-                    )
-                  }
-                  icon="beach_access"
-                  footer={
-                    isLoadingTimeBalance ? (
-                      <div className="flex justify-between text-sm">
-                        <Skeleton className="h-4 w-28" />
-                        <Skeleton className="h-4 w-16" />
-                      </div>
-                    ) : timeBalance?.savedVacationDays ? (
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">{t('dashboard.savedDays')}:</span>
-                        <span>
-                          {Object.values(timeBalance.savedVacationDays).reduce((a, b) => a + (b as number), 0)} {t('days')}
-                        </span>
-                      </div>
-                    ) : null
-                  }
-                />
+        <StatusCard
+          title={t('dashboard.vacationBalance')}
+          value={
+            isLoadingTimeBalance ? (
+              <Skeleton className="h-6 w-24" />
+            ) : timeBalance ? (
+              `${timeBalance.vacationDays} ${t('days')}`
+            ) : (
+              "0 " + t('days')
+            )
+          }
+          icon="beach_access"
+          footer={
+            isLoadingTimeBalance ? (
+              <div className="flex justify-between text-sm">
+                <Skeleton className="h-4 w-28" />
+                <Skeleton className="h-4 w-16" />
+              </div>
+            ) : timeBalance?.savedVacationDays ? (
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">{t('dashboard.savedDays')}:</span>
+                <span>
+                  {Object.values(timeBalance.savedVacationDays).reduce((a, b) => a + (b as number), 0)} {t('days')}
+                </span>
+              </div>
+            ) : null
+          }
+        />
               </div>
             </TooltipTrigger>
             <TooltipContent side="bottom" className="max-w-xs">
@@ -369,32 +369,32 @@ export default function Dashboard() {
           </Tooltip>
 
           {/* Pending Deviations Card (only for managers) with Tooltip */}
-          {isManager && (
+        {isManager && (
             <Tooltip>
               <TooltipTrigger asChild>
                 <div>
-                  <StatusCard
+          <StatusCard
                     title={t('dashboard.pendingDeviations')}
-                    value={
-                      isLoadingPendingDeviations ? (
-                        <Skeleton className="h-6 w-24" />
-                      ) : pendingDeviations ? (
-                        `${pendingDeviations.length} ${t('items')}`
-                      ) : (
-                        "0 " + t('items')
-                      )
-                    }
-                    icon="pending_actions"
-                    className="bg-[#FFC107] bg-opacity-5"
-                    footer={
-                      <Link href="/manager">
-                        <div className="text-sm text-primary flex items-center cursor-pointer">
-                          {t('dashboard.viewAll')}
-                          <span className="material-icons text-sm ml-1">arrow_forward</span>
-                        </div>
-                      </Link>
-                    }
-                  />
+            value={
+              isLoadingPendingDeviations ? (
+                <Skeleton className="h-6 w-24" />
+              ) : pendingDeviations ? (
+                `${pendingDeviations.length} ${t('items')}`
+              ) : (
+                "0 " + t('items')
+              )
+            }
+            icon="pending_actions"
+            className="bg-[#FFC107] bg-opacity-5"
+            footer={
+              <Link href="/manager">
+                <div className="text-sm text-primary flex items-center cursor-pointer">
+                  {t('dashboard.viewAll')}
+                  <span className="material-icons text-sm ml-1">arrow_forward</span>
+                </div>
+              </Link>
+            }
+          />
                 </div>
               </TooltipTrigger>
               <TooltipContent side="bottom" className="max-w-xs">
@@ -495,8 +495,8 @@ export default function Dashboard() {
                       </Collapsible>
                     )}
                   </div>
-                </div>
-                
+      </div>
+
                 {/* Right side actions */}
                 <div className="flex items-center gap-3">
                   {/* Disabled button - compact version */}

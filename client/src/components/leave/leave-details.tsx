@@ -24,9 +24,10 @@ const LeaveDetails = ({ leaveId, onBack }: LeaveDetailsProps) => {
   });
 
   // Fetch employee info to show names instead of IDs
+  const currentUserId = user.currentUser?.employeeId || user.currentUser?.id;
   const { data: employees = [] } = useQuery({
-    queryKey: ['/api/employees'],
-    queryFn: () => apiService.getAllEmployees(user.currentUser?.employeeId),
+    queryKey: ['/api/employees', currentUserId],
+    queryFn: () => apiService.getAllEmployees(currentUserId),
   });
 
   // Helper function to get employee name

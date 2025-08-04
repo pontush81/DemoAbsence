@@ -20,7 +20,7 @@ import { useIsMobile } from '@/hooks/use-is-mobile';
 export default function SchedulesPage() {
   const { t } = useI18n();
   const { user } = useStore();
-  const employeeId = user.currentUser?.employeeId;
+  const employeeId = user.currentUser?.employeeId || user.currentUser?.id;
   const isMobile = useIsMobile();
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);

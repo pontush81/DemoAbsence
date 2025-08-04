@@ -19,7 +19,7 @@ const LeaveList = ({ onSelect }: LeaveListProps) => {
   const { t } = useI18n();
   const [, setLocation] = useLocation();
   const { user } = useStore();
-  const employeeId = user.currentUser?.employeeId;
+  const employeeId = user.currentUser?.employeeId || user.currentUser?.id;
   
   // Filters - show all periods by default so users see their submitted requests immediately
   const [filters, setFilters] = useState({

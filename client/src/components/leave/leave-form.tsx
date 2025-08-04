@@ -82,12 +82,13 @@ const LeaveForm = ({ leaveRequestId, onCancel }: LeaveFormProps) => {
     queryFn: () => leaveRequestId ? apiService.getLeaveRequest(leaveRequestId) : null,
     enabled: !!leaveRequestId,
   });
+  const currentUserId = user.currentUser?.employeeId || user.currentUser?.id;
   
   // Fetch existing leave requests for overlap validation
   const { data: existingLeaveRequests = [] } = useQuery({
-    queryKey: ['/api/leave-requests', user.currentUser?.employeeId, 'all'],
-    queryFn: () => user.currentUser?.employeeId ? apiService.getLeaveRequests(user.currentUser.employeeId, { status: 'all' }) : Promise.resolve([]),
-    enabled: !!user.currentUser?.employeeId,
+    queryKey: ['/api/leave-requests', currentUserId, 'all'],
+    queryFn: () => currentUserId ? apiService.getLeaveRequests(currentUserId, { status: 'all' }) : Promise.resolve([]),
+    enabled: !!currentUserId,
   });
   
   // Form setup with default values
@@ -95,7 +96,7 @@ const LeaveForm = ({ leaveRequestId, onCancel }: LeaveFormProps) => {
   const form = useForm<LeaveFormValues>({
     resolver: zodResolver(leaveFormSchema),
     defaultValues: {
-      employeeId: user.currentUser?.employeeId || '',
+      employeeId: currentUserId || '',
       startDate: format(new Date(), 'yyyy-MM-dd'),
       endDate: format(new Date(), 'yyyy-MM-dd'),
       leaveType: '',

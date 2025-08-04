@@ -43,7 +43,7 @@ const PersonalInfoForm = () => {
   const { t } = useI18n();
   const { toast } = useToast();
   const { user } = useStore();
-  const employeeId = user.currentUser?.employeeId;
+  const employeeId = user.currentUser?.employeeId || user.currentUser?.id;
   
   // Fetch employee data
   const { data: employee, isLoading } = useQuery({

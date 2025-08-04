@@ -264,10 +264,12 @@ const DeviationForm = ({ deviationId, onCancel }: DeviationFormProps) => {
     queryFn: () => apiService.getTimeCodes(),
   });
   
+  const currentUserId = user.currentUser?.employeeId || user.currentUser?.id;
+  
   // Helper function to get default values based on form type
   const getDefaultValues = () => {
     const baseDefaults = {
-      employeeId: user.currentUser?.employeeId || '',
+      employeeId: currentUserId || '',
       date: format(new Date(), 'yyyy-MM-dd'),
       startTime: '08:00',
       endTime: '16:00', // 8 timmar arbetstid (exklusive lunch) - konsistent med Quick Actions
@@ -313,18 +315,18 @@ const DeviationForm = ({ deviationId, onCancel }: DeviationFormProps) => {
   // Fetch schedule for the selected date to calculate duration correctly
   const selectedDate = form.watch('date');
   const { data: scheduleForDate } = useQuery({
-    queryKey: ['/api/schedules', user.currentUser?.employeeId, selectedDate],
+    queryKey: ['/api/schedules', currentUserId, selectedDate],
     queryFn: async () => {
-      if (!user.currentUser?.employeeId || !selectedDate) return null;
+      if (!currentUserId || !selectedDate) return null;
       try {
         // Use apiService to get proper snake_case→camelCase mapping
-                    const schedule = await apiService.getEmployeeSchedule(user.currentUser.employeeId, selectedDate, user.currentUser.employeeId);
+                    const schedule = await apiService.getEmployeeSchedule(currentUserId, selectedDate, currentUserId);
         return schedule;
       } catch {
         return null;
       }
     },
-    enabled: !!user.currentUser?.employeeId && !!selectedDate,
+    enabled: !!currentUserId && !!selectedDate,
   });
   
   // Calculate duration function with schedule data
