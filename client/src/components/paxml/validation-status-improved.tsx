@@ -252,35 +252,35 @@ export function ValidationStatusImproved({ validation, isLoading = false, deviat
       <CardContent className="space-y-6">
         {/* Quick stats - more visual and scannable */}
         <div className="grid grid-cols-4 gap-3">
-          <div className="text-center p-3 bg-white rounded-lg border">
+          <div className="text-center p-4 bg-white rounded-lg border-2 shadow-sm">
             <div className="text-2xl font-bold text-gray-900">
               {validation.stats.totalDeviations}
             </div>
-            <div className="text-xs text-muted-foreground">
+            <div className="text-sm font-medium text-gray-600">
               Totalt
             </div>
           </div>
-          <div className="text-center p-3 bg-white rounded-lg border">
-            <div className="text-2xl font-bold text-green-600">
+          <div className="text-center p-4 bg-white rounded-lg border-2 shadow-sm">
+            <div className="text-2xl font-bold text-green-700">
               {validation.stats.validDeviations}
             </div>
-            <div className="text-xs text-muted-foreground">
+            <div className="text-sm font-medium text-gray-600">
               Giltiga
             </div>
           </div>
-          <div className="text-center p-3 bg-white rounded-lg border">
-            <div className="text-2xl font-bold text-red-600">
+          <div className="text-center p-4 bg-white rounded-lg border-2 shadow-sm">
+            <div className="text-2xl font-bold text-red-700">
               {validation.stats.invalidDeviations}
             </div>
-            <div className="text-xs text-muted-foreground">
+            <div className="text-sm font-medium text-gray-600">
               Fel
             </div>
           </div>
-          <div className="text-center p-3 bg-white rounded-lg border">
-            <div className="text-2xl font-bold text-yellow-600">
+          <div className="text-center p-4 bg-white rounded-lg border-2 shadow-sm">
+            <div className="text-2xl font-bold text-yellow-700">
               {validation.stats.duplicates}
             </div>
-            <div className="text-xs text-muted-foreground">
+            <div className="text-sm font-medium text-gray-600">
               Dubbletter
             </div>
           </div>
@@ -307,15 +307,15 @@ export function ValidationStatusImproved({ validation, isLoading = false, deviat
               {validation.stats.duplicates > 0 && (
                 <Button 
                   variant="outline" 
-                  className="h-auto p-4 justify-start"
+                  className="h-auto p-4 justify-start bg-white border-2 hover:bg-gray-50"
                   onClick={handleRemoveDuplicates}
                   disabled={removeDuplicatesMutation.isPending}
                 >
                   <div className="flex items-center gap-3">
                     <span className="text-xl">🗑️</span>
                     <div className="text-left">
-                      <div className="font-medium">Ta bort dubbletter</div>
-                      <div className="text-xs text-muted-foreground">
+                      <div className="font-semibold text-gray-900">Ta bort dubbletter</div>
+                      <div className="text-sm text-gray-600">
                         {validation.stats.duplicates} dubbletter hittade
                       </div>
                     </div>
@@ -325,7 +325,7 @@ export function ValidationStatusImproved({ validation, isLoading = false, deviat
               
               <Button 
                 variant="outline" 
-                className="h-auto p-4 justify-start"
+                className="h-auto p-4 justify-start bg-white border-2 hover:bg-gray-50"
                 onClick={() => {
                   // Export detailed report
                   alert('📊 Exporterar detaljerad problemrapport för Excel-analys');
@@ -334,8 +334,8 @@ export function ValidationStatusImproved({ validation, isLoading = false, deviat
                 <div className="flex items-center gap-3">
                   <span className="text-xl">📊</span>
                   <div className="text-left">
-                    <div className="font-medium">Exportera rapport</div>
-                    <div className="text-xs text-muted-foreground">
+                    <div className="font-semibold text-gray-900">Exportera rapport</div>
+                    <div className="text-sm text-gray-600">
                       Detaljerad analys i Excel
                     </div>
                   </div>
@@ -475,7 +475,7 @@ function GroupCard({ group, onAction }: { group: GroupedIssue; onAction?: () => 
             <Button 
               size="sm" 
               variant="outline" 
-              className="mb-2"
+              className="mb-2 bg-white text-gray-900 font-semibold border-2 hover:bg-gray-50"
               onClick={onAction}
             >
               {group.actionLabel}
@@ -487,7 +487,7 @@ function GroupCard({ group, onAction }: { group: GroupedIssue; onAction?: () => 
             <Button
               variant="ghost"
               size="sm"
-              className="text-xs p-1 h-auto"
+              className="text-xs p-2 h-auto text-gray-700 font-medium hover:bg-white/50"
               onClick={() => setIsExpanded(!isExpanded)}
             >
               {isExpanded ? '🔼 Dölj detaljer' : '🔽 Visa detaljer'} ({group.count} poster)
@@ -497,17 +497,18 @@ function GroupCard({ group, onAction }: { group: GroupedIssue; onAction?: () => 
           {isExpanded && (
             <div className="mt-3 space-y-1">
               {group.issues.slice(0, 5).map((issue, index) => (
-                <div key={issue.id} className="text-xs p-2 bg-white/50 rounded">
-                  <strong>#{index + 1}:</strong> {issue.description}
+                <div key={issue.id} className="text-sm p-3 bg-white border rounded-md">
+                  <strong className="text-gray-900">#{index + 1}:</strong> 
+                  <span className="text-gray-700"> {issue.description}</span>
                   {issue.employeeId && (
-                    <Badge variant="outline" className="ml-1 text-xs">
+                    <Badge variant="outline" className="ml-2 text-xs bg-gray-100 text-gray-800">
                       {issue.employeeId}
                     </Badge>
                   )}
                 </div>
               ))}
               {group.issues.length > 5 && (
-                <div className="text-xs text-center p-2 text-muted-foreground">
+                <div className="text-sm text-center p-2 text-gray-600 font-medium">
                   ... och {group.issues.length - 5} till
                 </div>
               )}

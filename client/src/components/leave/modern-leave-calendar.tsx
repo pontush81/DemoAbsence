@@ -18,7 +18,9 @@ import {
   addMonths, 
   subMonths,
   getISOWeek,
-  isWeekend
+  isWeekend,
+  startOfWeek,
+  endOfWeek
 } from 'date-fns';
 import { sv } from 'date-fns/locale';
 
@@ -45,13 +47,19 @@ const LEAVE_TYPE_COLORS = {
     bg: 'bg-red-100 hover:bg-red-200', 
     border: 'border-red-300', 
     text: 'text-red-800',
-    icon: '🤒'
+    icon: '😷'
   },
   parental: { 
     bg: 'bg-purple-100 hover:bg-purple-200', 
     border: 'border-purple-300', 
     text: 'text-purple-800',
     icon: '👶'
+  },
+  childcare: { 
+    bg: 'bg-amber-100 hover:bg-amber-200', 
+    border: 'border-amber-300', 
+    text: 'text-amber-800',
+    icon: '🧸'
   },
   personal: { 
     bg: 'bg-blue-100 hover:bg-blue-200', 
@@ -80,10 +88,23 @@ export default function ModernLeaveCalendar() {
     queryFn: () => apiService.getLeaveRequests(currentUserId || ''),
   });
 
-  // Calendar calculations
+  // Calendar calculations - Create full calendar grid starting with Monday
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
-  const calendarDays = eachDayOfInterval({ start: monthStart, end: monthEnd });
+  
+  // Find the Monday of the week containing the first day of the month
+  const calendarStart = startOfWeek(monthStart, { weekStartsOn: 1 }); // 1 = Monday
+  // Find the Sunday of the week containing the last day of the month  
+  const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
+  
+  // Get all days for the calendar grid (including days from previous/next month)
+  const calendarDays = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
+  
+  // Group calendar days into weeks for easier rendering
+  const calendarWeeks = [];
+  for (let i = 0; i < calendarDays.length; i += 7) {
+    calendarWeeks.push(calendarDays.slice(i, i + 7));
+  }
 
   // Group leave requests by date for quick lookup
   const leaveByDate = useMemo(() => {
@@ -208,12 +229,7 @@ export default function ModernLeaveCalendar() {
           </div>
         )}
 
-        {/* Week number (Monday only) */}
-        {format(day, 'E', { locale: sv }) === 'mån' && (
-          <div className="absolute -left-10 top-2 text-xs text-gray-400 font-medium">
-            v.{getISOWeek(day)}
-          </div>
-        )}
+
       </div>
     );
   };
@@ -225,9 +241,14 @@ export default function ModernLeaveCalendar() {
           <div className="h-6 bg-gray-200 rounded w-1/3"></div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-7 gap-2">
-            {Array.from({ length: 35 }).map((_, i) => (
-              <div key={i} className="h-20 bg-gray-100 rounded"></div>
+          <div className="space-y-2">
+            {Array.from({ length: 6 }).map((_, weekIndex) => (
+              <div key={weekIndex} className="grid grid-cols-8 gap-2">
+                <div className="w-12 h-20 bg-gray-100 rounded"></div>
+                {Array.from({ length: 7 }).map((_, dayIndex) => (
+                  <div key={dayIndex} className="h-20 bg-gray-100 rounded"></div>
+                ))}
+              </div>
             ))}
           </div>
         </CardContent>
@@ -294,8 +315,8 @@ export default function ModernLeaveCalendar() {
       <Card className="shadow-sm border-0">
         <CardContent className="p-6">
           {/* Weekday headers */}
-          <div className="grid grid-cols-7 gap-2 mb-4">
-            <div className="w-12 text-xs text-gray-400 text-center py-2">Vecka</div> {/* Space for week numbers */}
+          <div className="grid grid-cols-8 gap-2 mb-4">
+            <div className="w-12 text-xs text-gray-400 text-center py-2 font-semibold">Vecka</div>
             {['Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör', 'Sön'].map((day, index) => (
               <div key={day} className={`
                 text-center text-sm font-semibold py-2
@@ -306,12 +327,25 @@ export default function ModernLeaveCalendar() {
             ))}
           </div>
 
-          {/* Calendar days */}
-          <div className="relative">
-            <div className="grid grid-cols-7 gap-2">
-              <div className="w-12"></div> {/* Empty space for week number column */}
-              {calendarDays.map((day, index) => renderDay(day, index))}
-            </div>
+          {/* Calendar weeks */}
+          <div className="space-y-2">
+            {calendarWeeks.map((week, weekIndex) => {
+              const weekNumber = getISOWeek(week[0]); // First day (Monday) of the week
+              
+              return (
+                <div key={weekIndex} className="grid grid-cols-8 gap-2">
+                  {/* Week number column */}
+                  <div className="w-12 flex items-center justify-center">
+                    <div className="text-xs text-gray-400 font-medium bg-gray-50 px-2 py-1 rounded">
+                      v.{weekNumber}
+                    </div>
+                  </div>
+                  
+                  {/* Days in the week */}
+                  {week.map((day, dayIndex) => renderDay(day, weekIndex * 7 + dayIndex))}
+                </div>
+              );
+            })}
           </div>
         </CardContent>
       </Card>
