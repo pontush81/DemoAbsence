@@ -54,21 +54,29 @@ export default function Leave() {
             
             {/* Clear hierarchy: Secondary navigation + Primary action */}
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-              {/* View Toggle - Subtle secondary navigation */}
-              <div className="flex bg-gray-100 rounded-lg p-1 order-2 sm:order-1">
+              {/* View Toggle - Modern secondary navigation */}
+              <div className="flex bg-white border border-gray-200 rounded-xl p-1 shadow-sm order-2 sm:order-1">
                 <Button
-                  variant={displayMode === 'calendar' ? 'secondary' : 'ghost'}
+                  variant="ghost"
                   size="sm"
                   onClick={() => setDisplayMode('calendar')}
-                  className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+                    displayMode === 'calendar' 
+                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md hover:from-blue-600 hover:to-blue-700' 
+                      : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
+                  }`}
                 >
                   📅 Kalender
                 </Button>
                 <Button
-                  variant={displayMode === 'list' ? 'secondary' : 'ghost'}
+                  variant="ghost"
                   size="sm"
                   onClick={() => setDisplayMode('list')}
-                  className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+                    displayMode === 'list' 
+                      ? 'bg-gradient-to-r from-gray-600 to-gray-700 text-white shadow-md hover:from-gray-700 hover:to-gray-800' 
+                      : 'text-gray-600 hover:text-gray-700 hover:bg-gray-50'
+                  }`}
                 >
                   📋 Lista
                 </Button>
