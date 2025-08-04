@@ -97,12 +97,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       leaveType: leave.leave_type || leave.leaveType,
     }));
     
-      res.json(mappedLeaveRequests);
-    } catch (error) {
-      console.error('Error fetching leave requests:', error);
-      res.status(500).json({ error: (error as Error).message });
-    }
-  } else if (req.method === 'POST') {
+    res.json(mappedLeaveRequests);
+  } catch (error) {
+    console.error('Error fetching leave requests:', error);
+    res.status(500).json({ error: (error as Error).message });
+  }
+} else if (req.method === 'POST') {
     // POST - create new leave request
     try {
       const now = new Date();
