@@ -232,18 +232,14 @@ export default function LeaveCalendar() {
                   const dateDesc = getDateDescription(day);
                   
                   let dayBackgroundClass = '';
-                  if (hasApprovedLeave) {
-                    dayBackgroundClass = 'bg-green-50';
-                  } else if (hasPendingLeave) {
-                    dayBackgroundClass = 'bg-yellow-50';
-                  } else if (isCurrentMonth) {
+                  if (isCurrentMonth) {
                     if (isWorkingDayToday) {
                       dayBackgroundClass = 'bg-white';
                     } else {
-                      dayBackgroundClass = 'bg-gray-100'; // Different color for weekends/holidays
+                      dayBackgroundClass = 'bg-gray-50'; // Subtle color for weekends/holidays
                     }
                   } else {
-                    dayBackgroundClass = 'bg-gray-50';
+                    dayBackgroundClass = 'bg-gray-100';
                   }
                   
                   return (
@@ -263,23 +259,56 @@ export default function LeaveCalendar() {
                         ${!isWorkingDayToday && isCurrentMonth ? 'text-gray-500' : ''}
                       `}>
                         {day.getDate()}
-                        {/* Show indicator for non-working days - Simplified on mobile */}
+                        {/* Subtle indicator for non-working days */}
                         {!isWorkingDayToday && isCurrentMonth && (
                           <div className="text-xs text-gray-400 leading-none hidden sm:block" title={dateDesc}>
-                            {dateDesc === 'Lördag' || dateDesc === 'Söndag' ? '⌛' : '🎉'}
+                            {dateDesc === 'Lördag' || dateDesc === 'Söndag' ? '·' : '🎉'}
                           </div>
                         )}
                       </div>
                       
-                      {/* Clean status indicator - No dots, use background color + simple text */}
+                      {/* Professional continuous leave indicators */}
                       {dayLeaves.length > 0 && (
-                        <div className="absolute top-1 right-1">
-                          <div className={`
-                            px-1 py-0.5 rounded text-xs font-medium
-                            ${hasApprovedLeave ? 'bg-green-600 text-white' : 'bg-yellow-600 text-white'}
-                          `}>
-                            {dayLeaves.length}
-                          </div>
+                        <div className="absolute inset-1">
+                          {dayLeaves.map((leave: LeaveRequest, idx) => {
+                            const isStart = new Date(leave.startDate).toDateString() === day.toDateString();
+                            const isEnd = new Date(leave.endDate).toDateString() === day.toDateString();
+                            const isSingleDay = isStart && isEnd;
+                            
+                            return (
+                              <div
+                                key={idx}
+                                className={`
+                                  absolute inset-0 
+                                  ${leave.status === 'approved' ? 'bg-green-100 border-green-300' : 'bg-yellow-100 border-yellow-300'}
+                                  ${isSingleDay ? 'rounded-md border-2' : ''}
+                                  ${isStart && !isSingleDay ? 'rounded-l-md border-l-2 border-t-2 border-b-2' : ''}
+                                  ${isEnd && !isSingleDay ? 'rounded-r-md border-r-2 border-t-2 border-b-2' : ''}
+                                  ${!isStart && !isEnd ? 'border-t-2 border-b-2' : ''}
+                                `}
+                                title={`${leave.leaveType} - ${leave.status} (${leave.startDate} till ${leave.endDate})`}
+                              >
+                                {/* Show leave type only at start of period */}
+                                {isStart && (
+                                  <div className={`
+                                    absolute top-1 left-1 px-1 py-0.5 rounded-sm text-xs font-medium
+                                    ${leave.status === 'approved' ? 'bg-green-600 text-white' : 'bg-yellow-600 text-white'}
+                                  `}>
+                                    {leave.leaveType === 'vacation' ? '🏖️' : 
+                                     leave.leaveType === 'sick' ? '🏥' : 
+                                     leave.leaveType === 'parental' ? '👶' : '📅'}
+                                  </div>
+                                )}
+                                
+                                {/* Status indicator for pending items */}
+                                {leave.status === 'pending' && isStart && (
+                                  <div className="absolute top-1 right-1 w-4 h-4 bg-yellow-600 rounded-full flex items-center justify-center">
+                                    <span className="text-white text-xs">⏳</span>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
                         </div>
                       )}
                     </div>
@@ -290,23 +319,39 @@ export default function LeaveCalendar() {
           })}
         </div>
 
-        {/* Simplified Legend - Focus on essential status info */}
-        <div className="flex flex-wrap gap-6 pt-4 border-t border-gray-200">
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 bg-green-600 rounded flex items-center justify-center">
-              <span className="text-white text-xs font-bold">✓</span>
+        {/* Professional Legend - Shows continuous period visualization */}
+        <div className="pt-4 border-t border-gray-200">
+          <h4 className="text-sm font-semibold text-gray-900 mb-3">Förklaring</h4>
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="flex">
+                <div className="w-8 h-6 bg-green-100 border-2 border-green-300 rounded-l-md flex items-center justify-center">
+                  <span className="text-green-700 text-xs">🏖️</span>
+                </div>
+                <div className="w-8 h-6 bg-green-100 border-t-2 border-b-2 border-green-300"></div>
+                <div className="w-8 h-6 bg-green-100 border-2 border-green-300 rounded-r-md"></div>
+              </div>
+              <span className="text-sm font-medium text-gray-700">Godkänd ledighet (sammanhängande period)</span>
             </div>
-            <span className="text-sm font-medium text-gray-700">Godkänd ledighet</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 bg-yellow-600 rounded flex items-center justify-center">
-              <span className="text-white text-xs font-bold">⏳</span>
+            
+            <div className="flex items-center gap-3">
+              <div className="flex">
+                <div className="w-8 h-6 bg-yellow-100 border-2 border-yellow-300 rounded-l-md flex items-center justify-center relative">
+                  <span className="text-yellow-700 text-xs">📅</span>
+                  <div className="absolute top-0 right-0 w-3 h-3 bg-yellow-600 rounded-full flex items-center justify-center">
+                    <span className="text-white text-xs">⏳</span>
+                  </div>
+                </div>
+                <div className="w-8 h-6 bg-yellow-100 border-t-2 border-b-2 border-yellow-300"></div>
+                <div className="w-8 h-6 bg-yellow-100 border-2 border-yellow-300 rounded-r-md"></div>
+              </div>
+              <span className="text-sm font-medium text-gray-700">Väntar på svar (sammanhängande period)</span>
             </div>
-            <span className="text-sm font-medium text-gray-700">Väntar på svar</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 ring-2 ring-blue-500 bg-blue-50 rounded"></div>
-            <span className="text-sm font-medium text-gray-700">Idag</span>
+            
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-6 ring-2 ring-blue-500 bg-blue-50 rounded"></div>
+              <span className="text-sm font-medium text-gray-700">Idag</span>
+            </div>
           </div>
         </div>
 
