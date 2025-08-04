@@ -166,30 +166,42 @@ export default function LeaveCalendar() {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={previousMonth}>
+          <div className="flex items-center gap-2 w-full justify-center">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={previousMonth}
+              className="min-w-[40px] h-8 sm:h-9"
+            >
               <ChevronLeftIcon className="h-4 w-4" />
             </Button>
-            <span className="min-w-[150px] text-center font-medium">
+            <span className="min-w-[140px] sm:min-w-[150px] text-center font-medium text-sm sm:text-base px-2">
               {currentDate.toLocaleDateString('sv-SE', { month: 'long', year: 'numeric' })}
             </span>
-            <Button variant="outline" size="sm" onClick={nextMonth}>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={nextMonth}
+              className="min-w-[40px] h-8 sm:h-9"
+            >
               <ChevronRightIcon className="h-4 w-4" />
             </Button>
           </div>
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {/* Calendar Grid with Swedish Week Numbers */}
-        <div className="grid grid-cols-8 gap-1 mb-4">
-          {/* Header row with week number column */}
-          <div className="p-2 text-center text-sm font-medium text-gray-500">
+        {/* Calendar Grid with Swedish Week Numbers - Mobile Optimized */}
+        <div className="grid grid-cols-7 sm:grid-cols-8 gap-0.5 sm:gap-1 mb-4">
+          {/* Header row with week number column - Hidden on mobile */}
+          <div className="hidden sm:block p-2 text-center text-sm font-medium text-gray-500">
             v.
           </div>
           {/* Header days - European/Swedish standard (Monday start) */}
-          {['Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör', 'Sön'].map((day) => (
-            <div key={day} className="p-2 text-center text-sm font-medium text-gray-500">
-              {day}
+          {['Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör', 'Sön'].map((day, index) => (
+            <div key={day} className="p-1 sm:p-2 text-center text-xs sm:text-sm font-medium text-gray-500">
+              {/* Show abbreviated version on mobile */}
+              <span className="sm:hidden">{day.substring(0, 1)}</span>
+              <span className="hidden sm:inline">{day}</span>
             </div>
           ))}
           
@@ -200,8 +212,8 @@ export default function LeaveCalendar() {
             
             return (
               <React.Fragment key={weekIndex}>
-                {/* Week number column */}
-                <div className="min-h-[80px] p-2 border border-gray-200 bg-gray-50 flex items-center justify-center">
+                {/* Week number column - Hidden on mobile */}
+                <div className="hidden sm:flex min-h-[60px] sm:min-h-[80px] p-2 border border-gray-200 bg-gray-50 items-center justify-center">
                   <span className="text-sm font-medium text-gray-600 whitespace-nowrap">
                     v.{weekNumber}
                   </span>
@@ -238,43 +250,43 @@ export default function LeaveCalendar() {
                     <div
                       key={dayIndex}
                       className={`
-                        min-h-[80px] p-1 border border-gray-200 relative
+                        min-h-[60px] sm:min-h-[80px] p-1 sm:p-2 border border-gray-200 relative
                         ${dayBackgroundClass}
-                        ${isToday ? 'ring-2 ring-blue-500' : ''}
+                        ${isToday ? 'ring-1 sm:ring-2 ring-blue-500' : ''}
                         hover:bg-gray-100 transition-colors duration-150
                       `}
                     >
                       <div className={`
-                        text-sm font-medium mb-1
+                        text-xs sm:text-sm font-medium mb-1
                         ${isCurrentMonth ? 'text-gray-900' : 'text-gray-400'}
                         ${isToday ? 'text-blue-600 font-bold' : ''}
                         ${!isWorkingDayToday && isCurrentMonth ? 'text-gray-500' : ''}
                       `}>
                         {day.getDate()}
-                        {/* Show indicator for non-working days */}
+                        {/* Show indicator for non-working days - Simplified on mobile */}
                         {!isWorkingDayToday && isCurrentMonth && (
-                          <div className="text-xs text-gray-400 leading-none" title={dateDesc}>
+                          <div className="text-xs text-gray-400 leading-none hidden sm:block" title={dateDesc}>
                             {dateDesc === 'Lördag' || dateDesc === 'Söndag' ? '⌛' : '🎉'}
                           </div>
                         )}
                       </div>
                       
-                      {/* Leave indicators - Modern design following UX best practices */}
+                      {/* Leave indicators - Mobile Optimized */}
                       {dayLeaves.length > 0 && (
                         <div className="absolute inset-0 flex items-end p-1">
-                          <div className="flex gap-1">
-                            {dayLeaves.slice(0, 3).map((leave: LeaveRequest, idx) => (
+                          <div className="flex gap-0.5 sm:gap-1">
+                            {dayLeaves.slice(0, 2).map((leave: LeaveRequest, idx) => (
                               <div
                                 key={idx}
-                                className="w-2 h-2 rounded-full"
+                                className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full"
                                 style={{
                                   backgroundColor: leave.status === 'approved' ? '#22c55e' : '#eab308'
                                 }}
                                 title={`${leave.leaveType} - ${leave.status}`}
                               />
                             ))}
-                            {dayLeaves.length > 3 && (
-                              <div className="w-2 h-2 rounded-full bg-gray-400" title={`+${dayLeaves.length - 3} mer`} />
+                            {dayLeaves.length > 2 && (
+                              <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-gray-400" title={`+${dayLeaves.length - 2} mer`} />
                             )}
                           </div>
                         </div>
