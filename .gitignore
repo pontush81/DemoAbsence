@@ -35,3 +35,8 @@ Thumbs.db
 .idea/
 .replit
 .vercel
+
+# Uploads and exports (contains sensitive data)
+uploads/
+exports/
+*.xml
