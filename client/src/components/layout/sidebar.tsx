@@ -22,12 +22,14 @@ const Sidebar = () => {
   
   // Rollväxling hanteras nu via persona-växlaren
   
+  // Define payroll role first
+  const isPayroll = user.currentRole === 'payroll';
+  
   // Roles that can access manager functions
   const canAccessManagerFunctions = isManager || isHR || isHRManager || isPayrollAdmin || isPayrollManager || isPayroll;
   
   // 🔒 PAYROLL EXPORT - HIGHLY RESTRICTED per GDPR and Swedish law
   // Only specific payroll roles + HR-manager (if they have payroll responsibility)
-  const isPayroll = user.currentRole === 'payroll';
   const canAccessPayrollExport = isPayrollAdmin || isPayrollManager || isHRManager || isPayroll;
   
   const menuItems = [
