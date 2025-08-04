@@ -381,6 +381,16 @@ export default function PAXMLExport({ employees, deviations }: PAXMLExportProps)
               </div>
             </div>
 
+            {/* Future Date Filtering Warning */}
+            <Alert className="border-orange-200 bg-orange-50">
+              <span className="material-icons text-orange-600">schedule</span>
+              <AlertDescription className="text-orange-800 text-sm">
+                <strong>🚨 Automatisk säkerhetsfiltrering:</strong> Framtida datum filtreras automatiskt bort från löneexporten.
+                <br />Du betalar endast för arbetstid som redan utförts (datum ≤ idag).
+                <br /><em>Detta förhindrar att du betalar för arbetstid som inte utförts än.</em>
+              </AlertDescription>
+            </Alert>
+
             <Button
               onClick={handleExport}
               disabled={

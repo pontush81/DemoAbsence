@@ -1482,6 +1482,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         deviations = deviations.filter((d: any) => employeeIds.includes(d.employeeId || d.employee_id));
         console.log(`After employee filtering: ${deviations.length} deviations`);
       }
+
+      // 🚨 CRITICAL PAYROLL SECURITY: Filter out future dates
+      // Never pay for work not yet performed!
+      const today = new Date();
+      today.setHours(23, 59, 59, 999); // End of today
+      const beforeCount = deviations.length;
+      
+      const futureDeviations = deviations.filter((d: any) => new Date(d.date) > today);
+      deviations = deviations.filter((d: any) => new Date(d.date) <= today);
+      
+      console.log(`🚨 PAYROLL SECURITY: Filtered out ${futureDeviations.length} future-dated deviations`);
+      console.log(`After future date filtering: ${deviations.length} deviations (was ${beforeCount})`);
+      
+      if (futureDeviations.length > 0) {
+        console.log('🚨 Future deviations excluded from payroll:', 
+          futureDeviations.map(d => `${d.employeeId || d.employee_id}: ${d.date}`));
+      }
       
       // Get employees
       let employees = [];
@@ -1711,6 +1728,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (employeeIds && employeeIds.length > 0) {
         deviations = deviations.filter((d: any) => employeeIds.includes(d.employeeId || d.employee_id));
         console.log(`After employee filtering: ${deviations.length} deviations`);
+      }
+
+      // 🚨 CRITICAL PAYROLL SECURITY: Filter out future dates
+      // Never pay for work not yet performed!
+      const today = new Date();
+      today.setHours(23, 59, 59, 999); // End of today
+      const beforeCountScheduled = deviations.length;
+      
+      const futureDeviationsScheduled = deviations.filter((d: any) => new Date(d.date) > today);
+      deviations = deviations.filter((d: any) => new Date(d.date) <= today);
+      
+      console.log(`🚨 PAYROLL SECURITY (with schedules): Filtered out ${futureDeviationsScheduled.length} future-dated deviations`);
+      console.log(`After future date filtering: ${deviations.length} deviations (was ${beforeCountScheduled})`);
+      
+      if (futureDeviationsScheduled.length > 0) {
+        console.log('🚨 Future deviations excluded from payroll:', 
+          futureDeviationsScheduled.map(d => `${d.employeeId || d.employee_id}: ${d.date}`));
       }
       
       let schedules: any[] = [];

@@ -202,13 +202,13 @@ export function usePAXMLValidation(
           const daysDiff = Math.ceil((deviationDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
           issues.push({
             id: `future-date-${deviation.id}`,
-            type: 'warning',
+            type: 'info',
             category: 'business',
-            title: 'Framtida datum',
-            description: `Avvikelse för ${getEmployeeName(deviation.employeeId, employees)} är daterad ${daysDiff} dag${daysDiff !== 1 ? 'ar' : ''} framåt i tiden (${deviation.date})`,
+            title: 'Framtida datum (filtreras bort automatiskt)',
+            description: `Avvikelse för ${getEmployeeName(deviation.employeeId, employees)} är daterad ${daysDiff} dag${daysDiff !== 1 ? 'ar' : ''} framåt i tiden (${deviation.date}) - kommer INTE exporteras till lönesystemet`,
             employeeId: deviation.employeeId,
             deviationId: deviation.id,
-            action: 'Kontrollera om datumit är korrekt - är det verkligen framtida arbetstid eller felaktigt inmatat?'
+            action: 'Framtida datum filtreras automatiskt bort från löneexporten för att förhindra betalning för ej utförd arbetstid'
           });
         }
       } catch (error) {

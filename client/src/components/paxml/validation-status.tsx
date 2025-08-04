@@ -179,15 +179,15 @@ export function ValidationStatus({ validation, isLoading = false, deviations = [
 
       <CardContent className="space-y-4">
         {/* Quick Help for Common Issues */}
-        {(validation.hasWarnings || validation.hasErrors) && (
+        {(validation.hasWarnings || validation.hasErrors || validation.issues.some(i => i.type === 'info')) && (
           <Alert className="border-blue-200 bg-blue-50">
             <span className="material-icons text-blue-600">info</span>
             <AlertDescription className="text-blue-800 text-sm">
               <strong>💡 Vanliga problem:</strong>
-              <br />• <strong>Framtida datum:</strong> Avvikelse daterad efter idag - kontrollera om datumit är korrekt
+              <br />• <strong>Framtida datum:</strong> Filtreras automatiskt bort (visas som info) - du betalar inte för ej utförd arbetstid
               <br />• <strong>Dubblett:</strong> Samma avvikelse finns flera gånger - ta bort överflödiga
               <br />• <strong>Saknar tidkod:</strong> Avvikelsen saknar PAXML-kompatibel tidkod
-              <br />📌 <em>Klicka på "Detaljer" för specifik hjälp per varning</em>
+              <br />📌 <em>Klicka på "Detaljer" för specifik hjälp per problem</em>
             </AlertDescription>
           </Alert>
         )}
