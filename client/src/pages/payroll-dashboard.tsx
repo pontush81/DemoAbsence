@@ -124,6 +124,19 @@ export default function PayrollDashboard() {
             new Date(d.date) >= monthStart &&
             new Date(d.date) <= monthEnd
           );
+          
+          // 🔍 DEBUG: Log filtering for debugging
+          if (employee.employeeId === 'E001') {
+            console.log('🔍 DEBUG E001 Anna Andersson:', {
+              selectedMonth,
+              monthStart: monthStart.toISOString(),
+              monthEnd: monthEnd.toISOString(),
+              totalDeviations: allDeviations.length,
+              annaDeviations: (allDeviations as Deviation[]).filter(d => d.employeeId === 'E001').length,
+              filteredCount: employeeDeviations.length,
+              sampleDates: (allDeviations as Deviation[]).filter(d => d.employeeId === 'E001').slice(0,3).map(d => d.date)
+            });
+          }
 
           const employeeLeaveRequests = (allLeaveRequests as LeaveRequest[]).filter((lr: LeaveRequest) => 
             lr.employeeId === employee.employeeId &&
