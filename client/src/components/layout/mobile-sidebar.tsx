@@ -16,8 +16,16 @@ const MobileSidebar = () => {
   const isHRManager = user.currentRole === 'hr-manager';
   const isPayrollAdmin = user.currentRole === 'payroll-admin';
   const isPayrollManager = user.currentRole === 'payroll-manager';
+  const isFinanceController = user.currentRole === 'finance-controller';
+  const isEmployee = user.currentRole === 'employee';
+  
+  // Rollväxling hanteras nu via persona-växlaren
+  
+  // Roles that can access manager functions
+  const canAccessManagerFunctions = isManager || isHR || isHRManager || isPayrollAdmin || isPayrollManager;
   
   // 🔒 PAYROLL EXPORT - HIGHLY RESTRICTED per GDPR and Swedish law
+  // Only specific payroll roles + HR-manager (if they have payroll responsibility)
   const isPayroll = user.currentRole === 'payroll';
   const canAccessPayrollExport = isPayrollAdmin || isPayrollManager || isHRManager || isPayroll;
   
@@ -59,20 +67,20 @@ const MobileSidebar = () => {
     }
   ];
   
+  // Role-specific menu items
   const managerMenuItems = [
-    {
+    ...(isManager || isHR ? [{
       href: "/manager",
       icon: "supervisor_account",
       label: t('nav.manager'),
       active: currentRoute === "/manager"
-    },
-    {
+    }] : []),
+    ...(isManager || isHR ? [{
       href: "/attestation",
       icon: "fact_check",
       label: t('nav.attestation'),
       active: currentRoute === "/attestation"
-    },
-    // 🔒 PAYROLL EXPORT - HIGHLY RESTRICTED per GDPR and Swedish law
+    }] : []),
     ...(canAccessPayrollExport ? [{
       href: "/paxml-export",
       icon: "file_download",
@@ -80,6 +88,19 @@ const MobileSidebar = () => {
       active: currentRoute === "/paxml-export"
     }] : [])
   ];
+
+  // HR-specific items - REMOVED HR Översikt as it has no corresponding page
+  const hrMenuItems: any[] = [];
+
+  // Payroll-specific items  
+  const payrollMenuItems = (isPayrollAdmin || isPayrollManager || isPayroll) ? [
+    {
+      href: "/payroll-dashboard", 
+      icon: "account_balance_wallet",
+      label: "Löneoversikt",
+      active: currentRoute === "/payroll-dashboard"
+    }
+  ] : [];
   
   const travelExpensesMenuItem = {
     href: "#",
@@ -142,7 +163,7 @@ const MobileSidebar = () => {
           ))}
           
           {/* Manager/Administrative section */}
-          {(isManager || isHR || isHRManager || isPayrollAdmin || isPayrollManager) && (
+          {canAccessManagerFunctions && (
             <>
               <li className="border-t mt-2 pt-2 border-sidebar-border">
                 <div className="px-4 py-2 text-xs font-semibold text-muted-foreground">
@@ -150,6 +171,32 @@ const MobileSidebar = () => {
                 </div>
               </li>
               {managerMenuItems.map((item) => (
+                <li key={item.href}>
+                  <Link 
+                    href={item.href}
+                    className={cn(
+                      "flex items-center px-4 py-3 text-sidebar-foreground",
+                      item.active && "text-primary border-l-4 border-primary"
+                    )}
+                    onClick={closeSidebar}
+                  >
+                    <span className="material-icons mr-3">{item.icon}</span>
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </>
+          )}
+          
+          {/* Payroll section */}
+          {payrollMenuItems.length > 0 && (
+            <>
+              <li className="border-t mt-2 pt-2 border-sidebar-border">
+                <div className="px-4 py-2 text-xs font-semibold text-muted-foreground">
+                  Löneadministration
+                </div>
+              </li>
+              {payrollMenuItems.map((item) => (
                 <li key={item.href}>
                   <Link 
                     href={item.href}

@@ -90,7 +90,7 @@ const Sidebar = () => {
   const hrMenuItems: any[] = [];
 
   // Payroll-specific items  
-  const payrollMenuItems = (isPayrollAdmin || isPayrollManager) ? [
+  const payrollMenuItems = (isPayrollAdmin || isPayrollManager || isPayroll) ? [
     {
       href: "/payroll-dashboard", 
       icon: "account_balance_wallet",
