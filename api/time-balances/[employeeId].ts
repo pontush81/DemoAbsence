@@ -1,25 +1,13 @@
 import 'dotenv/config';
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createClient } from '@supabase/supabase-js';
-import fs from 'fs';
-import path from 'path';
 
 // Initialize Supabase client
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_ANON_KEY;
 const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
 
-// Helper to read mock data
-async function getMockData(filename: string) {
-  try {
-    const filePath = path.join(process.cwd(), 'mock-data', filename);
-    const fileContent = fs.readFileSync(filePath, 'utf8');
-    return JSON.parse(fileContent);
-  } catch (error) {
-    console.error(`Error reading mock data ${filename}:`, error);
-    return [];
-  }
-}
+// 🚫 MOCK DATA REMOVED - Time balances are SALARY-CRITICAL and must use real database data only
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
@@ -45,33 +33,43 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
-    let timeBalance;
-    
-    // Try Supabase first, fallback to mock data
-    if (supabase) {
-      try {
-        const { data, error } = await supabase
-          .from('time_balances')
-          .select('*')
-          .eq('employee_id', employeeId)
-          .single();
-        
-        if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
-          throw error;
-        }
-        timeBalance = data;
-      } catch (error) {
-        console.log('Supabase failed, using mock data:', error);
-      }
+    // 🔒 CRITICAL: Time balances MUST use database only - NO MOCK DATA FALLBACK!
+    // Time balances affect salary calculations and must be accurate
+    if (!supabase) {
+      console.error('🚫 CRITICAL: Database connection required for time balance access');
+      return res.status(500).json({ 
+        error: 'Database connection required',
+        message: 'Tidssaldo kräver databasanslutning. Mock data är inte tillåtet för tidssaldon som påverkar löner.',
+        code: 'TIME_BALANCE_DB_REQUIRED'
+      });
     }
     
-    // If Supabase didn't work or no data found, try mock data
-    if (!timeBalance) {
-      console.log('Using mock data for time balance');
-      const mockTimeBalances = await getMockData('timebalances.json');
-      timeBalance = mockTimeBalances.find((tb: any) => 
-        tb.employeeId === employeeId || tb.employee_id === employeeId
-      );
+    let timeBalance;
+    try {
+      const { data, error } = await supabase
+        .from('time_balances')
+        .select('*')
+        .eq('employee_id', employeeId)
+        .single();
+      
+      if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned is OK
+        console.error('🚫 CRITICAL: Database query failed for time balance:', error);
+        return res.status(500).json({ 
+          error: 'Database query failed',
+          message: 'Kunde inte hämta tidssaldo från databasen. Mock data är inte tillåtet för tidssaldon.',
+          code: 'TIME_BALANCE_DB_QUERY_FAILED'
+        });
+      }
+      
+      timeBalance = data;
+      console.log(`✅ TIME BALANCE ACCESS: Retrieved time balance from database for ${employeeId}`);
+    } catch (error) {
+      console.error('🚫 CRITICAL: Unexpected error accessing time balance:', error);
+      return res.status(500).json({ 
+        error: 'Database access failed',
+        message: 'Ett oväntat fel uppstod vid hämtning av tidssaldo från databasen.',
+        code: 'TIME_BALANCE_UNEXPECTED_ERROR'
+      });
     }
     
     if (timeBalance) {

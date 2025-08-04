@@ -1,25 +1,13 @@
 import 'dotenv/config';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
-import fs from 'fs';
-import path from 'path';
 
 // Initialize Supabase client
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_ANON_KEY;
 const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
 
-// Helper to read mock data
-async function getMockData(filename: string) {
-  try {
-    const filePath = path.join(process.cwd(), 'mock-data', filename);
-    const fileContent = fs.readFileSync(filePath, 'utf8');
-    return JSON.parse(fileContent);
-  } catch (error) {
-    console.error(`Error reading mock data ${filename}:`, error);
-    return [];
-  }
-}
+// 🚫 MOCK DATA REMOVED - Manager rejections are LEGALLY-CRITICAL and must use real database data only
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === 'POST') {
@@ -36,35 +24,43 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       
       let rejectedDeviation;
       
-      // Try Supabase first, fallback to mock data
-      if (supabase) {
-        try {
-          const { data, error } = await supabase
-            .from('deviations')
-            .update(updateData)
-            .eq('id', deviationId)
-            .select()
-            .single();
-          
-          if (error) throw error;
-          rejectedDeviation = data;
-        } catch (error) {
-          console.log('Supabase rejection failed, using mock data:', error);
-        }
+      // 🔒 CRITICAL: Manager rejections MUST use database only - NO MOCK DATA FALLBACK!
+      if (!supabase) {
+        console.error('🚫 CRITICAL: Database connection required for manager rejections');
+        return res.status(500).json({ 
+          error: 'Database connection required',
+          message: 'Avslag kräver databasanslutning. Mock data är inte tillåtet för manager-beslut.',
+          code: 'REJECTION_DB_REQUIRED'
+        });
       }
       
-      // If Supabase didn't work, try mock data fallback
-      if (!rejectedDeviation) {
-        const deviations = await getMockData('deviations.json');
-        const index = deviations.findIndex((d: any) => d.id === deviationId);
+      let rejectedDeviation;
+      try {
+        const { data, error } = await supabase
+          .from('deviations')
+          .update(updateData)
+          .eq('id', deviationId)
+          .select()
+          .single();
         
-        if (index !== -1) {
-          rejectedDeviation = {
-            ...deviations[index],
-            ...updateData,
-            lastUpdated: new Date().toISOString()
-          };
+        if (error) {
+          console.error('🚫 CRITICAL: Database update failed for deviation rejection:', error);
+          return res.status(500).json({ 
+            error: 'Database update failed',
+            message: 'Kunde inte avslå avvikelse i databasen. Mock data är inte tillåtet för avslag.',
+            code: 'REJECTION_DB_UPDATE_FAILED'
+          });
         }
+        
+        rejectedDeviation = data;
+        console.log(`✅ MANAGER REJECTION: Rejected deviation ${deviationId} via database`);
+      } catch (error) {
+        console.error('🚫 CRITICAL: Unexpected error during deviation rejection:', error);
+        return res.status(500).json({ 
+          error: 'Rejection failed',
+          message: 'Ett oväntat fel uppstod vid avslag av avvikelse.',
+          code: 'REJECTION_UNEXPECTED_ERROR'
+        });
       }
       
       if (rejectedDeviation) {

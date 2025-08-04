@@ -1,37 +1,13 @@
 import 'dotenv/config';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
-import fs from 'fs';
-import path from 'path';
 
 // Initialize Supabase client
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_ANON_KEY;
 const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
 
-// Helper to read mock data
-async function getMockData(filename: string) {
-  try {
-    const filePath = path.join(process.cwd(), 'mock-data', filename);
-    const fileContent = fs.readFileSync(filePath, 'utf8');
-    return JSON.parse(fileContent);
-  } catch (error) {
-    console.error(`Error reading mock data ${filename}:`, error);
-    return [];
-  }
-}
-
-// Helper to save mock data back to file (CRITICAL: This was missing!)
-async function saveMockData(filename: string, data: any) {
-  try {
-    const filePath = path.join(process.cwd(), 'mock-data', filename);
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
-    console.log(`✅ Successfully saved mock data to ${filename}`);
-  } catch (error) {
-    console.error(`❌ Error saving mock data ${filename}:`, error);
-    throw error;
-  }
-}
+// 🚫 MOCK DATA REMOVED - Leave request rejections are LEGALLY-CRITICAL and must use real database data only
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === 'POST') {
@@ -46,46 +22,43 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         rejected_at: new Date().toISOString()
       };
       
-      let rejectedLeaveRequest;
-      
-      // Try Supabase first, fallback to mock data
-      if (supabase) {
-        try {
-          const { data, error } = await supabase
-            .from('leave_requests')
-            .update(updateData)
-            .eq('id', leaveRequestId)
-            .select()
-            .single();
-          
-          if (error) throw error;
-          rejectedLeaveRequest = data;
-        } catch (error) {
-          console.log('Supabase rejection failed, using mock data:', error);
-        }
+      // 🔒 CRITICAL: Leave request rejections MUST use database only - NO MOCK DATA FALLBACK!
+      if (!supabase) {
+        console.error('🚫 CRITICAL: Database connection required for leave request rejections');
+        return res.status(500).json({ 
+          error: 'Database connection required',
+          message: 'Avslag av ledighet kräver databasanslutning. Mock data är inte tillåtet för manager-beslut.',
+          code: 'LEAVE_REJECTION_DB_REQUIRED'
+        });
       }
       
-      // If Supabase didn't work, try mock data fallback
-      if (!rejectedLeaveRequest) {
-        const leaveRequests = await getMockData('leave-requests.json');
-        const index = leaveRequests.findIndex((lr: any) => lr.id === leaveRequestId);
+      let rejectedLeaveRequest;
+      try {
+        const { data, error } = await supabase
+          .from('leave_requests')
+          .update(updateData)
+          .eq('id', leaveRequestId)
+          .select()
+          .single();
         
-        if (index !== -1) {
-          // 🎯 CRITICAL FIX: Update the object in the array AND save back to file
-          rejectedLeaveRequest = {
-            ...leaveRequests[index],
-            ...updateData,
-            lastUpdated: new Date().toISOString()
-          };
-          
-          // Update the array with the rejected request
-          leaveRequests[index] = rejectedLeaveRequest;
-          
-          // Save the updated array back to the file (THIS WAS MISSING!)
-          await saveMockData('leave-requests.json', leaveRequests);
-          
-          console.log(`✅ Successfully rejected leave request ${leaveRequestId} in mock data`);
+        if (error) {
+          console.error('🚫 CRITICAL: Database update failed for leave request rejection:', error);
+          return res.status(500).json({ 
+            error: 'Database update failed',
+            message: 'Kunde inte avslå ledighetsansökan i databasen. Mock data är inte tillåtet för avslag.',
+            code: 'LEAVE_REJECTION_DB_UPDATE_FAILED'
+          });
         }
+        
+        rejectedLeaveRequest = data;
+        console.log(`✅ MANAGER REJECTION: Rejected leave request ${leaveRequestId} via database`);
+      } catch (error) {
+        console.error('🚫 CRITICAL: Unexpected error during leave request rejection:', error);
+        return res.status(500).json({ 
+          error: 'Rejection failed',
+          message: 'Ett oväntat fel uppstod vid avslag av ledighetsansökan.',
+          code: 'LEAVE_REJECTION_UNEXPECTED_ERROR'
+        });
       }
       
       if (rejectedLeaveRequest) {

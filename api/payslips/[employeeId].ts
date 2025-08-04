@@ -1,25 +1,13 @@
 import 'dotenv/config';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
-import fs from 'fs';
-import path from 'path';
 
 // Initialize Supabase client
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_ANON_KEY;
 const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
 
-// Helper to read mock data
-async function getMockData(filename: string) {
-  try {
-    const filePath = path.join(process.cwd(), 'mock-data', filename);
-    const fileContent = fs.readFileSync(filePath, 'utf8');
-    return JSON.parse(fileContent);
-  } catch (error) {
-    console.error(`Error reading mock data ${filename}:`, error);
-    return [];
-  }
-}
+// 🚫 MOCK DATA REMOVED - Payslips are SALARY-CRITICAL and must use real database data only
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
@@ -40,32 +28,42 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
     
-    let payslips;
+    // 🔒 CRITICAL: Payslips MUST use database only - NO MOCK DATA FALLBACK!
+    if (!supabase) {
+      console.error('🚫 CRITICAL: Database connection required for payslips access');
+      return res.status(500).json({ 
+        error: 'Database connection required',
+        message: 'Lönebesked kräver databasanslutning. Mock data är inte tillåtet för löneuppgifter.',
+        code: 'PAYSLIP_DB_REQUIRED'
+      });
+    }
     
-    // Try Supabase first, fallback to mock data
-    if (supabase) {
-      try {
-        const { data, error } = await supabase
-          .from('payslips')
-          .select('*')
-          .eq('employee_id', employeeId)
-          .order('pay_period_start', { ascending: false });
-        
-        if (error) throw error;
-        payslips = data || [];
-      } catch (error) {
-        console.log('Supabase failed, using mock data:', error);
-        const allPayslips = await getMockData('payslips.json');
-        payslips = allPayslips.filter((p: any) => 
-          (p.employeeId === employeeId || p.employee_id === employeeId)
-        );
+    let payslips;
+    try {
+      const { data, error } = await supabase
+        .from('payslips')
+        .select('*')
+        .eq('employee_id', employeeId)
+        .order('pay_period_start', { ascending: false });
+      
+      if (error) {
+        console.error('🚫 CRITICAL: Database query failed for payslips:', error);
+        return res.status(500).json({ 
+          error: 'Database query failed',
+          message: 'Kunde inte hämta lönebesked från databasen. Mock data är inte tillåtet för löneuppgifter.',
+          code: 'PAYSLIP_DB_QUERY_FAILED'
+        });
       }
-    } else {
-      console.log('Supabase not configured, using mock data');
-      const allPayslips = await getMockData('payslips.json');
-      payslips = allPayslips.filter((p: any) => 
-        (p.employeeId === employeeId || p.employee_id === employeeId)
-      );
+      
+      payslips = data || [];
+      console.log(`✅ PAYSLIP ACCESS: Retrieved ${payslips.length} payslips from database for ${employeeId}`);
+    } catch (error) {
+      console.error('🚫 CRITICAL: Unexpected error accessing payslips:', error);
+      return res.status(500).json({ 
+        error: 'Database access failed',
+        message: 'Ett oväntat fel uppstod vid hämtning av lönebesked från databasen.',
+        code: 'PAYSLIP_UNEXPECTED_ERROR'
+      });
     }
     
     // Map snake_case to camelCase for frontend compatibility

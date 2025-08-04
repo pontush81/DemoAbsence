@@ -1,25 +1,13 @@
 import 'dotenv/config';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
-import fs from 'fs';
-import path from 'path';
 
 // Initialize Supabase client
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_ANON_KEY;
 const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
 
-// Helper to read mock data
-async function getMockData(filename: string) {
-  try {
-    const filePath = path.join(process.cwd(), 'mock-data', filename);
-    const fileContent = fs.readFileSync(filePath, 'utf8');
-    return JSON.parse(fileContent);
-  } catch (error) {
-    console.error(`Error reading mock data ${filename}:`, error);
-    return [];
-  }
-}
+// 🚫 MOCK DATA REMOVED - Manager approvals are LEGALLY-CRITICAL and must use real database data only
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === 'POST') {
@@ -34,40 +22,44 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         approved_at: new Date().toISOString()
       };
       
-      let approvedDeviation;
-      
-      // Try Supabase first, fallback to mock data
-      if (supabase) {
-        try {
-          const { data, error } = await supabase
-            .from('deviations')
-            .update(updateData)
-            .eq('id', deviationId)
-            .select()
-            .single();
-          
-          if (error) throw error;
-          approvedDeviation = data;
-          console.log('Approved deviation via Supabase:', approvedDeviation);
-        } catch (error) {
-          console.log('Supabase approval failed, using mock data:', error);
-        }
+      // 🔒 CRITICAL: Manager approvals MUST use database only - NO MOCK DATA FALLBACK!
+      // Approvals have legal and financial implications and must be auditable
+      if (!supabase) {
+        console.error('🚫 CRITICAL: Database connection required for manager approvals');
+        return res.status(500).json({ 
+          error: 'Database connection required',
+          message: 'Godkännanden kräver databasanslutning. Mock data är inte tillåtet för manager-beslut.',
+          code: 'APPROVAL_DB_REQUIRED'
+        });
       }
       
-      // If Supabase didn't work, try mock data fallback
-      if (!approvedDeviation) {
-        const deviations = await getMockData('deviations.json');
-        const index = deviations.findIndex((d: any) => d.id === deviationId);
+      let approvedDeviation;
+      try {
+        const { data, error } = await supabase
+          .from('deviations')
+          .update(updateData)
+          .eq('id', deviationId)
+          .select()
+          .single();
         
-        if (index !== -1) {
-          approvedDeviation = {
-            ...deviations[index],
-            ...updateData,
-            lastUpdated: new Date().toISOString()
-          };
-          // In a real implementation, we would save back to file
-          console.log('Approved deviation via mock fallback:', approvedDeviation);
+        if (error) {
+          console.error('🚫 CRITICAL: Database update failed for deviation approval:', error);
+          return res.status(500).json({ 
+            error: 'Database update failed',
+            message: 'Kunde inte godkänna avvikelse i databasen. Mock data är inte tillåtet för godkännanden.',
+            code: 'APPROVAL_DB_UPDATE_FAILED'
+          });
         }
+        
+        approvedDeviation = data;
+        console.log(`✅ MANAGER APPROVAL: Approved deviation ${deviationId} via database`);
+      } catch (error) {
+        console.error('🚫 CRITICAL: Unexpected error during deviation approval:', error);
+        return res.status(500).json({ 
+          error: 'Approval failed',
+          message: 'Ett oväntat fel uppstod vid godkännande av avvikelse.',
+          code: 'APPROVAL_UNEXPECTED_ERROR'
+        });
       }
       
       if (approvedDeviation) {
