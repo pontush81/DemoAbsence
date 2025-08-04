@@ -514,8 +514,12 @@ const translations: Translations = {
     en: 'Parental Leave',
   },
   'leave.personal': {
-    sv: 'Vård av barn',
+    sv: 'Personlig ledighet',
     en: 'Personal Leave',
+  },
+  'leave.childcare': {
+    sv: 'Vård av barn',
+    en: 'Childcare',
   },
   'leave.startDate': {
     sv: 'Från datum',
