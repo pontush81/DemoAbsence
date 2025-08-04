@@ -7,12 +7,9 @@ const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_ANON_KEY;
 const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
 
-// Fallback mock data - embedded for Vercel compatibility
-const mockLeaveRequests = [
-  {"id":1,"employeeId":"E001","startDate":"2025-08-15","endDate":"2025-08-16","leaveType":"vacation","status":"approved","submitted":"2025-08-01T10:00:00+00:00"},
-  {"id":2,"employeeId":"E001","startDate":"2025-08-20","endDate":"2025-08-21","leaveType":"sick","status":"pending","submitted":"2025-08-02T10:00:00+00:00"},
-  {"id":3,"employeeId":"E001","startDate":"2025-08-25","endDate":"2025-08-25","leaveType":"personal","status":"rejected","submitted":"2025-08-03T10:00:00+00:00"}
-];
+// 🚫 MOCK DATA COMPLETELY REMOVED - Leave requests are CRITICAL and must use real database data only
+// ALL leave request operations must go through Supabase database
+const mockLeaveRequests: any[] = []; // Empty array - no fallback data allowed
 const mockData = mockLeaveRequests; // Alias for compatibility
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -53,8 +50,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         leaveRequests = [];
       }
     } else {
-      console.log('📂 No Supabase connection, using mock data');
-      leaveRequests = mockLeaveRequests;
+      console.error('🚫 CRITICAL: No Supabase connection for leave requests - cannot use mock data');
+      return res.status(500).json({ 
+        error: 'Database connection required',
+        message: 'Leave requests require database connection. Mock data is not allowed.',
+        code: 'LEAVE_REQUESTS_DB_REQUIRED'
+      });
     }
     
     // Apply sorting and mapping - use mock data if no Supabase or query failed
