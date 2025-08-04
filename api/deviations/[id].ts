@@ -122,6 +122,43 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         details: (error as Error).message 
       });
     }
+  } else if (req.method === 'DELETE') {
+    // DELETE - remove deviation
+    try {
+      const { id } = req.query;
+      const deviationId = parseInt(id as string);
+      
+      // 🔒 DATABASE REQUIRED - No mock data fallback allowed
+      if (supabase) {
+        try {
+          const { error } = await supabase
+            .from('deviations')
+            .delete()
+            .eq('id', deviationId);
+          
+          if (error) throw error;
+          
+          res.json({ 
+            message: 'Avvikelse raderad framgångsrikt',
+            id: deviationId 
+          });
+        } catch (error) {
+          console.error('Error deleting deviation:', error);
+          res.status(500).json({ 
+            error: 'Failed to delete deviation', 
+            details: (error as Error).message 
+          });
+        }
+      } else {
+        res.status(500).json({ error: 'Database connection not available' });
+      }
+    } catch (error) {
+      console.error('Error processing delete request:', error);
+      res.status(500).json({ 
+        error: 'Failed to delete deviation', 
+        details: (error as Error).message 
+      });
+    }
   } else {
     res.status(405).json({ message: 'Method not allowed' });
   }
