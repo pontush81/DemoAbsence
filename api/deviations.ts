@@ -142,19 +142,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
       }
       
+      // Map camelCase to snake_case for Supabase columns
       const deviationData = {
-        ...req.body,
-        // Map camelCase to snake_case for Supabase columns
         employee_id: req.body.employeeId,
         time_code: req.body.timeCode,
         start_time: req.body.startTime && !req.body.startTime.includes(':00') ? req.body.startTime + ':00' : req.body.startTime,
         end_time: req.body.endTime && !req.body.endTime.includes(':00') ? req.body.endTime + ':00' : req.body.endTime,
-        status: status,
-        // Remove camelCase versions to avoid confusion
-        employeeId: undefined,
-        timeCode: undefined,
-        startTime: undefined,
-        endTime: undefined
+        date: req.body.date,
+        comment: req.body.comment,
+        status: status
       };
       
       let newDeviation;
