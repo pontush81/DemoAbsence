@@ -154,21 +154,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
       }
       
-      // Use EXACT same structure as working createDeviation method
+      // Use EXACT same structure as working leave-requests endpoint
       const deviationData = {
-        employee_id: req.body.employeeId,
-        date: req.body.date,
-        start_time: req.body.startTime && !req.body.startTime.includes(':00') ? req.body.startTime + ':00' : req.body.startTime,
-        end_time: req.body.endTime && !req.body.endTime.includes(':00') ? req.body.endTime + ':00' : req.body.endTime,
-        time_code: req.body.timeCode,
-        comment: req.body.comment,
+        ...req.body,
         status: status || 'pending',
-        manager_comment: req.body.managerComment || null,
-        submitted: req.body.submitted || new Date().toISOString(),
-        approved_by: req.body.approvedBy || null,
-        approved_at: req.body.approvedAt || null,
-        rejected_by: req.body.rejectedBy || null,
-        rejected_at: req.body.rejectedAt || null
+        submitted: new Date().toISOString(),
+        last_updated: new Date().toISOString()
       };
       
       let newDeviation;
