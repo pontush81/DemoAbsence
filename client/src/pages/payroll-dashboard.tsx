@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useI18n } from "@/lib/i18n";
+import { useStore } from "@/lib/store";
 import { apiService } from "@/lib/apiService";
 import { useQuery } from "@tanstack/react-query";
 // Import types directly - no central types file exists yet
@@ -66,6 +67,8 @@ interface PayrollEmployeeData {
 
 export default function PayrollDashboard() {
   const { t } = useI18n();
+  const { user } = useStore();
+  const currentUserId = user.currentUser?.employeeId;
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedMonth, setSelectedMonth] = useState(format(new Date(), 'yyyy-MM'));
@@ -96,10 +99,10 @@ export default function PayrollDashboard() {
 
       for (const employee of employees) {
         try {
-          // Get employee-specific data
+          // Get employee-specific data (pass currentUser for manager access)
           const [schedule, timeBalance] = await Promise.all([
-            apiService.getEmployeeSchedule(employee.employeeId, selectedMonth + "-01").catch(() => []),
-            apiService.getTimeBalance(employee.employeeId).catch(() => null)
+            apiService.getEmployeeSchedule(employee.employeeId, selectedMonth + "-01", currentUserId).catch(() => []),
+            apiService.getTimeBalance(employee.employeeId, currentUserId).catch(() => null)
           ]);
 
           // Filter data for selected month

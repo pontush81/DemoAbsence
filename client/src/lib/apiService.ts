@@ -95,10 +95,11 @@ class ApiService {
   
   // --------------- Schedule APIs ---------------
   
-  async getEmployeeSchedule(employeeId: string, date: string): Promise<Schedule[]> {
+  async getEmployeeSchedule(employeeId: string, date: string, currentUser?: string): Promise<Schedule[]> {
     try {
       await delay(MOCK_DELAY);
-      const response = await fetch(`/api/schedules/${employeeId}?date=${date}`);
+      const effectiveCurrentUser = currentUser || employeeId; // Default to employeeId for self-access
+      const response = await fetch(`/api/schedules/${employeeId}?date=${date}&currentUser=${effectiveCurrentUser}`);
       
       if (!response.ok) {
         throw new ApiError(`Failed to fetch employee schedule: ${response.statusText}`, response.status);
@@ -630,10 +631,11 @@ class ApiService {
   
   // --------------- Time Balance APIs ---------------
   
-  async getTimeBalance(employeeId: string): Promise<TimeBalance> {
+  async getTimeBalance(employeeId: string, currentUser?: string): Promise<TimeBalance> {
     try {
       await delay(MOCK_DELAY);
-      const response = await fetch(`/api/time-balances/${employeeId}?currentUser=${employeeId}`);
+      const effectiveCurrentUser = currentUser || employeeId; // Default to employeeId for self-access
+      const response = await fetch(`/api/time-balances/${employeeId}?currentUser=${effectiveCurrentUser}`);
       
       if (!response.ok) {
         throw new ApiError(`Failed to fetch time balance: ${response.statusText}`, response.status);

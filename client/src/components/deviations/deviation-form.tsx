@@ -318,7 +318,7 @@ const DeviationForm = ({ deviationId, onCancel }: DeviationFormProps) => {
       if (!user.currentUser?.employeeId || !selectedDate) return null;
       try {
         // Use apiService to get proper snake_case→camelCase mapping
-        const schedule = await apiService.getEmployeeSchedule(user.currentUser.employeeId, selectedDate);
+                    const schedule = await apiService.getEmployeeSchedule(user.currentUser.employeeId, selectedDate, user.currentUser.employeeId);
         return schedule;
       } catch {
         return null;

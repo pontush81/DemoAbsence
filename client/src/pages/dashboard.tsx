@@ -56,15 +56,15 @@ export default function Dashboard() {
   // Fetch pending approvals (for manager)
   const { data: pendingDeviations, isLoading: isLoadingPendingDeviations } = useQuery({
     queryKey: ['/api/manager/deviations/pending', employeeId],
-    queryFn: () => apiService.getPendingDeviations(employeeId),
+    queryFn: () => apiService.getPendingDeviations(employeeId), // employeeId is the manager's ID
     enabled: isManager && !!employeeId,
   });
 
   // Fetch pending leave requests (for manager)
   const { data: pendingLeaveRequests, isLoading: isLoadingPendingLeaveRequests } = useQuery({
-    queryKey: ['/api/manager/leave-requests/pending'],
-    queryFn: () => apiService.getPendingLeaveRequests(),
-    enabled: isManager,
+    queryKey: ['/api/manager/leave-requests/pending', employeeId],
+    queryFn: () => apiService.getPendingLeaveRequests(employeeId), // Pass managerId
+    enabled: isManager && !!employeeId,
   });
 
   // Fetch monthly deviations for time reporting (for employees)
