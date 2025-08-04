@@ -271,23 +271,14 @@ export default function LeaveCalendar() {
                         )}
                       </div>
                       
-                      {/* Leave indicators - Mobile Optimized */}
+                      {/* Clean status indicator - No dots, use background color + simple text */}
                       {dayLeaves.length > 0 && (
-                        <div className="absolute inset-0 flex items-end p-1">
-                          <div className="flex gap-0.5 sm:gap-1">
-                            {dayLeaves.slice(0, 2).map((leave: LeaveRequest, idx) => (
-                              <div
-                                key={idx}
-                                className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full"
-                                style={{
-                                  backgroundColor: leave.status === 'approved' ? '#22c55e' : '#eab308'
-                                }}
-                                title={`${leave.leaveType} - ${leave.status}`}
-                              />
-                            ))}
-                            {dayLeaves.length > 2 && (
-                              <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-gray-400" title={`+${dayLeaves.length - 2} mer`} />
-                            )}
+                        <div className="absolute top-1 right-1">
+                          <div className={`
+                            px-1 py-0.5 rounded text-xs font-medium
+                            ${hasApprovedLeave ? 'bg-green-600 text-white' : 'bg-yellow-600 text-white'}
+                          `}>
+                            {dayLeaves.length}
                           </div>
                         </div>
                       )}
@@ -299,81 +290,78 @@ export default function LeaveCalendar() {
           })}
         </div>
 
-        {/* Legend - Updated for modern dot design */}
-        <div className="flex flex-wrap gap-4 pt-4 border-t border-gray-200">
+        {/* Simplified Legend - Focus on essential status info */}
+        <div className="flex flex-wrap gap-6 pt-4 border-t border-gray-200">
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-green-50 border border-green-200 rounded flex items-center justify-center">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+            <div className="w-5 h-5 bg-green-600 rounded flex items-center justify-center">
+              <span className="text-white text-xs font-bold">✓</span>
             </div>
-            <span className="text-sm text-gray-600">Godkänd ledighet</span>
+            <span className="text-sm font-medium text-gray-700">Godkänd ledighet</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-yellow-50 border border-yellow-200 rounded flex items-center justify-center">
-              <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+            <div className="w-5 h-5 bg-yellow-600 rounded flex items-center justify-center">
+              <span className="text-white text-xs font-bold">⏳</span>
             </div>
-            <span className="text-sm text-gray-600">Väntar på svar</span>
+            <span className="text-sm font-medium text-gray-700">Väntar på svar</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 ring-2 ring-blue-500 rounded"></div>
-            <span className="text-sm text-gray-600">Idag</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-gray-100 border border-gray-300 rounded flex items-center justify-center">
-              <span className="text-xs font-medium text-gray-600">v.</span>
-            </div>
-            <span className="text-sm text-gray-600">Veckonummer (ISO 8601)</span>
+            <div className="w-5 h-5 ring-2 ring-blue-500 bg-blue-50 rounded"></div>
+            <span className="text-sm font-medium text-gray-700">Idag</span>
           </div>
         </div>
 
-        {/* Business Rules Explanation */}
-        <div className="mt-3 pt-3 border-t border-gray-100">
-          <div className="flex flex-wrap gap-4 text-sm">
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-white border border-gray-200 rounded"></div>
-              <span className="text-gray-600">Arbetsdagar</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-gray-100 border border-gray-200 rounded flex items-center justify-center">
-                <span className="text-xs">⌛</span>
+        {/* Summary Statistics - Improved clarity and visual hierarchy */}
+        <div className="mt-6 pt-4 border-t border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Översikt</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
+                  <span className="text-white text-sm font-bold">✓</span>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-green-700">
+                    {leaveRequests.filter((l: LeaveRequest) => l.status === 'approved').length}
+                  </div>
+                  <div className="text-sm font-medium text-green-700">Godkända ansökningar</div>
+                </div>
               </div>
-              <span className="text-gray-600">Helger & veckoslut</span>
             </div>
-            <div className="flex items-center gap-2 text-blue-600 font-medium">
-              <span>ℹ️</span>
-              <span>Semesterdagar dras endast för arbetsdagar (mån-fre, exkl. helger)</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Summary */}
-        <div className="mt-4 pt-4 border-t border-gray-200">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-            <div>
-              <div className="text-2xl font-bold text-green-600">
-                {leaveRequests.filter((l: LeaveRequest) => l.status === 'approved').length}
+            
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-yellow-600 rounded-full flex items-center justify-center">
+                  <span className="text-white text-sm font-bold">⏳</span>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-yellow-700">
+                    {leaveRequests.filter((l: LeaveRequest) => l.status === 'pending').length}
+                  </div>
+                  <div className="text-sm font-medium text-yellow-700">Väntar på svar</div>
+                </div>
               </div>
-              <div className="text-sm text-gray-500">Godkända</div>
             </div>
-            <div>
-              <div className="text-2xl font-bold text-yellow-600">
-                {leaveRequests.filter((l: LeaveRequest) => l.status === 'pending').length}
+            
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                  <span className="text-white text-sm font-bold">📅</span>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-blue-700">
+                    {leaveRequests.reduce((sum: number, l: LeaveRequest) => {
+                      if (l.status === 'approved' && l.startDate && l.endDate) {
+                        const start = new Date(l.startDate);
+                        const end = new Date(l.endDate);
+                        const vacationDaysUsed = calculateVacationDeduction(l.leaveType, start, end, l.scope || 'full-day');
+                        return sum + vacationDaysUsed;
+                      }
+                      return sum;
+                    }, 0)}
+                  </div>
+                  <div className="text-sm font-medium text-blue-700">Arbetsdagar använda</div>
+                </div>
               </div>
-              <div className="text-sm text-gray-500">Väntar på svar</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-blue-600">
-                {leaveRequests.reduce((sum: number, l: LeaveRequest) => {
-                  if (l.status === 'approved' && l.startDate && l.endDate) {
-                    const start = new Date(l.startDate);
-                    const end = new Date(l.endDate);
-                    // 🎯 Use correct business logic: only count working days for vacation
-                    const vacationDaysUsed = calculateVacationDeduction(l.leaveType, start, end, l.scope || 'full-day');
-                    return sum + vacationDaysUsed;
-                  }
-                  return sum;
-                }, 0)}
-              </div>
-              <div className="text-sm text-gray-500">Arbetsdagar använda</div>
             </div>
           </div>
         </div>

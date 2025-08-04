@@ -52,34 +52,35 @@ export default function Leave() {
               <p className="text-lg text-muted-foreground mt-1">{t('leave.description')}</p>
             </div>
             
-            {/* Primary action + View toggle - adapted for leave planning workflow */}
-            <div className="flex flex-col sm:flex-row gap-3">
-              {/* View Toggle - Following Perplexity's UX best practice */}
-              <div className="flex bg-gray-100 rounded-lg p-1">
+            {/* Clear hierarchy: Secondary navigation + Primary action */}
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+              {/* View Toggle - Subtle secondary navigation */}
+              <div className="flex bg-gray-100 rounded-lg p-1 order-2 sm:order-1">
                 <Button
-                  variant={displayMode === 'calendar' ? 'default' : 'ghost'}
+                  variant={displayMode === 'calendar' ? 'secondary' : 'ghost'}
                   size="sm"
                   onClick={() => setDisplayMode('calendar')}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
                 >
                   📅 Kalender
                 </Button>
                 <Button
-                  variant={displayMode === 'list' ? 'default' : 'ghost'}
+                  variant={displayMode === 'list' ? 'secondary' : 'ghost'}
                   size="sm"
                   onClick={() => setDisplayMode('list')}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
                 >
                   📋 Lista
                 </Button>
               </div>
               
-              <Link href="/leave/new">
+              {/* Primary action - Prominent and clear */}
+              <Link href="/leave/new" className="order-1 sm:order-2">
                 <Button 
                   size="lg" 
-                  className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-semibold px-8 py-3 shadow-lg"
+                  className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white font-semibold px-8 py-3 shadow-lg hover:shadow-xl transition-all"
                 >
-                  📅 Ansök om ledighet
+                  ➕ Ansök om ledighet
                 </Button>
               </Link>
             </div>
