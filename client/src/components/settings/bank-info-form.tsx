@@ -76,7 +76,7 @@ const BankInfoForm = () => {
   // Update mutation
   const updateMutation = useMutation({
     mutationFn: (data: BankInfoFormValues) => 
-      apiRequest('PATCH', `/api/employees/${employeeId}`, data),
+      apiRequest('PATCH', `/api/employees/${employeeId}?currentUser=${employeeId}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/employees'] });
       toast({

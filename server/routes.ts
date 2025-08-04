@@ -493,7 +493,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update employee
   app.patch('/api/employees/:id', async (req, res) => {
     try {
-      const updated = await restStorage.updateEmployee(req.params.id, req.body);
+      const { id } = req.params;
+      const { currentUser } = req.query;
+      
+      // 🚨 DEMO SECURITY: Prevent IDOR - can only update own employee data
+      if (!currentUser) {
+        return res.status(400).json({
+          error: 'currentUser parameter required',
+          message: 'Du måste ange vem du är för att uppdatera medarbetardata'
+        });
+      }
+      
+      if (currentUser !== id) {
+        return res.status(403).json({
+          error: 'Access denied',
+          message: 'Du kan bara uppdatera din egen medarbetardata'
+        });
+      }
+      
+      const updated = await restStorage.updateEmployee(id, req.body);
       if (updated) {
         res.json(updated);
       } else {
