@@ -92,14 +92,20 @@ export default function PayrollDashboard() {
 
   // Fetch deviations for current month
   const { data: allDeviations = [] } = useQuery({
-    queryKey: ['deviations', selectedMonth],
-    queryFn: () => apiService.getDeviations("ALL") // Use existing method
+    queryKey: ['payroll-deviations', selectedMonth, currentUserId],
+    queryFn: () => apiService.getDeviations("ALL"), // Use existing method
+    enabled: !!currentUserId, // Only run when we have user
+    staleTime: 30000, // 30 seconds cache
+    retry: 3
   });
 
   // Fetch leave requests for current month
   const { data: allLeaveRequests = [] } = useQuery({
-    queryKey: ['leave-requests', selectedMonth],
-    queryFn: () => apiService.getLeaveRequests("ALL") // Use existing method
+    queryKey: ['payroll-leave-requests', selectedMonth, currentUserId],
+    queryFn: () => apiService.getLeaveRequests("ALL"), // Use existing method
+    enabled: !!currentUserId, // Only run when we have user
+    staleTime: 30000, // 30 seconds cache
+    retry: 3
   });
 
   // Build payroll data when dependencies change
@@ -127,14 +133,22 @@ export default function PayrollDashboard() {
           
           // 🔍 DEBUG: Log filtering for debugging
           if (employee.employeeId === 'E001') {
+            const annaAllDeviations = (allDeviations as Deviation[]).filter(d => d.employeeId === 'E001');
+            const augustAnnaDeviations = annaAllDeviations.filter(d => {
+              const devDate = new Date(d.date);
+              return devDate >= monthStart && devDate <= monthEnd;
+            });
+            
             console.log('🔍 DEBUG E001 Anna Andersson:', {
               selectedMonth,
               monthStart: monthStart.toISOString(),
               monthEnd: monthEnd.toISOString(),
               totalDeviations: allDeviations.length,
-              annaDeviations: (allDeviations as Deviation[]).filter(d => d.employeeId === 'E001').length,
+              annaDeviations: annaAllDeviations.length,
               filteredCount: employeeDeviations.length,
-              sampleDates: (allDeviations as Deviation[]).filter(d => d.employeeId === 'E001').slice(0,3).map(d => d.date)
+              augustCount: augustAnnaDeviations.length,
+              sampleDates: annaAllDeviations.slice(0,5).map(d => ({ date: d.date, status: d.status })),
+              augustDates: augustAnnaDeviations.slice(0,3).map(d => ({ date: d.date, status: d.status }))
             });
           }
 
