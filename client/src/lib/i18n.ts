@@ -1046,8 +1046,8 @@ const translations: Translations = {
     en: 'No payslips available',
   },
   'payslips.noPayslipsDescription': {
-    sv: 'Du har inte några lönespecifikationer tillgängliga för tillfället.',
-    en: 'You don\'t have any payslips available at the moment.',
+    sv: 'Lönespecifikationer publiceras vanligtvis månadsvis. Kontakta HR om du har frågor.',
+    en: 'Payslips are usually published monthly. Contact HR if you have any questions.',
   },
   'payslips.published': {
     sv: 'Publicerad',
