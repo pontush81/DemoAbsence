@@ -6,7 +6,7 @@ import { useI18n } from "@/lib/i18n";
 import LeaveList from "@/components/leave/leave-list";
 import LeaveForm from "@/components/leave/leave-form";
 import LeaveDetails from "@/components/leave/leave-details";
-import LeaveCalendar from "@/components/leave/leave-calendar";
+import ModernLeaveCalendar from "@/components/leave/modern-leave-calendar";
 import { apiService } from "@/lib/apiService";
 
 export default function Leave() {
