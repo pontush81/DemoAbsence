@@ -145,9 +145,9 @@ export default function PayrollDashboard() {
           if (employeeDeviations.some(d => !d.timeCode)) {
             errors.push('Saknar tidkod');
           }
-          if (schedule.length === 0) {
-            warnings.push('Saknar schema');
-          }
+          // NOTE: Removed "Saknar schema" warning per Swedish payroll best practice
+          // Schema warnings are unnecessary when only exporting deviations/time transactions
+          // The payroll system (Kontek Lön, Fortnox, etc.) already handles base schedules
 
           // Determine overall status
           let status: PayrollEmployeeData['status'] = 'ready';
