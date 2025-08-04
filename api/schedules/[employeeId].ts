@@ -7,8 +7,12 @@ const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_ANON_KEY;
 const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
 
-// Fallback mock data - use require for better Vercel compatibility
-const mockSchedules = require('../../mock-data/schedules.json');
+// Fallback mock data - embedded for Vercel compatibility
+const mockSchedules = [
+  {"id":1,"employee_id":"E001","date":"2025-08-04","start_time":"08:00:00","end_time":"17:00:00","break_start":"12:00:00","break_end":"13:00:00"},
+  {"id":2,"employee_id":"E001","date":"2025-08-05","start_time":"08:00:00","end_time":"17:00:00","break_start":"12:00:00","break_end":"13:00:00"},
+  {"id":3,"employee_id":"E002","date":"2025-08-04","start_time":"09:00:00","end_time":"18:00:00","break_start":"12:30:00","break_end":"13:30:00"}
+];
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {

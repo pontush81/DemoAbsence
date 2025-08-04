@@ -8,9 +8,17 @@ const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_ANON_KEY;
 const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
 
-// Fallback mock data - use require for better Vercel compatibility
-const mockDeviations = require('../mock-data/deviations.json');
-const timeCodes = require('../mock-data/timecodes.json');
+// Fallback mock data - embedded for Vercel compatibility
+const mockDeviations = [
+  {"id":1,"date":"2023-04-14","comment":"Akut projektleverans","status":"approved","submitted":"2023-04-14T19:45:00+00:00","employeeId":"E001","timeCode":"200","startTime":"17:00:00","endTime":"19:30:00"},
+  {"id":2,"date":"2023-04-11","comment":"Förkylning","status":"returned","submitted":"2023-04-11T18:10:00+00:00","employeeId":"E001","timeCode":"300","startTime":"08:00:00","endTime":"17:00:00"},
+  {"id":3,"date":"2023-04-05","comment":"Vård av sjukt barn","status":"rejected","submitted":"2023-04-05T12:15:00+00:00","employeeId":"E001","timeCode":"400","startTime":"08:00:00","endTime":"12:00:00"}
+];
+const timeCodes = [
+  {"code":"200","name":"Övertid","description":"Övertidsarbete utöver ordinarie arbetstid","requiresApproval":true,"category":"overtime"},
+  {"code":"300","name":"Sjukfrånvaro","description":"Frånvaro på grund av sjukdom","requiresApproval":false,"category":"absence"},
+  {"code":"400","name":"VAB","description":"Vård av barn","requiresApproval":false,"category":"absence"}
+];
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === 'GET') {
