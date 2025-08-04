@@ -1,86 +1,79 @@
-import { useState, useEffect } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useI18n } from "@/lib/i18n";
-import { useLocation } from "wouter";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import ApprovalsList from "./approvals-list";
-
-type TabType = 'deviations' | 'leaveRequests' | 'history';
 
 const ApprovalTabs = () => {
   const { t } = useI18n();
-  const [location, setLocation] = useLocation();
-  const [activeTab, setActiveTab] = useState<TabType>('deviations');
-  
-  // Check URL parameters on mount to set the correct tab
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const tabParam = urlParams.get('tab');
-    
-    if (tabParam && ['deviations', 'leaveRequests', 'history'].includes(tabParam)) {
-      setActiveTab(tabParam as TabType);
-    }
-  }, [location]);
-  
-  const handleTabChange = (value: string) => {
-    const newTab = value as TabType;
-    setActiveTab(newTab);
-    
-    // Update URL without page reload
-    const url = new URL(window.location.href);
-    url.searchParams.set('tab', newTab);
-    window.history.replaceState({}, '', url.toString());
-  };
   
   return (
-    <Tabs value={activeTab} onValueChange={handleTabChange}>
-      <TabsList className="border-b border-gray-200 w-full bg-transparent">
-        <TabsTrigger 
-          value="deviations" 
-          className={`
-            px-4 py-2 text-sm font-medium border-b-2 -mb-px
-            ${activeTab === 'deviations' 
-              ? 'border-primary text-primary' 
-              : 'border-transparent text-muted-foreground hover:text-foreground hover:border-gray-300'}
-          `}
-        >
-          {t('manager.pendingDeviations')}
-        </TabsTrigger>
-        <TabsTrigger 
-          value="leaveRequests" 
-          className={`
-            px-4 py-2 text-sm font-medium border-b-2 -mb-px
-            ${activeTab === 'leaveRequests' 
-              ? 'border-primary text-primary' 
-              : 'border-transparent text-muted-foreground hover:text-foreground hover:border-gray-300'}
-          `}
-        >
-          {t('manager.leaveRequests')}
-        </TabsTrigger>
-        <TabsTrigger 
-          value="history" 
-          className={`
-            px-4 py-2 text-sm font-medium border-b-2 -mb-px
-            ${activeTab === 'history' 
-              ? 'border-primary text-primary' 
-              : 'border-transparent text-muted-foreground hover:text-foreground hover:border-gray-300'}
-          `}
-        >
-          {t('manager.history')}
-        </TabsTrigger>
-      </TabsList>
-      
-      <TabsContent value="deviations" className="pt-6">
-        <ApprovalsList type="deviations" />
-      </TabsContent>
-      
-      <TabsContent value="leaveRequests" className="pt-6">
-        <ApprovalsList type="leaveRequests" />
-      </TabsContent>
-      
-      <TabsContent value="history" className="pt-6">
-        <ApprovalsList type="history" />
-      </TabsContent>
-    </Tabs>
+    <div className="space-y-8">
+      {/* Pending Deviations Section */}
+      <Card>
+        <CardHeader className="pb-4">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-xl font-semibold text-gray-900">
+              {t('manager.pendingDeviations')}
+            </CardTitle>
+            <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+              <span className="material-icons text-sm mr-1">pending_actions</span>
+              Behöver godkännande
+            </Badge>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Avvikelser som medarbetare skickat in och väntar på ditt godkännande
+          </p>
+        </CardHeader>
+        <CardContent>
+          <ApprovalsList type="deviations" />
+        </CardContent>
+      </Card>
+
+      {/* Pending Leave Requests Section */}
+      <Card>
+        <CardHeader className="pb-4">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-xl font-semibold text-gray-900">
+              {t('manager.leaveRequests')}
+            </CardTitle>
+            <Badge variant="secondary" className="bg-green-100 text-green-800">
+              <span className="material-icons text-sm mr-1">event_available</span>
+              Väntar på svar
+            </Badge>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Ledighets- och semesteransökningar från dina medarbetare
+          </p>
+        </CardHeader>
+        <CardContent>
+          <ApprovalsList type="leaveRequests" />
+        </CardContent>
+      </Card>
+
+      <Separator className="my-8" />
+
+      {/* History Section */}
+      <Card>
+        <CardHeader className="pb-4">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-xl font-semibold text-gray-900">
+              {t('manager.history')}
+            </CardTitle>
+            <Badge variant="outline" className="text-gray-600">
+              <span className="material-icons text-sm mr-1">history</span>
+              Tidigare hanterade
+            </Badge>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Tidigare godkända och avvisade ansökningar
+          </p>
+        </CardHeader>
+        <CardContent>
+          <ApprovalsList type="history" />
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
