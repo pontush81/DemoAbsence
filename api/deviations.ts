@@ -11,14 +11,15 @@ const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabase
 // Production: Only use Supabase, no mock data fallback
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // Debug: Check environment variables
-  console.log('🔍 Environment check:', {
+  // Debug: Check environment variables + Force cache refresh
+  console.log('🔍 Environment check [SCHEMA-FIXED-v2]:', {
     hasSupabaseUrl: !!process.env.SUPABASE_URL,
     hasSupabaseKey: !!process.env.SUPABASE_ANON_KEY,
     supabaseClientExists: !!supabase,
     runtime: process.env.VERCEL ? 'VERCEL' : 'LOCAL',
     nodeVersion: process.version,
-    supabaseUrlPrefix: process.env.SUPABASE_URL ? process.env.SUPABASE_URL.substring(0, 20) + '...' : 'MISSING'
+    supabaseUrlPrefix: process.env.SUPABASE_URL ? process.env.SUPABASE_URL.substring(0, 20) + '...' : 'MISSING',
+    timestamp: new Date().toISOString()
   });
   if (req.method === 'GET') {
     // GET - fetch deviations with filtering
