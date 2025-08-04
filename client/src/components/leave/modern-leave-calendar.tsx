@@ -111,10 +111,12 @@ export default function ModernLeaveCalendar() {
     setCurrentDate(prev => direction === 'prev' ? subMonths(prev, 1) : addMonths(prev, 1));
   };
 
-  // Get leave requests for a specific day
+  // Get leave requests for a specific day (exclude rejected)
   const getDayLeaves = (day: Date) => {
     const dateKey = format(day, 'yyyy-MM-dd');
-    return leaveByDate.get(dateKey) || [];
+    const dayLeaves = leaveByDate.get(dateKey) || [];
+    // Filter out rejected leave requests
+    return dayLeaves.filter(leave => leave.status !== 'rejected');
   };
 
   // Check if day has any leaves
@@ -187,13 +189,15 @@ export default function ModernLeaveCalendar() {
               {t(`leave.${primaryLeave.leaveType}`) || primaryLeave.leaveType}
             </div>
             
-            {/* Status badge */}
-            <Badge className={`
-              text-xs px-1 py-0.5 h-auto
-              ${STATUS_STYLES[primaryLeave.status].badge}
-            `}>
-              {t(`status.${primaryLeave.status}`)}
-            </Badge>
+            {/* Status badge - only show if pending */}
+            {primaryLeave.status === 'pending' && (
+              <Badge className={`
+                text-xs px-1 py-0.5 h-auto
+                ${STATUS_STYLES[primaryLeave.status].badge}
+              `}>
+                {t(`status.${primaryLeave.status}`)}
+              </Badge>
+            )}
 
             {/* Multiple leaves indicator */}
             {hasMultipleLeaves && (
@@ -204,9 +208,9 @@ export default function ModernLeaveCalendar() {
           </div>
         )}
 
-        {/* Week number (first day of week) */}
-        {dayIndex % 7 === 0 && (
-          <div className="absolute -left-8 top-2 text-xs text-gray-400 font-medium">
+        {/* Week number (Monday only) */}
+        {format(day, 'E', { locale: sv }) === 'mån' && (
+          <div className="absolute -left-10 top-2 text-xs text-gray-400 font-medium">
             v.{getISOWeek(day)}
           </div>
         )}
@@ -291,7 +295,7 @@ export default function ModernLeaveCalendar() {
         <CardContent className="p-6">
           {/* Weekday headers */}
           <div className="grid grid-cols-7 gap-2 mb-4">
-            <div className="w-8"></div> {/* Space for week numbers */}
+            <div className="w-12 text-xs text-gray-400 text-center py-2">Vecka</div> {/* Space for week numbers */}
             {['Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör', 'Sön'].map((day, index) => (
               <div key={day} className={`
                 text-center text-sm font-semibold py-2
@@ -305,7 +309,7 @@ export default function ModernLeaveCalendar() {
           {/* Calendar days */}
           <div className="relative">
             <div className="grid grid-cols-7 gap-2">
-              <div></div> {/* Empty space for week number column */}
+              <div className="w-12"></div> {/* Empty space for week number column */}
               {calendarDays.map((day, index) => renderDay(day, index))}
             </div>
           </div>
