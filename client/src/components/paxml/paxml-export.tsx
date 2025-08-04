@@ -378,6 +378,13 @@ export default function PAXMLExport({ employees, deviations }: PAXMLExportProps)
               </AlertDescription>
             </Alert>
 
+            {/* Validation Status - Show BEFORE export button for better UX flow */}
+            <ValidationStatus 
+              validation={validation} 
+              isLoading={isLoadingTimeCodes && filteredDeviations.length > 0}
+              deviations={filteredDeviations}
+            />
+
             <Button
               onClick={handleExport}
               disabled={
@@ -516,13 +523,6 @@ export default function PAXMLExport({ employees, deviations }: PAXMLExportProps)
           </Card>
         </div>
       </div>
-      
-      {/* Validation Status - After controls for better UX flow */}
-      <ValidationStatus 
-        validation={validation} 
-        isLoading={isLoadingTimeCodes && filteredDeviations.length > 0}
-        deviations={filteredDeviations}
-      />
     </div>
   );
 }
