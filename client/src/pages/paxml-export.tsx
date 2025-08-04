@@ -13,7 +13,7 @@ export default function PAXMLExportPage() {
   
   const { data: employees = [], isLoading: employeesLoading } = useQuery({
     queryKey: ['/api/employees'],
-    queryFn: () => apiService.getAllEmployees(),
+    queryFn: () => apiService.getAllEmployees(user.currentUser?.employeeId),
     enabled: hasAccess, // Ladda endast data om användaren har behörighet
   });
 

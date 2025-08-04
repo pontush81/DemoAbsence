@@ -5,6 +5,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import StatusBadge from "@/components/ui/status-badge";
 import { apiService } from "@/lib/apiService";
 import { useI18n } from "@/lib/i18n";
+import { useStore } from "@/lib/store";
 
 interface LeaveDetailsProps {
   leaveId: number;
@@ -13,6 +14,7 @@ interface LeaveDetailsProps {
 
 const LeaveDetails = ({ leaveId, onBack }: LeaveDetailsProps) => {
   const { t } = useI18n();
+  const { user } = useStore();
 
   // Fetch leave request details
   const { data: leaveRequest, isLoading, error } = useQuery({
@@ -24,7 +26,7 @@ const LeaveDetails = ({ leaveId, onBack }: LeaveDetailsProps) => {
   // Fetch employee info to show names instead of IDs
   const { data: employees = [] } = useQuery({
     queryKey: ['/api/employees'],
-    queryFn: () => apiService.getAllEmployees(),
+    queryFn: () => apiService.getAllEmployees(user.currentUser?.employeeId),
   });
 
   // Helper function to get employee name

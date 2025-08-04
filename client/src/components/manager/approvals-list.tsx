@@ -89,7 +89,7 @@ const ApprovalsList = ({ type }: ApprovalsListProps) => {
   // Fetch employees to display names instead of just IDs
   const { data: employees = [] } = useQuery({
     queryKey: ['/api/employees'],
-    queryFn: () => apiService.getAllEmployees(),
+    queryFn: () => apiService.getAllEmployees(user.currentUser?.employeeId),
   });
 
   // Helper function to get employee name

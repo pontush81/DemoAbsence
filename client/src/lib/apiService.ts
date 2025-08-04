@@ -30,10 +30,11 @@ export class ApiError extends Error {
 class ApiService {
   // --------------- Employee APIs ---------------
   
-  async getAllEmployees(): Promise<Employee[]> {
+  async getAllEmployees(currentUser?: string): Promise<Employee[]> {
     try {
       await delay(MOCK_DELAY);
-      const response = await fetch('/api/employees');
+      const params = currentUser ? `?currentUser=${currentUser}` : '';
+      const response = await fetch(`/api/employees${params}`);
       
       if (!response.ok) {
         throw new ApiError(`Failed to fetch employees: ${response.statusText}`, response.status);
@@ -632,7 +633,7 @@ class ApiService {
   async getTimeBalance(employeeId: string): Promise<TimeBalance> {
     try {
       await delay(MOCK_DELAY);
-      const response = await fetch(`/api/time-balances/${employeeId}`);
+      const response = await fetch(`/api/time-balances/${employeeId}?currentUser=${employeeId}`);
       
       if (!response.ok) {
         throw new ApiError(`Failed to fetch time balance: ${response.statusText}`, response.status);
@@ -662,7 +663,7 @@ class ApiService {
   async getPayslips(employeeId: string): Promise<Payslip[]> {
     try {
       await delay(MOCK_DELAY);
-      const response = await fetch(`/api/payslips/${employeeId}`);
+      const response = await fetch(`/api/payslips/${employeeId}?currentUser=${employeeId}`);
       
       if (!response.ok) {
         throw new ApiError(`Failed to fetch payslips: ${response.statusText}`, response.status);
@@ -737,6 +738,8 @@ class ApiService {
       const params = new URLSearchParams();
       if (filters?.employeeId) {
         params.append('employeeId', filters.employeeId);
+        // 🚨 DEMO SECURITY: Add currentUser for IDOR protection when filtering by employeeId
+        params.append('currentUser', filters.employeeId);
       }
       if (filters?.startDate) {
         params.append('startDate', filters.startDate);
@@ -745,7 +748,9 @@ class ApiService {
         params.append('endDate', filters.endDate);
       }
 
-      const response = await fetch(`/api/schedules?${params.toString()}`);
+      // Use per-employee endpoint if filtering by employeeId, otherwise use general endpoint
+      const endpoint = filters?.employeeId ? `/api/schedules/${filters.employeeId}` : '/api/schedules';
+      const response = await fetch(`${endpoint}?${params.toString()}`);
       if (!response.ok) {
         throw new ApiError(`Failed to fetch schedules: ${response.statusText}`, response.status);
       }
@@ -821,8 +826,8 @@ class ApiService {
     }
   }
 
-  async getEmployees(): Promise<Employee[]> {
-    return this.getAllEmployees();
+  async getEmployees(currentUser?: string): Promise<Employee[]> {
+    return this.getAllEmployees(currentUser);
   }
 }
 
