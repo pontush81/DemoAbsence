@@ -60,12 +60,6 @@ const LEAVE_TYPE_COLORS = {
     border: 'border-amber-300', 
     text: 'text-amber-800',
     icon: '🧸'
-  },
-  personal: { 
-    bg: 'bg-blue-100 hover:bg-blue-200', 
-    border: 'border-blue-300', 
-    text: 'text-blue-800',
-    icon: '📋'
   }
 };
 
@@ -159,7 +153,7 @@ export default function ModernLeaveCalendar() {
     const getLeaveStyle = () => {
       if (!primaryLeave) return null;
       
-      const typeStyle = LEAVE_TYPE_COLORS[primaryLeave.leaveType as keyof typeof LEAVE_TYPE_COLORS] || LEAVE_TYPE_COLORS.personal;
+      const typeStyle = LEAVE_TYPE_COLORS[primaryLeave.leaveType as keyof typeof LEAVE_TYPE_COLORS] || LEAVE_TYPE_COLORS.vacation;
       const statusStyle = STATUS_STYLES[primaryLeave.status];
       
       return {
