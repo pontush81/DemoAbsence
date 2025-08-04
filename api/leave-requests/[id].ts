@@ -122,6 +122,43 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         details: (error as Error).message 
       });
     }
+  } else if (req.method === 'DELETE') {
+    // DELETE - remove leave request
+    try {
+      const { id } = req.query;
+      const leaveRequestId = parseInt(id as string);
+      
+      // 🔒 DATABASE REQUIRED - No mock data fallback allowed
+      if (supabase) {
+        try {
+          const { error } = await supabase
+            .from('leave_requests')
+            .delete()
+            .eq('id', leaveRequestId);
+          
+          if (error) throw error;
+          
+          res.json({ 
+            message: 'Semesteransökan raderad framgångsrikt',
+            id: leaveRequestId 
+          });
+        } catch (error) {
+          console.error('Error deleting leave request:', error);
+          res.status(500).json({ 
+            error: 'Failed to delete leave request', 
+            details: (error as Error).message 
+          });
+        }
+      } else {
+        res.status(500).json({ error: 'Database connection not available' });
+      }
+    } catch (error) {
+      console.error('Error processing delete request:', error);
+      res.status(500).json({ 
+        error: 'Failed to delete leave request', 
+        details: (error as Error).message 
+      });
+    }
   } else {
     res.status(405).json({ message: 'Method not allowed' });
   }
