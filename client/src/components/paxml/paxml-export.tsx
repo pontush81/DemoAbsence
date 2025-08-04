@@ -125,6 +125,19 @@ export default function PAXMLExport({ employees, deviations }: PAXMLExportProps)
     );
   };
 
+  const handleSelectAll = () => {
+    if (selectedEmployees.length === employees.length) {
+      // If all are selected, deselect all
+      setSelectedEmployees([]);
+    } else {
+      // Select all employees
+      setSelectedEmployees(employees.map(emp => emp.employeeId));
+    }
+  };
+
+  const isAllSelected = selectedEmployees.length === employees.length && employees.length > 0;
+  const isIndeterminate = selectedEmployees.length > 0 && selectedEmployees.length < employees.length;
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div className="lg:col-span-2">
@@ -142,8 +155,65 @@ export default function PAXMLExport({ employees, deviations }: PAXMLExportProps)
 
             <div className="space-y-4">
               <div>
-                <Label htmlFor="employees">Anställda (valfritt)</Label>
-                <div className="mt-2 space-y-2">
+                <div className="flex items-center justify-between mb-3">
+                  <Label htmlFor="employees">Anställda (valfritt)</Label>
+                  {selectedEmployees.length > 0 && (
+                    <Badge variant="secondary" className="text-xs">
+                      {selectedEmployees.length} av {employees.length} valda
+                    </Badge>
+                  )}
+                </div>
+                
+                {/* Master Select All Checkbox */}
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2 p-2 bg-muted/30 rounded-md border-b">
+                    <input
+                      type="checkbox"
+                      id="select-all-employees"
+                      checked={isAllSelected}
+                      ref={(input) => {
+                        if (input) input.indeterminate = isIndeterminate;
+                      }}
+                      onChange={handleSelectAll}
+                      className="rounded border-gray-300"
+                    />
+                    <Label htmlFor="select-all-employees" className="text-sm font-medium cursor-pointer flex-1">
+                      {isAllSelected ? 'Avmarkera alla' : 'Markera alla'} ({employees.length} anställda)
+                    </Label>
+                  </div>
+                  
+                  {/* Quick Selection Buttons */}
+                  <div className="flex flex-wrap gap-2 text-xs">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const employeesWithDeviations = employees.filter(emp => 
+                          filteredDeviations.some(dev => dev.employeeId === emp.employeeId)
+                        );
+                        setSelectedEmployees(employeesWithDeviations.map(emp => emp.employeeId));
+                      }}
+                      className="h-7 text-xs"
+                    >
+                      Bara med avvikelser ({filteredDeviations.reduce((acc, dev) => {
+                        if (!acc.includes(dev.employeeId)) acc.push(dev.employeeId);
+                        return acc;
+                      }, [] as string[]).length})
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setSelectedEmployees([])}
+                      className="h-7 text-xs"
+                    >
+                      Rensa alla
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="mt-2 space-y-2 max-h-64 overflow-y-auto">
                   {employees.map((employee) => (
                     <div key={employee.employeeId} className="flex items-center space-x-2">
                       <input
@@ -153,7 +223,7 @@ export default function PAXMLExport({ employees, deviations }: PAXMLExportProps)
                         onChange={() => handleEmployeeToggle(employee.employeeId)}
                         className="rounded border-gray-300"
                       />
-                      <Label htmlFor={`employee-${employee.employeeId}`} className="text-sm">
+                      <Label htmlFor={`employee-${employee.employeeId}`} className="text-sm cursor-pointer">
                         {employee.firstName} {employee.lastName} ({employee.employeeId})
                       </Label>
                     </div>
